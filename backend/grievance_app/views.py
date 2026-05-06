@@ -36,10 +36,14 @@ class MeView(generics.RetrieveUpdateAPIView):
 # ─── Departments ────────────────────────────────────────────────────────────
 
 
-class DepartmentListView(generics.ListAPIView):
+class DepartmentListView(generics.ListCreateAPIView):
     queryset = Department.objects.filter(is_active=True)
     serializer_class = DepartmentSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
 
 
 class DepartmentDetailView(generics.RetrieveAPIView):
