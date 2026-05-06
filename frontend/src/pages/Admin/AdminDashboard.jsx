@@ -290,20 +290,41 @@ export default function AdminDashboard() {
 }
 
 function OfficerManagement({ departments, officers, onCreated }) {
-  const [form, setForm] = useState({ username: "", email: "", password: "", phone: "", first_name: "", last_name: "", employee_id: "", department_id: "" });
+  const emptyForm = { username: "", email: "", password: "", phone: "", first_name: "", last_name: "", employee_id: "", department_id: "" };
+  const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [editingOfficer, setEditingOfficer] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
-  const mutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: (data) => adminApi.createOfficer(data),
-    onSuccess: () => { toast.success("Officer account created! Credentials sent."); setShowForm(false); onCreated(); },
+    onSuccess: () => { toast.success("Officer account created!"); setShowForm(false); setForm(emptyForm); onCreated(); },
     onError: (err) => toast.error(err.response?.data?.error || "Failed to create officer"),
   });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => adminApi.updateOfficer(id, data),
+    onSuccess: () => { toast.success("Officer updated!"); setEditingOfficer(null); onCreated(); },
+    onError: (err) => toast.error(err.response?.data?.error || "Failed to update officer"),
+  });
+
+  const startEdit = (o) => {
+    setEditingOfficer(o.id);
+    setEditForm({
+      first_name: o.first_name || "",
+      last_name: o.last_name || "",
+      email: o.email || "",
+      phone: o.phone || "",
+      employee_id: o.employee_id || "",
+      department_id: o.department?.id || "",
+    });
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Officer Management</h2>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm">+ Add Officer</button>
+        <button onClick={() => { setShowForm(!showForm); setEditingOfficer(null); }} className="btn-primary text-sm">+ Add Officer</button>
       </div>
 
       {showForm && (
@@ -333,8 +354,8 @@ function OfficerManagement({ departments, officers, onCreated }) {
             </div>
           </div>
           <div className="flex gap-3 mt-4">
-            <button onClick={() => mutation.mutate(form)} disabled={mutation.isPending} className="btn-primary text-sm">
-              {mutation.isPending ? "Creating..." : "Create Officer"}
+            <button onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending} className="btn-primary text-sm">
+              {createMutation.isPending ? "Creating..." : "Create Officer"}
             </button>
             <button onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
           </div>
@@ -344,19 +365,54 @@ function OfficerManagement({ departments, officers, onCreated }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {officers.map((o) => (
           <div key={o.id} className="card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold">
-                {o.first_name?.[0] || o.username?.[0]?.toUpperCase()}
-              </div>
+            {editingOfficer === o.id ? (
               <div>
-                <p className="font-medium text-gray-900">{o.first_name} {o.last_name}</p>
-                <p className="text-xs text-gray-500">{o.email}</p>
+                <h4 className="font-medium mb-3 text-sm">Edit Officer</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {[["first_name", "First Name"], ["last_name", "Last Name"], ["email", "Email"], ["phone", "Phone"], ["employee_id", "Employee ID"]].map(([k, l]) => (
+                    <div key={k}>
+                      <label className="text-xs text-gray-500 mb-1 block">{l}</label>
+                      <input className="input text-xs py-1" value={editForm[k]}
+                        onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })} />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Department</label>
+                    <select className="input text-xs py-1" value={editForm.department_id}
+                      onChange={(e) => setEditForm({ ...editForm, department_id: e.target.value })}>
+                      <option value="">-- Select --</option>
+                      {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => updateMutation.mutate({ id: o.id, data: editForm })}
+                    disabled={updateMutation.isPending} className="btn-primary text-xs py-1 px-3">
+                    {updateMutation.isPending ? "Saving..." : "Save"}
+                  </button>
+                  <button onClick={() => setEditingOfficer(null)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
+                </div>
               </div>
-            </div>
-            <div className="mt-3 flex gap-2 flex-wrap">
-              <span className="badge bg-blue-50 text-blue-700">{o.department_name || "No Dept"}</span>
-              {o.employee_id && <span className="badge bg-gray-100 text-gray-600">ID: {o.employee_id}</span>}
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold">
+                      {o.first_name?.[0] || o.username?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{o.first_name} {o.last_name}</p>
+                      <p className="text-xs text-gray-500">{o.email}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => startEdit(o)} className="text-xs text-blue-600 hover:underline">Edit</button>
+                </div>
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  <span className="badge bg-blue-50 text-blue-700">{o.department_name || "No Dept"}</span>
+                  {o.employee_id && <span className="badge bg-gray-100 text-gray-600">ID: {o.employee_id}</span>}
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>

@@ -62,6 +62,8 @@ export const adminApi = {
   stats: () => api.get("/admin/stats/"),
   users: (params) => api.get("/admin/users/", { params }),
   createOfficer: (data) => api.post("/admin/create-officer/", data),
+  updateOfficer: (id, data) => api.patch(`/admin/users/${id}/`, data),
+  deleteOfficer: (id) => api.delete(`/admin/users/${id}/`),
 };
 
 export const officerApi = {

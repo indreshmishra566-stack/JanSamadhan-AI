@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/complaints/<int:pk>/", views.AdminComplaintUpdateView.as_view()),
     path("admin/stats/", views.AdminDashboardStatsView.as_view()),
     path("admin/users/", views.AdminUserListView.as_view()),
+    path("admin/users/<int:pk>/", views.AdminUserDetailView.as_view()),
     path("admin/create-officer/", views.AdminCreateOfficerView.as_view()),
 
     # Officer

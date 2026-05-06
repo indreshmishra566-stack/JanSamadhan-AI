@@ -39,9 +39,11 @@ class MeView(generics.RetrieveUpdateAPIView):
 class DepartmentListView(generics.ListCreateAPIView):
     queryset = Department.objects.filter(is_active=True)
     serializer_class = DepartmentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method == "POST":
+            from rest_framework.permissions import IsAdminUser
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
@@ -191,6 +193,12 @@ class AdminUserListView(generics.ListCreateAPIView):
         if role:
             qs = qs.filter(role=role)
         return qs
+
+
+class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = User.objects.all()
 
 
 class AdminCreateOfficerView(generics.CreateAPIView):
