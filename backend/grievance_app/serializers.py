@@ -28,8 +28,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email", "phone", "role", "first_name", "last_name",
-                  "department", "department_name", "employee_id", "is_verified", "date_joined"]
-        read_only_fields = ["role", "date_joined", "is_verified"]
+                  "department", "department_name", "employee_id", "is_verified", "date_joined",
+                  "state", "district", "block", "created_by"]
+        read_only_fields = ["date_joined", "is_verified"]
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -148,3 +149,23 @@ class CitizenFeedbackSerializer(serializers.ModelSerializer):
         if value not in range(1, 6):
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+
+class ForwardingRecordSerializer(serializers.ModelSerializer):
+    from_user_name = serializers.SerializerMethodField()
+    to_user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import ForwardingRecord
+        model = ForwardingRecord
+        fields = ["id", "from_user_name", "to_user_name", "from_level", "to_level", "action", "note", "created_at"]
+
+    def get_from_user_name(self, obj):
+        if obj.from_user:
+            return obj.from_user.get_full_name() or obj.from_user.username
+        return "System"
+
+    def get_to_user_name(self, obj):
+        if obj.to_user:
+            return obj.to_user.get_full_name() or obj.to_user.username
+        return "Unknown"

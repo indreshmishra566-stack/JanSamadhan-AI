@@ -2,28 +2,43 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.conf import settings
-import uuid
 
 
 class User(AbstractUser):
     ROLE_CHOICES = [
         ("CITIZEN", "Citizen"),
         ("ADMIN", "Admin"),
+        ("PM", "PM / Super Admin"),
+        ("CM", "CM / State Admin"),
+        ("DISTRICT_OFFICER", "District Officer"),
+        ("BLOCK_OFFICER", "Block Officer"),
+        ("FIELD_OFFICER", "Field Officer"),
         ("OFFICER", "Officer"),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="CITIZEN")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="CITIZEN")
     phone = models.CharField(max_length=15, blank=True)
     department = models.ForeignKey(
         "Department", null=True, blank=True, on_delete=models.SET_NULL, related_name="officers"
     )
     employee_id = models.CharField(max_length=30, blank=True, unique=True, null=True)
     is_verified = models.BooleanField(default=False)
+    state = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    block = models.CharField(max_length=100, blank=True)
+    created_by = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="subordinates"
+    )
 
     class Meta:
         verbose_name = "User"
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+    @property
+    def hierarchy_level(self):
+        order = {"PM": 1, "ADMIN": 1, "CM": 2, "DISTRICT_OFFICER": 3, "BLOCK_OFFICER": 4, "FIELD_OFFICER": 5, "OFFICER": 5, "CITIZEN": 99}
+        return order.get(self.role, 99)
 
 
 class Department(models.Model):
@@ -42,30 +57,20 @@ class Department(models.Model):
 
 
 class Complaint(models.Model):
-    PRIORITY_CHOICES = [
-        ("LOW", "Low"),
-        ("MEDIUM", "Medium"),
-        ("HIGH", "High"),
-        ("CRITICAL", "Critical"),
-    ]
+    PRIORITY_CHOICES = [("LOW","Low"),("MEDIUM","Medium"),("HIGH","High"),("CRITICAL","Critical")]
     STATUS_CHOICES = [
-        ("PENDING", "Pending"),
-        ("ASSIGNED", "Assigned"),
-        ("IN_PROGRESS", "In Progress"),
-        ("RESOLVED", "Resolved"),
-        ("CLOSED", "Closed"),
-        ("ESCALATED", "Escalated"),
-        ("REJECTED", "Rejected"),
+        ("PENDING","Pending"),("ASSIGNED","Assigned"),("FORWARDED","Forwarded"),
+        ("IN_PROGRESS","In Progress"),("RESOLVED","Resolved"),("CLOSED","Closed"),
+        ("ESCALATED","Escalated"),("REJECTED","Rejected"),
     ]
     CATEGORY_CHOICES = [
-        ("ELECTRICITY", "Electricity"),
-        ("WATER", "Water Supply"),
-        ("SANITATION", "Sanitation"),
-        ("ROADS", "Roads & Infrastructure"),
-        ("PUBLIC_SERVICES", "Public Services"),
-        ("HEALTH", "Health"),
-        ("EDUCATION", "Education"),
-        ("OTHER", "Other"),
+        ("ELECTRICITY","Electricity"),("WATER","Water Supply"),("SANITATION","Sanitation"),
+        ("ROADS","Roads & Infrastructure"),("PUBLIC_SERVICES","Public Services"),
+        ("HEALTH","Health"),("EDUCATION","Education"),("OTHER","Other"),
+    ]
+    LEVEL_CHOICES = [
+        ("PM","PM Level"),("CM","CM Level"),("DISTRICT","District Level"),
+        ("BLOCK","Block Level"),("FIELD","Field Level"),
     ]
 
     ticket_id = models.CharField(max_length=20, unique=True, editable=False)
@@ -85,6 +90,13 @@ class Complaint(models.Model):
     assigned_officer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_complaints"
     )
+    current_level = models.CharField(max_length=15, choices=LEVEL_CHOICES, default="PM")
+    forwarded_to = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="forwarded_complaints"
+    )
+    state = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    block = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=255, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -125,6 +137,23 @@ class Complaint(models.Model):
         ordering = ["-created_at"]
 
 
+class ForwardingRecord(models.Model):
+    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name="forwarding_records")
+    from_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="forwarded_from")
+    to_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="forwarded_to_records")
+    from_level = models.CharField(max_length=20)
+    to_level = models.CharField(max_length=20)
+    action = models.CharField(max_length=20, choices=[("FORWARD","Forward"),("ESCALATE","Escalate"),("ASSIGN","Assign")])
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.complaint.ticket_id}: {self.from_level} → {self.to_level}"
+
+
 class ComplaintHistory(models.Model):
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name="history")
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -142,11 +171,9 @@ class ComplaintHistory(models.Model):
 
 class Notification(models.Model):
     TYPE_CHOICES = [
-        ("ASSIGNED", "Complaint Assigned"),
-        ("STATUS_UPDATE", "Status Updated"),
-        ("SLA_BREACH", "SLA Breached"),
-        ("ESCALATION", "Escalated"),
-        ("RESOLVED", "Resolved"),
+        ("ASSIGNED","Complaint Assigned"),("STATUS_UPDATE","Status Updated"),
+        ("SLA_BREACH","SLA Breached"),("ESCALATION","Escalated"),
+        ("FORWARDED","Forwarded"),("RESOLVED","Resolved"),
     ]
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, null=True, blank=True)
