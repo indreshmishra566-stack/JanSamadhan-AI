@@ -5,13 +5,11 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CitizenDashboard from "./pages/Citizen/CitizenDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
-import OfficerDashboard from "./pages/Officer/OfficerDashboard";
-import HierarchyDashboard from "./pages/Hierarchy/HierarchyDashboard";
+import NodalDashboard from "./pages/Hierarchy/HierarchyDashboard";
 import TrackComplaint from "./pages/TrackComplaint";
 import { LoadingSpinner } from "./components/Shared";
 
-// Roles that use HierarchyDashboard
-const HIERARCHY_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"];
+const HANDLER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -26,8 +24,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 function getDashboardPath(role) {
   if (role === "ADMIN") return "/admin/dashboard";
-  if (role === "OFFICER") return "/officer/dashboard";
-  if (HIERARCHY_ROLES.includes(role)) return "/hierarchy/dashboard";
+  if (HANDLER_ROLES.includes(role)) return "/nodal/dashboard";
   return "/citizen/dashboard";
 }
 
@@ -72,19 +69,14 @@ export default function App() {
             </ProtectedRoute>
           } />
 
-          {/* Legacy Officer */}
-          <Route path="/officer/dashboard" element={
-            <ProtectedRoute allowedRoles={["OFFICER"]}>
-              <Layout><OfficerDashboard /></Layout>
+          {/* Nodal and grievance handler officers */}
+          <Route path="/nodal/dashboard" element={
+            <ProtectedRoute allowedRoles={HANDLER_ROLES}>
+              <Layout><NodalDashboard /></Layout>
             </ProtectedRoute>
           } />
-
-          {/* Hierarchy Officers (PM, CM, District, Block, Field) */}
-          <Route path="/hierarchy/dashboard" element={
-            <ProtectedRoute allowedRoles={HIERARCHY_ROLES}>
-              <Layout><HierarchyDashboard /></Layout>
-            </ProtectedRoute>
-          } />
+          <Route path="/hierarchy/dashboard" element={<Navigate to="/nodal/dashboard" replace />} />
+          <Route path="/officer/dashboard" element={<Navigate to="/nodal/dashboard" replace />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

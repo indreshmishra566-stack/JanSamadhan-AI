@@ -102,8 +102,8 @@ export const hierarchyApi = {
   updateComplaint: (id, fd) => api.patch(`/hierarchy/complaints/${id}/`, fd, { headers: { "Content-Type": "multipart/form-data" } }),
   forwardComplaint: (id, data) => api.post(`/complaints/${id}/forward/`, data),
   escalateComplaint: (id, data) => api.post(`/complaints/${id}/escalate/`, data),
-  createSubordinate: (data) => api.post("/hierarchy/create-officer/", data),
-  mySubordinates: () => api.get("/hierarchy/subordinates/"),
+  createOfficer: (data) => api.post("/hierarchy/create-officer/", data),
+  departmentOfficers: () => api.get("/hierarchy/subordinates/"),
 };
 
 export const notificationApi = {

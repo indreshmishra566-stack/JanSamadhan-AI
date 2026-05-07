@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
@@ -14,7 +14,7 @@ from .serializers import (
     AdminComplaintUpdateSerializer, OfficerComplaintUpdateSerializer,
     CitizenFeedbackSerializer, ForwardingRecordSerializer,
 )
-from .permissions import IsAdmin, IsPM, IsCM, IsOfficer, IsCitizen, IsHierarchyOfficer, IsAnyOfficer
+from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
 
 LEVEL_ROLE_MAP = {
@@ -45,6 +45,16 @@ def _complaint_owner_filter(user):
     return q
 
 
+def _department_peer_filter(user):
+    q = Q(created_by=user)
+    if user.department_id:
+        q |= Q(department_id=user.department_id)
+    headed_departments = Department.objects.filter(head_officer=user, is_active=True)
+    if headed_departments.exists():
+        q |= Q(department__in=headed_departments)
+    return q
+
+
 # ─── Auth ───────────────────────────────────────────────────────────────────
 
 class RegisterView(generics.CreateAPIView):
@@ -68,7 +78,7 @@ class DepartmentListView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == "POST":
-            return [IsAdminUser()]
+            return [IsAdmin()]
         return [IsAuthenticated()]
 
 
@@ -311,8 +321,14 @@ def create_subordinate_officer(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsHierarchyOfficer])
 def my_subordinates(request):
-    """Get all officers created by this user (direct reports)."""
-    subs = User.objects.filter(created_by=request.user)
+    """Get officers this user can forward work to: direct reports and department peers."""
+    subs = (
+        User.objects
+        .filter(_department_peer_filter(request.user))
+        .exclude(id=request.user.id)
+        .exclude(role__in=["CITIZEN", "ADMIN", "PM"])
+        .distinct()
+    )
     return Response(UserSerializer(subs, many=True).data)
 
 

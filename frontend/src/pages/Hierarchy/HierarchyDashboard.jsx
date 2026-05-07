@@ -29,7 +29,8 @@ const CREATABLE_ROLES = {
   CM: ["DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
   DISTRICT_OFFICER: ["BLOCK_OFFICER", "FIELD_OFFICER"],
   BLOCK_OFFICER: ["FIELD_OFFICER"],
-  FIELD_OFFICER: [],
+  FIELD_OFFICER: ["OFFICER"],
+  OFFICER: [],
 };
 
 export default function HierarchyDashboard() {
@@ -51,9 +52,9 @@ export default function HierarchyDashboard() {
     refetchInterval: 60000,
   });
 
-  const { data: subordinatesData } = useQuery({
-    queryKey: ["my-subordinates"],
-    queryFn: () => hierarchyApi.mySubordinates().then((r) => r.data),
+  const { data: departmentOfficersData } = useQuery({
+    queryKey: ["department-officers"],
+    queryFn: () => hierarchyApi.departmentOfficers().then((r) => r.data),
   });
 
   const { data: deptData } = useQuery({
@@ -62,7 +63,7 @@ export default function HierarchyDashboard() {
   });
 
   const complaints = data?.results || data || [];
-  const subordinates = subordinatesData?.results || subordinatesData || [];
+  const departmentOfficers = departmentOfficersData?.results || departmentOfficersData || [];
   const departments = deptData?.results || deptData || [];
 
   const stats = [
@@ -116,14 +117,14 @@ export default function HierarchyDashboard() {
   };
 
   const canCreateOfficers = (CREATABLE_ROLES[user?.role] || []).length > 0;
-  const canForwardEscalate = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "ADMIN"].includes(user?.role);
+  const canForwardEscalate = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "ADMIN"].includes(user?.role);
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          {user?.department_name ? `${user.department_name} Nodal Dashboard` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
+          {user?.department_name ? `${user.department_name} Nodal Dashboard` : `${ROLE_LABELS[user?.role] || "Nodal Officer"} Dashboard`}
         </h1>
         <p className="text-gray-500 text-sm">
           {user?.department_name && `${user.department_name} · Department/Nodal workflow · `}
@@ -142,7 +143,7 @@ export default function HierarchyDashboard() {
         {["complaints", canCreateOfficers && "team"].filter(Boolean).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
-            {t === "team" ? "My Team" : t}
+            {t === "team" ? "Department Officers" : t}
           </button>
         ))}
       </div>
@@ -171,7 +172,7 @@ export default function HierarchyDashboard() {
           {isLoading ? (
             <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
           ) : complaints.length === 0 ? (
-            <EmptyState icon="🎉" title="No complaints assigned" description="All clear at your level." />
+            <EmptyState icon="🎉" title="No grievances assigned" description="All clear for your department or desk." />
           ) : (
             <div className="space-y-3">
               {complaints.map((c) => (
@@ -225,7 +226,7 @@ export default function HierarchyDashboard() {
                           >Update</button>
                         )}
                         {/* Forward */}
-                        {canForwardEscalate && !["RESOLVED", "CLOSED"].includes(c.status) && subordinates.length > 0 && (
+                        {canForwardEscalate && !["RESOLVED", "CLOSED"].includes(c.status) && departmentOfficers.length > 0 && (
                           <button
                             onClick={() => { setForwardModal(c); setForwardForm({ to_user_id: "", note: "" }); }}
                             className="btn-secondary text-xs py-1 px-2.5 flex items-center gap-1 text-green-700 border-green-300"
@@ -341,9 +342,9 @@ export default function HierarchyDashboard() {
       {tab === "team" && canCreateOfficers && (
         <TeamManagement
           user={user}
-          subordinates={subordinates}
+          departmentOfficers={departmentOfficers}
           departments={departments}
-          onCreated={() => qc.invalidateQueries(["my-subordinates"])}
+          onCreated={() => qc.invalidateQueries(["department-officers"])}
         />
       )}
 
@@ -353,11 +354,11 @@ export default function HierarchyDashboard() {
           <p className="text-sm text-gray-600 mb-4">{forwardModal.title}</p>
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Forward to Officer *</label>
+              <label className="text-xs text-gray-500 mb-1 block">Forward to Department Officer *</label>
               <select className="input text-sm" value={forwardForm.to_user_id}
                 onChange={(e) => setForwardForm({ ...forwardForm, to_user_id: e.target.value })}>
                 <option value="">-- Select department/officer recipient --</option>
-                {subordinates.map((s) => (
+                {departmentOfficers.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.first_name} {s.last_name} ({ROLE_LABELS[s.role] || s.role})
                     {s.department_name ? ` · ${s.department_name}` : ""}
@@ -421,7 +422,7 @@ export default function HierarchyDashboard() {
 }
 
 // ─── Team Management Sub-Component ───────────────────────────────────────────
-function TeamManagement({ user, subordinates, departments, onCreated }) {
+function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   const creatableRoles = CREATABLE_ROLES[user?.role] || [];
   const emptyForm = {
     username: "", email: "", password: "", phone: "",
@@ -433,7 +434,7 @@ function TeamManagement({ user, subordinates, departments, onCreated }) {
   const [showForm, setShowForm] = useState(false);
 
   const createMutation = useMutation({
-    mutationFn: (data) => hierarchyApi.createSubordinate(data),
+    mutationFn: (data) => hierarchyApi.createOfficer(data),
     onSuccess: () => {
       toast.success("Officer account created!");
       setShowForm(false);
@@ -448,7 +449,7 @@ function TeamManagement({ user, subordinates, departments, onCreated }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users size={18} className="text-gray-600" />
-          <h2 className="text-lg font-semibold">My Team ({subordinates.length})</h2>
+          <h2 className="text-lg font-semibold">Department Officers ({departmentOfficers.length})</h2>
         </div>
         {creatableRoles.length > 0 && (
           <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
@@ -460,7 +461,7 @@ function TeamManagement({ user, subordinates, departments, onCreated }) {
       {/* Create officer form */}
       {showForm && (
         <div className="card p-5 mb-5">
-          <h3 className="font-medium mb-4">Create Subordinate Officer</h3>
+          <h3 className="font-medium mb-4">Create Department Officer</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[["first_name","First Name"],["last_name","Last Name"],["username","Username"],
               ["email","Email"],["phone","Phone"],["employee_id","Employee ID"]].map(([k, l]) => (
@@ -511,14 +512,14 @@ function TeamManagement({ user, subordinates, departments, onCreated }) {
         </div>
       )}
 
-      {/* Subordinates list */}
-      {subordinates.length === 0 ? (
-        <EmptyState icon="👥" title="No team members yet"
-          description="Create officer accounts to build your team."
+      {/* Department officers list */}
+      {departmentOfficers.length === 0 ? (
+        <EmptyState icon="👥" title="No department officers yet"
+          description="Create or assign officer accounts for this department."
           action={creatableRoles.length > 0 && <button onClick={() => setShowForm(true)} className="btn-primary">Add Officer</button>} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {subordinates.map((s) => (
+          {departmentOfficers.map((s) => (
             <div key={s.id} className="card p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold shrink-0">

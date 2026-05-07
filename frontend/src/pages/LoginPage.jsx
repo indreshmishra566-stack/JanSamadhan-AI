@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 
-const HIERARCHY_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"];
+const HANDLER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -19,8 +19,7 @@ export default function LoginPage() {
       const user = await login(form);
       toast.success(`Welcome back, ${user.first_name || user.username}!`);
       if (user.role === "ADMIN") navigate("/admin/dashboard");
-      else if (user.role === "OFFICER") navigate("/officer/dashboard");
-      else if (HIERARCHY_ROLES.includes(user.role)) navigate("/hierarchy/dashboard");
+      else if (HANDLER_ROLES.includes(user.role)) navigate("/nodal/dashboard");
       else navigate("/citizen/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Invalid credentials");
