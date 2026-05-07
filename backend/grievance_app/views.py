@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.conf import settings
+from django.core.management import call_command
 from django.utils import timezone
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
@@ -612,6 +614,27 @@ def track_complaint(request, ticket_id):
         "sla_deadline": complaint.sla_deadline,
         "is_sla_breached": complaint.is_sla_breached,
         "forwarding_trail": trail,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def run_demo_seed(request):
+    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
+    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
+    if not expected or token != expected:
+        return Response({"detail": "Invalid seed token."}, status=403)
+
+    call_command("seed")
+    return Response({
+        "status": "ok",
+        "message": "Demo departments, users, nodal mappings, and grievances were seeded.",
+        "logins": {
+            "admin": "Admin@1234",
+            "citizen_demo": "Citizen@1234",
+            "nodal_electricity": "Officer@1234",
+            "district_officer": "Officer@1234",
+        },
     })
 
 
