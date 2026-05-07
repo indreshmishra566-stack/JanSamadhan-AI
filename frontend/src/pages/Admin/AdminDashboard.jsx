@@ -457,7 +457,7 @@ export default function AdminDashboard() {
 }
 
 function OfficerManagement({ departments, officers, onChanged }) {
-  const ROLES = ["CM","DISTRICT_OFFICER","BLOCK_OFFICER","FIELD_OFFICER","OFFICER"];
+  const ROLES = ["PM","CM","DISTRICT_OFFICER","BLOCK_OFFICER","FIELD_OFFICER","OFFICER"];
   const emptyForm = { username:"",email:"",password:"",phone:"",first_name:"",last_name:"",employee_id:"",department_id:"",role:"OFFICER",state:"",district:"",block:"" };
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
