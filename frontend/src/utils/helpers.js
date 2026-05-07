@@ -8,6 +8,7 @@ export const PRIORITY_COLORS = {
 export const STATUS_COLORS = {
   PENDING: "bg-gray-100 text-gray-700",
   ASSIGNED: "bg-blue-100 text-blue-800",
+  FORWARDED: "bg-cyan-100 text-cyan-800",
   IN_PROGRESS: "bg-purple-100 text-purple-800",
   RESOLVED: "bg-green-100 text-green-800",
   CLOSED: "bg-gray-200 text-gray-600",

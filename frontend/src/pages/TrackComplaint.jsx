@@ -69,6 +69,10 @@ export default function TrackComplaint() {
                   <p className="font-medium">{result.department || "Being assigned"}</p>
                 </div>
                 <div>
+                  <p className="text-gray-400 text-xs">Current Level</p>
+                  <p className="font-medium">{result.current_level || "—"}</p>
+                </div>
+                <div>
                   <p className="text-gray-400 text-xs">SLA Deadline</p>
                   <p className={`font-medium text-xs ${result.is_sla_breached ? "text-red-600" : ""}`}>
                     {formatDate(result.sla_deadline)}
@@ -86,10 +90,30 @@ export default function TrackComplaint() {
               </div>
             </div>
 
+            {result.forwarding_trail?.length > 0 && (
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <h3 className="font-semibold text-gray-800 text-sm mb-3">Forwarding Trail</h3>
+                <div className="space-y-2">
+                  {result.forwarding_trail.map((item, index) => (
+                    <div key={index} className="text-xs bg-white rounded-lg border border-gray-100 p-3">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`font-semibold ${item.action === "ESCALATE" ? "text-orange-700" : "text-blue-700"}`}>
+                          {item.action}: {item.from_level} → {item.to_level}
+                        </span>
+                        <span className="text-gray-400">{formatDate(item.date)}</span>
+                      </div>
+                      <p className="text-gray-600">{item.from} → {item.to}</p>
+                      {item.note && <p className="text-gray-400 mt-1">{item.note}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Status timeline */}
             <div className="flex items-center gap-2 text-xs text-center">
-              {["PENDING", "ASSIGNED", "IN_PROGRESS", "RESOLVED"].map((s, i) => {
-                const statuses = ["PENDING", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+              {["PENDING", "ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED"].map((s, i) => {
+                const statuses = ["PENDING", "ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
                 const current = statuses.indexOf(result.status);
                 const step = statuses.indexOf(s);
                 const done = step <= current;
@@ -99,7 +123,7 @@ export default function TrackComplaint() {
                       {done ? "✓" : i + 1}
                     </div>
                     <p className={`text-xs leading-tight ${done ? "text-blue-700 font-medium" : "text-gray-400"}`}>{s}</p>
-                    {i < 3 && <div className={`absolute h-0.5 w-full ${done ? "bg-blue-300" : "bg-gray-200"}`} />}
+                    {i < 5 && <div className={`absolute h-0.5 w-full ${done ? "bg-blue-300" : "bg-gray-200"}`} />}
                   </div>
                 );
               })}

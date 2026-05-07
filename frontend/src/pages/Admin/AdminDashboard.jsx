@@ -6,7 +6,7 @@ import {
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import toast from "react-hot-toast";
-import { Trash2, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp, Plus, Building2 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -26,6 +26,7 @@ const ROLE_LABELS = {
 };
 
 const ALL_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "CITIZEN", "ADMIN"];
+const OFFICER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
 
 export default function AdminDashboard() {
   const qc = useQueryClient();
@@ -74,6 +75,7 @@ export default function AdminDashboard() {
     mutationFn: (id) => adminApi.deleteOfficer(id),
     onSuccess: () => {
       qc.invalidateQueries(["admin-users"]);
+      qc.invalidateQueries(["all-officers"]);
       toast.success("User deleted");
       setDeleteConfirm(null);
     },
@@ -87,9 +89,9 @@ export default function AdminDashboard() {
   // All officers for assigning
   const { data: allOfficers } = useQuery({
     queryKey: ["all-officers"],
-    queryFn: () => adminApi.users({ role: "OFFICER" }).then((r) => r.data),
+    queryFn: () => adminApi.users().then((r) => r.data),
   });
-  const officers = allOfficers?.results || allOfficers || [];
+  const officers = (allOfficers?.results || allOfficers || []).filter((u) => OFFICER_ROLES.includes(u.role));
 
   const statCards = stats ? [
     { label: "Total Complaints", value: stats.total, icon: "📋", color: "blue" },
@@ -129,7 +131,7 @@ export default function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", "analytics", "users", "officers"].map((t) => (
+        {["complaints", "analytics", "users", "officers", "departments"].map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
             {t}
@@ -420,7 +422,15 @@ export default function AdminDashboard() {
 
       {/* ── OFFICERS TAB ── */}
       {tab === "officers" && (
-        <OfficerManagement departments={departments} onCreated={() => qc.invalidateQueries(["all-officers"])} officers={officers} />
+        <OfficerManagement departments={departments} onChanged={() => {
+          qc.invalidateQueries(["all-officers"]);
+          qc.invalidateQueries(["admin-users"]);
+        }} officers={officers} />
+      )}
+
+      {/* ── DEPARTMENTS TAB ── */}
+      {tab === "departments" && (
+        <DepartmentManagement departments={departments} officers={officers} onChanged={() => qc.invalidateQueries(["departments"])} />
       )}
 
       {/* Delete Confirm Modal */}
@@ -446,7 +456,7 @@ export default function AdminDashboard() {
   );
 }
 
-function OfficerManagement({ departments, officers, onCreated }) {
+function OfficerManagement({ departments, officers, onChanged }) {
   const ROLES = ["CM","DISTRICT_OFFICER","BLOCK_OFFICER","FIELD_OFFICER","OFFICER"];
   const emptyForm = { username:"",email:"",password:"",phone:"",first_name:"",last_name:"",employee_id:"",department_id:"",role:"OFFICER",state:"",district:"",block:"" };
   const [form, setForm] = useState(emptyForm);
@@ -456,25 +466,29 @@ function OfficerManagement({ departments, officers, onCreated }) {
 
   const createMutation = useMutation({
     mutationFn: (data) => adminApi.createOfficer(data),
-    onSuccess: () => { toast.success("Officer account created!"); setShowForm(false); setForm(emptyForm); onCreated(); },
+    onSuccess: () => { toast.success("Officer account created!"); setShowForm(false); setForm(emptyForm); onChanged(); },
     onError: (err) => toast.error(err.response?.data?.error || "Failed to create officer"),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => adminApi.updateOfficer(id, data),
-    onSuccess: () => { toast.success("Officer updated!"); setEditingOfficer(null); onCreated(); },
+    onSuccess: () => { toast.success("Officer updated!"); setEditingOfficer(null); onChanged(); },
     onError: (err) => toast.error(err.response?.data?.error || "Failed to update officer"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => adminApi.deleteOfficer(id),
-    onSuccess: () => { toast.success("Officer deleted!"); onCreated(); },
+    onSuccess: () => { toast.success("Officer deleted!"); onChanged(); },
     onError: () => toast.error("Delete failed"),
   });
 
   const startEdit = (o) => {
     setEditingOfficer(o.id);
-    setEditForm({ first_name: o.first_name||"", last_name: o.last_name||"", email: o.email||"", phone: o.phone||"", employee_id: o.employee_id||"", department_id: o.department||"", role: o.role||"OFFICER" });
+    setEditForm({
+      first_name: o.first_name||"", last_name: o.last_name||"", email: o.email||"",
+      phone: o.phone||"", employee_id: o.employee_id||"", department: o.department||"",
+      role: o.role||"OFFICER", state: o.state||"", district: o.district||"", block: o.block||"",
+    });
   };
 
   return (
@@ -511,6 +525,12 @@ function OfficerManagement({ departments, officers, onCreated }) {
                 {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
+            {[["state","State"],["district","District"],["block","Block"]].map(([k,l]) => (
+              <div key={k}>
+                <label className="text-xs text-gray-500 mb-1 block">{l}</label>
+                <input className="input text-sm" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+              </div>
+            ))}
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending || !form.username || !form.password} className="btn-primary text-sm">
@@ -528,7 +548,7 @@ function OfficerManagement({ departments, officers, onCreated }) {
               <div>
                 <h4 className="font-medium mb-3 text-sm">Edit Officer</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {[["first_name","First Name"],["last_name","Last Name"],["email","Email"],["phone","Phone"],["employee_id","Employee ID"]].map(([k,l]) => (
+                  {[["first_name","First Name"],["last_name","Last Name"],["email","Email"],["phone","Phone"],["employee_id","Employee ID"],["state","State"],["district","District"],["block","Block"]].map(([k,l]) => (
                     <div key={k}>
                       <label className="text-xs text-gray-500 mb-1 block">{l}</label>
                       <input className="input text-xs py-1" value={editForm[k]} onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })} />
@@ -542,7 +562,7 @@ function OfficerManagement({ departments, officers, onCreated }) {
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Department</label>
-                    <select className="input text-xs py-1" value={editForm.department_id} onChange={(e) => setEditForm({ ...editForm, department_id: e.target.value })}>
+                    <select className="input text-xs py-1" value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
                       <option value="">-- Select --</option>
                       {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
@@ -582,6 +602,114 @@ function OfficerManagement({ departments, officers, onCreated }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function DepartmentManagement({ departments, officers, onChanged }) {
+  const emptyForm = { name: "", code: "", description: "", email: "", head_officer: "" };
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+
+  const createMutation = useMutation({
+    mutationFn: (data) => departmentApi.create(data),
+    onSuccess: () => {
+      toast.success("Department created");
+      setShowForm(false);
+      setForm(emptyForm);
+      onChanged();
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to create department"),
+  });
+
+  const submit = () => {
+    createMutation.mutate({
+      ...form,
+      head_officer: form.head_officer || null,
+      code: form.code.trim().toUpperCase(),
+    });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Building2 size={18} className="text-gray-600" />
+          <h2 className="text-lg font-semibold">Departments ({departments.length})</h2>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
+          <Plus size={15} /> Add Department
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="card p-5 mb-5">
+          <h3 className="font-medium mb-4">Create Department</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Name *</label>
+              <input className="input text-sm" value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Code *</label>
+              <input className="input text-sm uppercase" value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Email</label>
+              <input className="input text-sm" type="email" value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Head Officer</label>
+              <select className="input text-sm" value={form.head_officer}
+                onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
+                <option value="">-- Select --</option>
+                {officers.map((o) => (
+                  <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({ROLE_LABELS[o.role] || o.role})</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-xs text-gray-500 mb-1 block">Description</label>
+              <input className="input text-sm" value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button onClick={submit} disabled={createMutation.isPending || !form.name || !form.code} className="btn-primary text-sm">
+              {createMutation.isPending ? "Creating..." : "Create Department"}
+            </button>
+            <button onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {departments.length === 0 ? (
+        <EmptyState icon="🏛️" title="No departments found" />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {departments.map((d) => (
+            <div key={d.id} className="card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-gray-900">{d.name}</p>
+                  <p className="text-xs font-mono text-gray-400">{d.code}</p>
+                </div>
+                <span className={`badge ${d.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                  {d.is_active ? "Active" : "Inactive"}
+                </span>
+              </div>
+              {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
+              <div className="mt-3 flex gap-2 flex-wrap">
+                <span className="badge bg-blue-50 text-blue-700">{d.complaint_count || 0} active complaints</span>
+                {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -5,14 +5,15 @@ import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, Emp
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { Plus, X, FileText, MapPin } from "lucide-react";
+import { Plus, X, MapPin, Navigation } from "lucide-react";
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [form, setForm] = useState({ title: "", description: "", location: "", attachment: null });
+  const emptyForm = { title: "", description: "", location: "", latitude: "", longitude: "", attachment: null };
+  const [form, setForm] = useState(emptyForm);
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-complaints"],
@@ -27,7 +28,7 @@ export default function CitizenDashboard() {
       qc.invalidateQueries(["my-complaints"]);
       toast.success("Complaint submitted! AI is classifying it now.");
       setShowForm(false);
-      setForm({ title: "", description: "", location: "", attachment: null });
+      setForm(emptyForm);
     },
     onError: (err) => toast.error(err.response?.data?.detail || "Submission failed"),
   });
@@ -38,8 +39,28 @@ export default function CitizenDashboard() {
     fd.append("title", form.title);
     fd.append("description", form.description);
     fd.append("location", form.location);
+    if (form.latitude) fd.append("latitude", form.latitude);
+    if (form.longitude) fd.append("longitude", form.longitude);
     if (form.attachment) fd.append("attachment", form.attachment);
     createMutation.mutate(fd);
+  };
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Location detection is not supported in this browser");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setForm((prev) => ({
+          ...prev,
+          latitude: coords.latitude.toFixed(6),
+          longitude: coords.longitude.toFixed(6),
+        }));
+        toast.success("Location coordinates added");
+      },
+      () => toast.error("Could not access your location")
+    );
   };
 
   const stats = [
@@ -87,13 +108,32 @@ export default function CitizenDashboard() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-2.5 text-gray-400" />
-                <input className="input pl-9" value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  placeholder="Ward no., area, city" />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <MapPin size={16} className="absolute left-3 top-2.5 text-gray-400" />
+                  <input className="input pl-9" value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    placeholder="Ward no., area, city" />
+                </div>
+                <button type="button" onClick={detectLocation} className="btn-secondary flex items-center gap-2 shrink-0">
+                  <Navigation size={15} /> GPS
+                </button>
               </div>
             </div>
+            {(form.latitude || form.longitude) && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                  <input className="input" value={form.latitude}
+                    onChange={(e) => setForm({ ...form, latitude: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                  <input className="input" value={form.longitude}
+                    onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
+                </div>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
               <input type="file" accept="image/*,application/pdf" className="input text-sm"
@@ -143,8 +183,19 @@ export default function CitizenDashboard() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                     <div><span className="text-gray-400">AI Category:</span> <span className="font-medium">{c.ai_category} ({Math.round(c.ai_confidence * 100)}%)</span></div>
                     <div><span className="text-gray-400">SLA Deadline:</span> <span className="font-medium">{formatDate(c.sla_deadline)}</span></div>
+                    <div><span className="text-gray-400">Current Level:</span> <span className="font-medium">{c.current_level || "—"}</span></div>
                     {c.officer_name && <div><span className="text-gray-400">Officer:</span> <span className="font-medium">{c.officer_name}</span></div>}
                   </div>
+                  {c.attachment && (
+                    <a href={c.attachment} target="_blank" rel="noreferrer" className="inline-flex mt-3 text-sm text-blue-600 hover:underline">
+                      View attachment
+                    </a>
+                  )}
+                  {c.proof_of_resolution && (
+                    <a href={c.proof_of_resolution} target="_blank" rel="noreferrer" className="inline-flex mt-3 ml-4 text-sm text-blue-600 hover:underline">
+                      View proof of resolution
+                    </a>
+                  )}
                   {c.officer_remarks && (
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
                       <span className="font-medium text-blue-700">Officer remarks:</span> {c.officer_remarks}
