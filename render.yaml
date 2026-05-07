@@ -1,0 +1,68 @@
+services:
+  # ─── Django Backend ───────────────────────────────────────────────────────
+  - type: web
+    name: jan-samadhan-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "jan-samadhan-backend.onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://jan-samadhan.vercel.app"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      # Set DB_* vars from your Neon/Supabase dashboard
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: REDIS_URL
+        sync: false
+
+  # ─── Celery Worker ────────────────────────────────────────────────────────
+  - type: worker
+    name: jan-samadhan-celery
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A config.celery worker -l info
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        fromService:
+          name: jan-samadhan-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: REDIS_URL
+        sync: false
