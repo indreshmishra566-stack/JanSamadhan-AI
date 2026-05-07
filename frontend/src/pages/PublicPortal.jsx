@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import {
   Activity,
   BarChart3,
-  CheckCircle2,
   ChevronDown,
   ClipboardList,
   FileCheck2,
@@ -28,14 +27,14 @@ const homeLinks = [
   { label: "Contact Us", to: "#contact" },
   { label: "About Us", to: "#about" },
   { label: "FAQ/Help", to: "#faq" },
-  { label: "Nodal PG Officer-Central Government", to: "#officers" },
-  { label: "Nodal PG Officer-State Government", to: "#officers" },
+  { label: "Department Nodal Officers", to: "#officers" },
+  { label: "State / District Officers", to: "#officers" },
   { label: "Redressal Process Flow", to: "/process-flow" },
 ];
 
 const citizenSteps = [
   { icon: Users, title: "Citizens", text: "Submit public grievances through portal or mobile app." },
-  { icon: MonitorCheck, title: "CPGRAMS Portal / App", text: "Single entry point for registration, login, grievance, tracking, and reminders." },
+  { icon: MonitorCheck, title: "Jan Samadhan Portal / App", text: "Single entry point for registration, login, grievance, tracking, and reminders." },
   { icon: ClipboardList, title: "Complaint Module", text: "Lodge grievance with title, description, GPS location, attachment, and AI classification." },
   { icon: UserPlus, title: "User Module", text: "Citizen registration, secure login, profile context, and public ticket lookup." },
   { icon: Search, title: "Tracking Module", text: "Track ticket status, current level, SLA deadline, and forwarding trail." },
@@ -75,12 +74,12 @@ function PortalHeader() {
     <header className="portal-header">
       <div className="portal-brandbar">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-slate-500">Government-style public grievance system</p>
+          <p className="text-[11px] uppercase tracking-wide text-slate-500">Trusted digital public grievance system</p>
           <div className="flex items-center gap-3">
             <div className="portal-emblem">JS</div>
             <div>
               <h1 className="text-lg font-bold text-slate-900 leading-tight">Jan Samadhan AI</h1>
-              <p className="text-xs text-slate-500">CPGRAMS-inspired citizen grievance portal</p>
+              <p className="text-xs text-slate-500">AI-assisted citizen grievance redressal portal</p>
             </div>
           </div>
         </div>
@@ -98,7 +97,7 @@ function PortalHeader() {
       </div>
       <nav className="portal-nav" aria-label="Portal navigation">
         <Link to="/track"><Search size={14} /> View Status</Link>
-        <a href="#officers"><Users size={14} /> Nodal PG Officers</a>
+        <a href="#officers"><Users size={14} /> Nodal Officers</a>
         <Link to="/process-flow"><Network size={14} /> Redress Process</Link>
         <Link to="/citizen/dashboard"><FileText size={14} /> Grievance</Link>
         <Link to="/nodal/dashboard"><ShieldCheck size={14} /> Nodal Authority for Appeal</Link>
@@ -117,7 +116,7 @@ function PortalFooter() {
         <span className="portal-social">x</span>
         <span className="portal-social">yt</span>
       </div>
-      <p>This site is designed as a Jan Samadhan AI grievance portal inspired by CPGRAMS public workflows.</p>
+      <p>Jan Samadhan AI routes grievances to the right department, officer desk, and appeal path.</p>
       <p className="text-[11px] opacity-80">Compatible with modern browsers. Version 1.0.0 | Updated on 07-05-2026</p>
     </footer>
   );
@@ -142,7 +141,7 @@ export function ProcessFlowPage() {
       <main className="portal-page">
         <section className="portal-panel">
           <p className="text-center text-sm font-semibold text-slate-700 mb-6">Redress Process Flow</p>
-          <h2 className="portal-title">CPGRAMS PROCESS FLOW</h2>
+          <h2 className="portal-title">JAN SAMADHAN PROCESS FLOW</h2>
           <div className="portal-process-canvas">
             <div className="process-citizen">
               <Users size={32} />
@@ -151,14 +150,14 @@ export function ProcessFlowPage() {
             <div className="process-box process-login">One Time Registration & Login</div>
             <div className="process-box process-register">Registration with Department / Organisation & Grievance Unique ID</div>
             <div className="process-box process-transfer">Transmission of Grievance to PGO / Field Office</div>
-            <div className="process-box process-portal">Portals of President Secretariat, PMO, CS</div>
+            <div className="process-box process-portal">Jan Samadhan Web Portal, Mobile App, Help Desk</div>
             <div className="process-box process-atr"><MailCheck size={22} /> ATR to citizen through SMS / Email</div>
             <div className="process-pill process-resolution">Resolution</div>
             <div className="process-time">Resolution Time<br /><strong>21 days</strong></div>
             <div className="process-pill process-feedback">Feedback</div>
             <div className="process-diamond">Satisfied?</div>
             <div className="process-box process-closure">Closure</div>
-            <div className="process-box process-appeal">Nodal Appellate Authority / Sub Appellate Auth.</div>
+            <div className="process-box process-appeal">Department Appellate Authority / Senior Review Desk</div>
             <div className="process-pill process-final">Final Resolution</div>
             <svg className="process-lines" viewBox="0 0 960 480" aria-hidden="true">
               <defs>
@@ -249,11 +248,11 @@ export default function PublicPortal() {
       <main>
         <section className="portal-hero">
           <div className="portal-hero-copy">
-            <p className="portal-kicker">Citizens {"->"} CPGRAMS Portal / App {"->"} Department Redressal</p>
+            <p className="portal-kicker">Citizens {"->"} Jan Samadhan Portal / App {"->"} Department Redressal</p>
             <h2>Jan Samadhan AI</h2>
             <p>
-              A CPGRAMS-style grievance system with your extra AI features kept intact:
-              auto-classification, department mapping, officer forwarding, monitoring, feedback, and appeal-ready tracking.
+              A modern grievance system for citizens, departments, and officers:
+              AI classification, nodal officer routing, forwarding, monitoring, feedback, and appeal-ready tracking.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/register" className="portal-primary"><UserPlus size={17} /> Register Citizen</Link>
@@ -261,7 +260,7 @@ export default function PublicPortal() {
               <Link to="/login" className="portal-secondary"><LogIn size={17} /> Sign In</Link>
             </div>
           </div>
-          <div className="portal-hero-board" aria-label="CPGRAMS system diagram">
+          <div className="portal-hero-board" aria-label="Jan Samadhan system diagram">
             {citizenSteps.map((step, index) => (
               <div key={step.title} className="portal-mini-step">
                 <step.icon size={18} />
@@ -297,7 +296,7 @@ export default function PublicPortal() {
         <section className="portal-page grid grid-cols-1 lg:grid-cols-3 gap-4" id="about">
           <div className="portal-info" id="officers">
             <ShieldCheck size={22} />
-            <h3>Nodal PG Officers</h3>
+            <h3>Nodal Officers</h3>
             <p>Officer dashboards support department cases, action notes, proof of resolution, forwarding, and escalation.</p>
             <Link to="/nodal/dashboard">Open officer dashboard</Link>
           </div>

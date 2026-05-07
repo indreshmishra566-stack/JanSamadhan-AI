@@ -38,7 +38,7 @@
     @apply mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3;
   }
   .portal-emblem {
-    @apply flex h-12 w-12 items-center justify-center rounded-md bg-blue-800 text-base font-bold text-white shadow-sm;
+    @apply flex h-12 w-12 items-center justify-center rounded-md bg-indigo-900 text-base font-bold text-white shadow-sm ring-2 ring-amber-400/70;
   }
   .portal-select {
     @apply rounded-sm border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-amber-400;
@@ -47,10 +47,10 @@
     @apply inline-flex items-center gap-1 bg-amber-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-400;
   }
   .portal-nav {
-    @apply flex items-center gap-1 overflow-x-auto bg-fuchsia-900 px-4 text-sm text-white;
+    @apply flex items-center gap-1 overflow-x-auto bg-indigo-900 px-4 text-sm text-white;
   }
   .portal-nav a {
-    @apply inline-flex shrink-0 items-center gap-1.5 px-3 py-2.5 hover:bg-fuchsia-800;
+    @apply inline-flex shrink-0 items-center gap-1.5 px-3 py-2.5 hover:bg-indigo-800;
   }
   .portal-page {
     @apply mx-auto max-w-7xl px-4 py-5;
@@ -59,12 +59,12 @@
     @apply rounded-md border border-slate-200 bg-white p-5 shadow-sm md:p-8;
   }
   .portal-title {
-    @apply mx-auto mb-8 w-fit border-b-4 border-sky-600 px-20 pb-2 text-center text-3xl font-extrabold text-blue-950;
+    @apply mx-auto mb-8 w-fit border-b-4 border-amber-500 px-20 pb-2 text-center text-3xl font-extrabold text-indigo-950;
   }
   .portal-hero {
-    @apply grid min-h-[520px] grid-cols-1 items-center gap-8 bg-slate-900 px-4 py-10 text-white md:grid-cols-[0.9fr_1.1fr] md:px-12 lg:px-20;
+    @apply grid min-h-[500px] grid-cols-1 items-center gap-8 bg-indigo-950 px-4 py-10 text-white md:grid-cols-[0.9fr_1.1fr] md:px-12 lg:px-20;
     background:
-      linear-gradient(110deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.82)),
+      linear-gradient(110deg, rgba(30, 27, 75, 0.96), rgba(30, 58, 138, 0.84)),
       url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80");
     background-size: cover;
     background-position: center;
@@ -94,7 +94,7 @@
     @apply relative flex min-h-20 items-center gap-3 rounded border border-white/15 bg-white/95 p-3 text-sm font-semibold text-slate-900;
   }
   .portal-mini-step svg {
-    @apply shrink-0 text-fuchsia-800;
+    @apply shrink-0 text-indigo-800;
   }
   .portal-mini-step i {
     @apply absolute -bottom-2 left-1/2 h-2 w-px bg-amber-400 md:left-auto md:right-[-9px] md:top-1/2 md:h-px md:w-2;
@@ -103,7 +103,7 @@
     @apply rounded-md border border-slate-200 bg-white p-5 shadow-sm;
   }
   .portal-module svg {
-    @apply mb-3 text-fuchsia-800;
+    @apply mb-3 text-indigo-800;
   }
   .portal-module h3,
   .portal-info h3,
@@ -118,7 +118,7 @@
   .portal-module a,
   .portal-info a,
   .portal-contact a {
-    @apply mt-4 inline-flex rounded border border-sky-200 px-3 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-50;
+    @apply mt-4 inline-flex rounded border border-indigo-200 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50;
   }
   .portal-section-title {
     @apply mb-5 text-xl font-bold text-slate-900;
@@ -130,7 +130,7 @@
     @apply flex items-start gap-3 rounded-md border border-slate-200 bg-slate-50 p-4;
   }
   .portal-flow-icon {
-    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded bg-fuchsia-900 text-white;
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded bg-indigo-900 text-white;
   }
   .portal-flow-node h3 {
     @apply text-sm font-bold text-slate-900;
@@ -142,22 +142,22 @@
     @apply rounded-md border border-slate-200 bg-white p-5 shadow-sm;
   }
   .portal-info svg {
-    @apply mb-3 text-fuchsia-800;
+    @apply mb-3 text-indigo-800;
   }
   .portal-contact {
     @apply flex flex-col gap-4 rounded-md border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center;
   }
   .portal-contact svg {
-    @apply shrink-0 text-fuchsia-800;
+    @apply shrink-0 text-indigo-800;
   }
   .portal-contact a {
     @apply md:ml-auto md:mt-0 md:shrink-0;
   }
   .portal-footer {
-    @apply bg-blue-900 px-4 pb-4 text-center text-xs font-medium text-white;
+    @apply bg-indigo-950 px-4 pb-4 text-center text-xs font-medium text-white;
   }
   .portal-social {
-    @apply flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-blue-800;
+    @apply flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-indigo-800;
   }
 
   .portal-process-canvas {
