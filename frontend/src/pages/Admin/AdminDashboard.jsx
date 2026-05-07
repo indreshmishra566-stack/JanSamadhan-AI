@@ -119,7 +119,7 @@ export default function AdminDashboard() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 text-sm">Manage all grievances and system users</p>
+        <p className="text-gray-500 text-sm">Manage grievances by department, nodal officers, and users</p>
       </div>
 
       {/* Stats */}
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="card p-5">
-            <h3 className="font-semibold text-gray-800 mb-4">By Hierarchy Level</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">By Handling Level</h3>
             <div className="space-y-2">
               {Object.entries(stats.by_level || {}).map(([level, count]) => (
                 <div key={level} className="flex items-center gap-3">
@@ -662,7 +662,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                 onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Head Officer</label>
+              <label className="text-xs text-gray-500 mb-1 block">Nodal Officer</label>
               <select className="input text-sm" value={form.head_officer}
                 onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
                 <option value="">-- Select --</option>
@@ -704,6 +704,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
               {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
               <div className="mt-3 flex gap-2 flex-wrap">
                 <span className="badge bg-blue-50 text-blue-700">{d.complaint_count || 0} active complaints</span>
+                {d.head_officer_name && <span className="badge bg-purple-50 text-purple-700">Nodal: {d.head_officer_name}</span>}
                 {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
               </div>
             </div>

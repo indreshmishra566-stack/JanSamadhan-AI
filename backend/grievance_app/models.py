@@ -69,6 +69,7 @@ class Complaint(models.Model):
         ("HEALTH","Health"),("EDUCATION","Education"),("OTHER","Other"),
     ]
     LEVEL_CHOICES = [
+        ("DEPARTMENT","Department / Nodal Officer"),
         ("PM","PM Level"),("CM","CM Level"),("DISTRICT","District Level"),
         ("BLOCK","Block Level"),("FIELD","Field Level"),
     ]
@@ -90,7 +91,7 @@ class Complaint(models.Model):
     assigned_officer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_complaints"
     )
-    current_level = models.CharField(max_length=15, choices=LEVEL_CHOICES, default="PM")
+    current_level = models.CharField(max_length=15, choices=LEVEL_CHOICES, default="DEPARTMENT")
     forwarded_to = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="forwarded_complaints"
     )

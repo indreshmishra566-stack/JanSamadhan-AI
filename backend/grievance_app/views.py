@@ -18,6 +18,7 @@ from .permissions import IsAdmin, IsPM, IsCM, IsOfficer, IsCitizen, IsHierarchyO
 
 
 LEVEL_ROLE_MAP = {
+    "DEPARTMENT": "OFFICER",
     "PM": "PM", "CM": "CM",
     "DISTRICT": "DISTRICT_OFFICER",
     "BLOCK": "BLOCK_OFFICER",
@@ -28,6 +29,20 @@ ROLE_LEVEL_MAP["ADMIN"] = "PM"
 ROLE_LEVEL_MAP["OFFICER"] = "FIELD"
 
 LEVEL_ORDER = ["PM", "CM", "DISTRICT", "BLOCK", "FIELD"]
+
+
+def _actor_level(user):
+    if Department.objects.filter(head_officer=user, is_active=True).exists():
+        return "DEPARTMENT"
+    return ROLE_LEVEL_MAP.get(user.role, "FIELD")
+
+
+def _complaint_owner_filter(user):
+    headed_departments = Department.objects.filter(head_officer=user, is_active=True)
+    q = Q(forwarded_to=user) | Q(assigned_officer=user)
+    if headed_departments.exists():
+        q |= Q(department__in=headed_departments)
+    return q
 
 
 # ─── Auth ───────────────────────────────────────────────────────────────────
@@ -78,6 +93,26 @@ class CitizenComplaintListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         complaint = serializer.save(citizen=self.request.user)
+        if complaint.assigned_officer:
+            ForwardingRecord.objects.create(
+                complaint=complaint,
+                from_user=None,
+                to_user=complaint.assigned_officer,
+                from_level="SYSTEM",
+                to_level="DEPARTMENT",
+                action="ASSIGN",
+                note="Auto-routed to department nodal officer.",
+            )
+            ComplaintHistory.objects.create(
+                complaint=complaint,
+                changed_by=None,
+                old_status="PENDING",
+                new_status=complaint.status,
+                note="Auto-routed to department nodal officer.",
+            )
+            _notify(complaint.assigned_officer, complaint, "ASSIGNED",
+                    f"New Department Grievance: #{complaint.ticket_id}",
+                    f"A new grievance was routed to {complaint.department.name}.")
         _notify(complaint.citizen, complaint, "ASSIGNED",
                 "Complaint Received",
                 f"Your complaint #{complaint.ticket_id} has been submitted successfully.")
@@ -124,7 +159,7 @@ def forward_complaint(request, pk):
     user = request.user
 
     # Determine levels
-    from_level = ROLE_LEVEL_MAP.get(user.role, "PM")
+    from_level = _actor_level(user)
     to_level = ROLE_LEVEL_MAP.get(to_user.role, "FIELD")
 
     # Record forwarding
@@ -140,7 +175,7 @@ def forward_complaint(request, pk):
 
     complaint.forwarded_to = to_user
     complaint.assigned_officer = to_user
-    complaint.current_level = to_level
+    complaint.current_level = "DEPARTMENT" if Department.objects.filter(head_officer=to_user, is_active=True).exists() else to_level
     complaint.status = "FORWARDED"
     complaint.save()
 
@@ -284,16 +319,17 @@ def my_subordinates(request):
 # ─── Hierarchy Complaint Views ────────────────────────────────────────────────
 
 class HierarchyComplaintListView(generics.ListAPIView):
-    """Complaints currently at this officer's level or forwarded to them."""
+    """Department/nodal complaints owned by this officer, plus forwarded work."""
     serializer_class = ComplaintSerializer
     permission_classes = [IsAuthenticated, IsHierarchyOfficer]
 
     def get_queryset(self):
         user = self.request.user
-        level = ROLE_LEVEL_MAP.get(user.role, "PM")
-        qs = Complaint.objects.filter(
-            Q(forwarded_to=user) | Q(current_level=level, forwarded_to__isnull=True)
-        ).prefetch_related("history", "forwarding_records")
+        if user.role in ("PM", "ADMIN"):
+            qs = Complaint.objects.all()
+        else:
+            qs = Complaint.objects.filter(_complaint_owner_filter(user))
+        qs = qs.prefetch_related("history", "forwarding_records")
 
         status_f = self.request.query_params.get("status")
         priority_f = self.request.query_params.get("priority")
@@ -312,9 +348,7 @@ class HierarchyComplaintUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsHierarchyOfficer]
 
     def get_queryset(self):
-        return Complaint.objects.filter(
-            Q(forwarded_to=self.request.user) | Q(assigned_officer=self.request.user)
-        )
+        return Complaint.objects.filter(_complaint_owner_filter(self.request.user))
 
     def perform_update(self, serializer):
         old = self.get_object()
@@ -330,7 +364,8 @@ class HierarchyComplaintUpdateView(generics.UpdateAPIView):
             new_status=complaint.status,
             note=complaint.officer_remarks,
         )
-        _notify(complaint.citizen, complaint, "STATUS_UPDATE",
+        notif_type = "RESOLVED" if complaint.status == "RESOLVED" else "STATUS_UPDATE"
+        _notify(complaint.citizen, complaint, notif_type,
                 f"Update on #{complaint.ticket_id}",
                 f"Status updated to: {complaint.get_status_display()}")
 
@@ -368,7 +403,23 @@ class AdminComplaintUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         old = self.get_object()
         old_status = old.status
+        old_officer = old.assigned_officer
         complaint = serializer.save()
+        if complaint.assigned_officer and complaint.assigned_officer != old_officer:
+            complaint.forwarded_to = complaint.assigned_officer
+            complaint.current_level = "DEPARTMENT" if Department.objects.filter(head_officer=complaint.assigned_officer, is_active=True).exists() else ROLE_LEVEL_MAP.get(complaint.assigned_officer.role, "FIELD")
+            if complaint.status == "PENDING":
+                complaint.status = "ASSIGNED"
+            complaint.save(update_fields=["forwarded_to", "current_level", "status"])
+            ForwardingRecord.objects.create(
+                complaint=complaint,
+                from_user=self.request.user,
+                to_user=complaint.assigned_officer,
+                from_level="ADMIN",
+                to_level=complaint.current_level,
+                action="ASSIGN",
+                note=complaint.admin_override_note or "Assigned by admin.",
+            )
         if old_status != complaint.status:
             ComplaintHistory.objects.create(
                 complaint=complaint,
@@ -464,7 +515,7 @@ class OfficerComplaintListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Complaint.objects.filter(
-            Q(assigned_officer=self.request.user) | Q(forwarded_to=self.request.user)
+            _complaint_owner_filter(self.request.user)
         ).prefetch_related("history", "forwarding_records")
 
 
@@ -473,9 +524,7 @@ class OfficerComplaintUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Complaint.objects.filter(
-            Q(assigned_officer=self.request.user) | Q(forwarded_to=self.request.user)
-        )
+        return Complaint.objects.filter(_complaint_owner_filter(self.request.user))
 
     def perform_update(self, serializer):
         old = self.get_object()

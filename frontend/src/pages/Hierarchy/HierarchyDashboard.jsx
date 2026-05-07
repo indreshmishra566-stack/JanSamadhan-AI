@@ -18,6 +18,7 @@ const ROLE_LABELS = {
   DISTRICT_OFFICER: "District Officer",
   BLOCK_OFFICER: "Block Officer",
   FIELD_OFFICER: "Field Officer",
+  OFFICER: "Department Officer",
   ADMIN: "Admin",
 };
 
@@ -65,7 +66,7 @@ export default function HierarchyDashboard() {
   const departments = deptData?.results || deptData || [];
 
   const stats = [
-    { label: "Total Assigned", value: complaints.length, icon: "📋", color: "blue" },
+    { label: "Department Cases", value: complaints.length, icon: "📋", color: "blue" },
     { label: "In Progress", value: complaints.filter((c) => c.status === "IN_PROGRESS").length, icon: "🔄", color: "purple" },
     { label: "Escalated", value: complaints.filter((c) => c.status === "ESCALATED").length, icon: "🚨", color: "red" },
     { label: "Resolved", value: complaints.filter((c) => c.status === "RESOLVED").length, icon: "✅", color: "green" },
@@ -122,10 +123,10 @@ export default function HierarchyDashboard() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          {ROLE_LABELS[user?.role] || "Officer"} Dashboard
+          {user?.department_name ? `${user.department_name} Nodal Dashboard` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
         </h1>
         <p className="text-gray-500 text-sm">
-          {user?.department_name && `${user.department_name} · `}
+          {user?.department_name && `${user.department_name} · Department/Nodal workflow · `}
           {user?.first_name} {user?.last_name}
           {user?.state && ` · ${user.district || user.state}`}
         </p>
@@ -355,7 +356,7 @@ export default function HierarchyDashboard() {
               <label className="text-xs text-gray-500 mb-1 block">Forward to Officer *</label>
               <select className="input text-sm" value={forwardForm.to_user_id}
                 onChange={(e) => setForwardForm({ ...forwardForm, to_user_id: e.target.value })}>
-                <option value="">-- Select subordinate officer --</option>
+                <option value="">-- Select department/officer recipient --</option>
                 {subordinates.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.first_name} {s.last_name} ({ROLE_LABELS[s.role] || s.role})

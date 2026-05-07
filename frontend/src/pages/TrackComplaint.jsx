@@ -112,18 +112,21 @@ export default function TrackComplaint() {
 
             {/* Status timeline */}
             <div className="flex items-center gap-2 text-xs text-center">
-              {["PENDING", "ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED"].map((s, i) => {
-                const statuses = ["PENDING", "ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+              {["PENDING", "DEPARTMENT", "ASSIGNED", "IN_PROGRESS", "RESOLVED"].map((s, i) => {
+                const statuses = ["PENDING", "DEPARTMENT", "ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
                 const current = statuses.indexOf(result.status);
+                const currentLevel = result.current_level === "DEPARTMENT" && ["ASSIGNED", "FORWARDED"].includes(result.status)
+                  ? statuses.indexOf("DEPARTMENT")
+                  : current;
                 const step = statuses.indexOf(s);
-                const done = step <= current;
+                const done = step <= currentLevel || (s === "ASSIGNED" && ["ASSIGNED", "FORWARDED", "ESCALATED", "IN_PROGRESS", "RESOLVED", "CLOSED"].includes(result.status));
                 return (
                   <div key={s} className="flex-1 flex flex-col items-center gap-1">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${done ? "bg-blue-600" : "bg-gray-200 text-gray-400"}`}>
                       {done ? "✓" : i + 1}
                     </div>
-                    <p className={`text-xs leading-tight ${done ? "text-blue-700 font-medium" : "text-gray-400"}`}>{s}</p>
-                    {i < 5 && <div className={`absolute h-0.5 w-full ${done ? "bg-blue-300" : "bg-gray-200"}`} />}
+                    <p className={`text-xs leading-tight ${done ? "text-blue-700 font-medium" : "text-gray-400"}`}>{s === "DEPARTMENT" ? "NODAL" : s}</p>
+                    {i < 4 && <div className={`absolute h-0.5 w-full ${done ? "bg-blue-300" : "bg-gray-200"}`} />}
                   </div>
                 );
               })}

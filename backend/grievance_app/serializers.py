@@ -35,14 +35,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DepartmentSerializer(serializers.ModelSerializer):
     complaint_count = serializers.SerializerMethodField()
+    head_officer_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Department
         fields = ["id", "name", "code", "description", "email", "is_active",
-                  "head_officer", "complaint_count", "created_at"]
+                  "head_officer", "head_officer_name", "complaint_count", "created_at"]
 
     def get_complaint_count(self, obj):
         return obj.complaints.filter(status__in=["PENDING", "ASSIGNED", "IN_PROGRESS"]).count()
+
+    def get_head_officer_name(self, obj):
+        if obj.head_officer:
+            return obj.head_officer.get_full_name() or obj.head_officer.username
+        return ""
 
 
 class ComplaintHistorySerializer(serializers.ModelSerializer):
@@ -134,6 +140,11 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         ).first()
         if dept:
             validated_data["department"] = dept
+            validated_data["current_level"] = "DEPARTMENT"
+            if dept.head_officer:
+                validated_data["assigned_officer"] = dept.head_officer
+                validated_data["forwarded_to"] = dept.head_officer
+                validated_data["status"] = "ASSIGNED"
 
         hours = settings.SLA_HOURS.get(validated_data["priority"], 168)
         validated_data["sla_deadline"] = timezone.now() + timezone.timedelta(hours=hours)
