@@ -204,6 +204,14 @@ export default function CitizenDashboard() {
                       <PriorityBadge priority={c.priority} />
                       {c.department_name && <span className="text-xs text-gray-500">🏛️ {c.department_name}</span>}
                     </div>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {c.officer_name && (
+                        <span className="badge bg-blue-50 text-blue-700">Assigned: {c.officer_name}</span>
+                      )}
+                      {c.supervising_head_name && (
+                        <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <p className="text-xs text-gray-400 whitespace-nowrap">{formatDate(c.created_at)}</p>

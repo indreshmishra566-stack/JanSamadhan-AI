@@ -203,6 +203,14 @@ export default function HierarchyDashboard() {
                           {c.department_name && <span className="text-xs text-gray-500">🏛️ {c.department_name}</span>}
                           <span className="text-xs text-gray-500">👤 {c.citizen_name}</span>
                         </div>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {c.officer_name && (
+                            <span className="badge bg-blue-50 text-blue-700">Assigned: {c.officer_name}</span>
+                          )}
+                          {c.supervising_head_name && (
+                            <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {/* Actions */}
