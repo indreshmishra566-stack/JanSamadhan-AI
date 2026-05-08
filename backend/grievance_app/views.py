@@ -50,6 +50,22 @@ def _managed_department_ids(user):
     return managed
 
 
+def _visible_department_queryset(user):
+    if not user or not user.is_authenticated:
+        return Department.objects.none()
+    return Department.objects.filter(is_active=True).filter(
+        Q(created_by=user) | Q(head_officer=user) | Q(sub_head_officer=user)
+    ).distinct()
+
+
+def _visible_user_queryset(user):
+    if not user or not user.is_authenticated:
+        return User.objects.none()
+    if user.role == "ADMIN":
+        return User.objects.filter(Q(id=user.id) | Q(created_by=user)).distinct()
+    return User.objects.filter(Q(id=user.id) | Q(created_by=user) | Q(reports_to=user)).distinct()
+
+
 def _actor_level(user):
     if Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True).exists():
         return "DEPARTMENT"
@@ -196,13 +212,7 @@ class DepartmentListView(generics.ListCreateAPIView):
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        qs = Department.objects.filter(is_active=True)
-        if self.request.user.role == "ADMIN":
-            return qs
-        managed_ids = _managed_department_ids(self.request.user)
-        if managed_ids:
-            return qs.filter(id__in=managed_ids)
-        return qs
+        return _visible_department_queryset(self.request.user)
 
     def perform_create(self, serializer):
         parent = None
@@ -215,8 +225,10 @@ class DepartmentListView(generics.ListCreateAPIView):
 
 
 class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
+
+    def get_queryset(self):
+        return _visible_department_queryset(self.request.user)
 
     def get_permissions(self):
         if self.request.method in ("PUT", "PATCH", "DELETE"):
@@ -600,7 +612,7 @@ class AdminUserListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         role = self.request.query_params.get("role")
-        qs = User.objects.all()
+        qs = _visible_user_queryset(self.request.user)
         if role:
             qs = qs.filter(role=role)
         return qs
@@ -609,7 +621,9 @@ class AdminUserListView(generics.ListCreateAPIView):
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
-    queryset = User.objects.all()
+
+    def get_queryset(self):
+        return _visible_user_queryset(self.request.user)
 
     def perform_update(self, serializer):
         user = serializer.save()
