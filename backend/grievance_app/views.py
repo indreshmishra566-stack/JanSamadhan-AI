@@ -756,6 +756,24 @@ def run_demo_seed(request):
     })
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def run_demo_clear(request):
+    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
+    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
+    if not expected or token != expected:
+        return Response({"detail": "Invalid seed token."}, status=403)
+
+    call_command("clear_demo_data")
+    return Response({
+        "status": "ok",
+        "message": "Seeded demo hierarchy data was deleted. Admin was kept.",
+        "remaining_login": {
+            "admin": "Admin@1234",
+        },
+    })
+
+
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
 def _notify(user, complaint, notif_type, title, message):
