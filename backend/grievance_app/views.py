@@ -734,7 +734,7 @@ def run_demo_seed(request):
     call_command("seed")
     return Response({
         "status": "ok",
-        "message": "Recursive demo departments, officers, citizens, and grievances were seeded.",
+        "message": "Water department demo branch, officers, citizens, and grievances were seeded.",
         "logins": {
             "admin": "Admin@1234",
             "chief_public_grievance": "Officer@1234",
@@ -742,14 +742,11 @@ def run_demo_seed(request):
             "lucknow_division_head": "Officer@1234",
             "citizen_rahul": "Citizen@1234",
             "citizen_aisha": "Citizen@1234",
-            "electricity_head": "Officer@1234",
             "water_head": "Officer@1234",
-            "sanitation_head": "Officer@1234",
-            "roads_head": "Officer@1234",
-            "services_head": "Officer@1234",
-            "health_head": "Officer@1234",
-            "education_head": "Officer@1234",
-            "general_head": "Officer@1234",
+            "water_sub_head": "Officer@1234",
+            "water_urban_head": "Officer@1234",
+            "water_chinhat_head": "Officer@1234",
+            "water_maint_head": "Officer@1234",
         },
     })
 
