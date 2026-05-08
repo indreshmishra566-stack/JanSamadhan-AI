@@ -55,6 +55,19 @@ export default function TrackComplaint() {
                 <StatusBadge status={result.status} />
               </div>
               <h2 className="font-semibold text-gray-900 mb-3">{result.title}</h2>
+              <div className="flex flex-wrap gap-2 mb-3 text-xs">
+                {result.assigned_officer && (
+                  <span className={`badge ${result.status === "ESCALATED" ? "bg-orange-50 text-orange-700" : "bg-green-50 text-green-700"}`}>
+                    {result.status === "ESCALATED" ? `Escalated Officer: ${result.assigned_officer}` : `Assigned Officer: ${result.assigned_officer}`}
+                  </span>
+                )}
+                {result.supervising_head && (
+                  <span className="badge bg-indigo-50 text-indigo-700">Head: {result.supervising_head}</span>
+                )}
+                {result.department && (
+                  <span className="badge bg-blue-50 text-blue-700">Department: {result.department}</span>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <p className="text-gray-400 text-xs">Category</p>
@@ -96,6 +109,13 @@ export default function TrackComplaint() {
                   <p className="font-medium text-xs">{formatDate(result.updated_at)}</p>
                 </div>
               </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="badge bg-green-50 text-green-700">Assigned Officer</span>
+              <span className="badge bg-orange-50 text-orange-700">Escalated Officer</span>
+              <span className="badge bg-indigo-50 text-indigo-700">Head</span>
+              <span className="badge bg-blue-50 text-blue-700">Department</span>
             </div>
 
             {result.forwarding_trail?.length > 0 && (
