@@ -736,12 +736,22 @@ def run_demo_seed(request):
     call_command("seed")
     return Response({
         "status": "ok",
-        "message": "Demo departments, users, nodal mappings, and grievances were seeded.",
+        "message": "Recursive demo departments, officers, citizens, and grievances were seeded.",
         "logins": {
             "admin": "Admin@1234",
-            "citizen_demo": "Citizen@1234",
-            "nodal_electricity": "Officer@1234",
-            "district_officer": "Officer@1234",
+            "chief_public_grievance": "Officer@1234",
+            "state_grievance_director": "Officer@1234",
+            "lucknow_division_head": "Officer@1234",
+            "citizen_rahul": "Citizen@1234",
+            "citizen_aisha": "Citizen@1234",
+            "electricity_head": "Officer@1234",
+            "water_head": "Officer@1234",
+            "sanitation_head": "Officer@1234",
+            "roads_head": "Officer@1234",
+            "services_head": "Officer@1234",
+            "health_head": "Officer@1234",
+            "education_head": "Officer@1234",
+            "general_head": "Officer@1234",
         },
     })
 
