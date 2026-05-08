@@ -55,6 +55,9 @@ export default function HierarchyDashboard() {
   const complaints = data?.results || data || [];
   const departmentOfficers = departmentOfficersData?.results || departmentOfficersData || [];
   const departments = deptData?.results || deptData || [];
+  const profileDepartment = departments.find((department) => department.id === user?.department)
+    || (user?.department_name ? { name: user.department_name } : null);
+  const createdDepartments = departments.filter((department) => department.created_by === user?.id);
 
   const stats = [
     { label: "Department Cases", value: complaints.length, icon: "📋", color: "blue" },
@@ -121,6 +124,17 @@ export default function HierarchyDashboard() {
           {user?.first_name} {user?.last_name}
           {user?.state && ` · ${user.district || user.state}`}
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {profileDepartment?.name && (
+            <span className="badge bg-blue-50 text-blue-700">Assigned Department: {profileDepartment.name}</span>
+          )}
+          {user?.designation && (
+            <span className="badge bg-slate-100 text-slate-700">Title: {user.designation}</span>
+          )}
+          {user?.reports_to_name && (
+            <span className="badge bg-amber-50 text-amber-700">Reports to: {user.reports_to_name}</span>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -341,7 +355,9 @@ export default function HierarchyDashboard() {
       {tab === "departments" && (
         <DepartmentBranchManagement
           user={user}
-          departments={departments}
+          departments={createdDepartments}
+          parentOptions={departments}
+          profileDepartment={profileDepartment}
           departmentOfficers={departmentOfficers}
           onChanged={() => {
             qc.invalidateQueries(["departments"]);
@@ -559,7 +575,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   );
 }
 
-function DepartmentBranchManagement({ user, departments, departmentOfficers, onChanged }) {
+function DepartmentBranchManagement({ user, departments, parentOptions, profileDepartment, departmentOfficers, onChanged }) {
   const emptyForm = {
     name: "", code: "", description: "", email: "",
     parent: user?.department || "", head_officer: "", sub_head_officer: "",
@@ -601,6 +617,22 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
         </button>
       </div>
 
+      {profileDepartment?.name && (
+        <div className="card p-4 mb-5">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Assigned Department</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-gray-900">{profileDepartment.name}</p>
+              {profileDepartment.code && <p className="text-xs font-mono text-gray-400">{profileDepartment.code}</p>}
+            </div>
+            <div className="flex gap-2 flex-wrap justify-end">
+              {profileDepartment.head_officer_name && <span className="badge bg-indigo-50 text-indigo-700">Head: {profileDepartment.head_officer_name}</span>}
+              {profileDepartment.sub_head_officer_name && <span className="badge bg-amber-50 text-amber-700">Sub Head: {profileDepartment.sub_head_officer_name}</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
       {showForm && (
         <div className="card p-5 mb-5">
           <h3 className="font-medium mb-4">Create Department Branch</h3>
@@ -610,7 +642,7 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
             <input className="input text-sm" placeholder="Department email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <select className="input text-sm" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })}>
               <option value="">-- Root within my branch --</option>
-              {departments.map((dept) => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
+              {parentOptions.map((dept) => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
             </select>
             <select className="input text-sm" value={form.head_officer} onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
               <option value="">-- Assign head officer --</option>
@@ -643,7 +675,14 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {departments.length === 0 ? (
+        <EmptyState
+          icon="🏛️"
+          title="No created departments yet"
+          description="Your assigned department is shown above. Departments you create will appear here."
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {departments.map((department) => (
           <div key={department.id} className="card p-4">
             {editingDepartment?.id === department.id ? (
@@ -653,7 +692,7 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
                 <input className="input text-sm" value={editingDepartment.email || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
                 <select className="input text-sm" value={editingDepartment.parent || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, parent: e.target.value || null })}>
                   <option value="">-- Root within my branch --</option>
-                  {departments.filter((item) => item.id !== department.id).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                  {parentOptions.filter((item) => item.id !== department.id).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
                 <select className="input text-sm" value={editingDepartment.head_officer || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, head_officer: e.target.value || null })}>
                   <option value="">-- Head officer --</option>
@@ -703,7 +742,8 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
