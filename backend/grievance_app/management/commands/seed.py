@@ -228,8 +228,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "State HQ",
                 "block": "Lucknow Secretariat",
-                "created_by": up_head,
-                "reports_to": up_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -273,8 +273,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Division Desk",
-                "created_by": division_head,
-                "reports_to": division_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -318,8 +318,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "District Desk",
-                "created_by": district_head,
-                "reports_to": district_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -363,8 +363,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Bakshi Ka Talab",
-                "created_by": bkt_head,
-                "reports_to": bkt_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -408,8 +408,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Bakshi Ka Talab",
-                "created_by": itaunja_head,
-                "reports_to": itaunja_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -453,8 +453,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Bakshi Ka Talab",
-                "created_by": nabinagar_head,
-                "reports_to": nabinagar_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -498,8 +498,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Malihabad",
-                "created_by": malihabad_head,
-                "reports_to": malihabad_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -543,8 +543,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Malihabad",
-                "created_by": rahimabad_head,
-                "reports_to": rahimabad_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
@@ -588,8 +588,8 @@ class Command(BaseCommand):
                 "state": "Uttar Pradesh",
                 "district": "Lucknow",
                 "block": "Malihabad",
-                "created_by": hasanapur_head,
-                "reports_to": hasanapur_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
