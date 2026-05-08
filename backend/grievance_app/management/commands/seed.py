@@ -87,7 +87,14 @@ class Command(BaseCommand):
         )
 
         head = self.upsert_user(**head_data, department=department)
-        sub_head = self.upsert_user(**sub_data, department=department)
+        sub_defaults = dict(sub_data)
+        sub_defaults.setdefault("created_by", head)
+        sub_defaults.setdefault("reports_to", head)
+        if sub_defaults.get("created_by") == "__HEAD__":
+            sub_defaults["created_by"] = head
+        if sub_defaults.get("reports_to") == "__HEAD__":
+            sub_defaults["reports_to"] = head
+        sub_head = self.upsert_user(**sub_defaults, department=department)
 
         department.head_officer = head
         department.sub_head_officer = sub_head
@@ -176,8 +183,8 @@ class Command(BaseCommand):
                 "state": "India",
                 "district": "National",
                 "block": "Central Desk",
-                "created_by": central_head,
-                "reports_to": central_head,
+                "created_by": "__HEAD__",
+                "reports_to": "__HEAD__",
             },
         )
 
