@@ -172,6 +172,11 @@ export default function HierarchyDashboard() {
               {["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((p) => <option key={p}>{p}</option>)}
             </select>
           </div>
+          <div className="flex flex-wrap gap-2 text-xs mb-4">
+            <span className="badge bg-green-50 text-green-700">Assigned to You</span>
+            <span className="badge bg-orange-50 text-orange-700">Escalated to You</span>
+            <span className="badge bg-indigo-50 text-indigo-700">Head</span>
+          </div>
 
           {isLoading ? (
             <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>

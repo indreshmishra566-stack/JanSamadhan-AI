@@ -187,6 +187,11 @@ export default function CitizenDashboard() {
           action={<button onClick={() => setShowForm(true)} className="btn-primary">Submit Complaint</button>} />
       ) : (
         <div className="space-y-3">
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="badge bg-green-50 text-green-700">Assigned to You</span>
+            <span className="badge bg-orange-50 text-orange-700">Escalated to You</span>
+            <span className="badge bg-indigo-50 text-indigo-700">Head</span>
+          </div>
           {complaints.map((c) => (
             <div key={c.id} onClick={() => setSelected(selected?.id === c.id ? null : c)}
               className="card p-4 cursor-pointer hover:shadow-md transition-shadow">
