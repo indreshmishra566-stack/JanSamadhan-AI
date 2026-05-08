@@ -5,6 +5,7 @@ import {
   PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
+import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import { Trash2, ChevronDown, ChevronUp, Plus, Building2 } from "lucide-react";
 import {
@@ -28,6 +29,7 @@ function getOfficerLabel(user) {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [tab, setTab] = useState("complaints");
   const [filters, setFilters] = useState({ status: "", department: "", priority: "", search: "" });
@@ -190,7 +192,9 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex gap-2 mt-2 flex-wrap">
                           {c.officer_name && (
-                            <span className="badge bg-blue-50 text-blue-700">Assigned: {c.officer_name}</span>
+                            <span className={`badge ${c.assigned_officer === user?.id ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"}`}>
+                              {c.assigned_officer === user?.id ? "Assigned to You" : `Assigned: ${c.officer_name}`}
+                            </span>
                           )}
                           {c.supervising_head_name && (
                             <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>

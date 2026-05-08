@@ -206,7 +206,9 @@ export default function CitizenDashboard() {
                     </div>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                       {c.officer_name && (
-                        <span className="badge bg-blue-50 text-blue-700">Assigned: {c.officer_name}</span>
+                        <span className={`badge ${c.assigned_officer === user?.id ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"}`}>
+                          {c.assigned_officer === user?.id ? "Assigned to You" : `Assigned: ${c.officer_name}`}
+                        </span>
                       )}
                       {c.supervising_head_name && (
                         <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
