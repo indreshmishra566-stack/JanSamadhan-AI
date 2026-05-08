@@ -824,6 +824,26 @@ def run_demo_clear(request):
     })
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def run_clear_all_except_admin(request):
+    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
+    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
+    if not expected or token != expected:
+        return Response({"detail": "Invalid clear token."}, status=403)
+
+    call_command("clear_all_except_admin")
+    admin_users = list(User.objects.filter(role="ADMIN").values_list("username", flat=True))
+    return Response({
+        "status": "ok",
+        "message": "All non-admin data was deleted. Admin account(s) were kept.",
+        "remaining_admins": admin_users,
+        "known_admin_login": {
+            "admin": "Admin@1234",
+        },
+    })
+
+
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
 def _notify(user, complaint, notif_type, title, message):

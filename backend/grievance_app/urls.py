@@ -49,4 +49,5 @@ urlpatterns = [
     path("track/<str:ticket_id>/", views.track_complaint),
     path("demo/seed/", views.run_demo_seed),
     path("demo/clear/", views.run_demo_clear),
+    path("demo/clear-all-except-admin/", views.run_clear_all_except_admin),
 ]
