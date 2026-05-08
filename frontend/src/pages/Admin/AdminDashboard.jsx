@@ -17,15 +17,15 @@ const COLORS = ["#1D6FA5","#16a34a","#d97706","#dc2626","#7c3aed","#0891b2","#be
 const ROLE_LABELS = {
   CITIZEN: "Citizen",
   ADMIN: "Admin",
-  PM: "PM / Super Admin",
-  CM: "CM / State Admin",
-  DISTRICT_OFFICER: "District Officer",
-  BLOCK_OFFICER: "Block Officer",
-  FIELD_OFFICER: "Field Officer",
+  PM: "Officer",
+  CM: "Officer",
+  DISTRICT_OFFICER: "Officer",
+  BLOCK_OFFICER: "Officer",
+  FIELD_OFFICER: "Officer",
   OFFICER: "Officer",
 };
 
-const ALL_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "CITIZEN", "ADMIN"];
+const ALL_ROLES = ["OFFICER", "CITIZEN", "ADMIN"];
 const OFFICER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
 
 function getOfficerLabel(user) {
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 text-sm">Manage grievances by department, nodal officers, and users</p>
+        <p className="text-gray-500 text-sm">Manage grievances, departments, and officer reporting chains</p>
       </div>
 
       {/* Stats */}
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
 }
 
 function OfficerManagement({ departments, officers, onChanged }) {
-  const ROLES = ["PM","CM","DISTRICT_OFFICER","BLOCK_OFFICER","FIELD_OFFICER","OFFICER"];
+  const ROLES = ["OFFICER"];
   const emptyForm = {
     username:"", email:"", password:"", phone:"", first_name:"", last_name:"",
     employee_id:"", department_id:"", role:"OFFICER", designation:"",
@@ -522,7 +522,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
               <input className="input text-sm" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Role</label>
+              <label className="text-xs text-gray-500 mb-1 block">Access Role</label>
               <select className="input text-sm" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                 {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
               </select>
@@ -577,9 +577,9 @@ function OfficerManagement({ departments, officers, onChanged }) {
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Role</label>
                     <select className="input text-xs py-1" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                      {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
-                    </select>
-                  </div>
+                {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
+              </select>
+            </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Department</label>
                     <select className="input text-xs py-1" value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
@@ -719,7 +719,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Nodal Officer</label>
+              <label className="text-xs text-gray-500 mb-1 block">Department Head</label>
               <select className="input text-sm" value={form.head_officer}
                 onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
                 <option value="">-- Select --</option>

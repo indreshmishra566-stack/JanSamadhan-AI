@@ -20,31 +20,7 @@ from .serializers import (
 from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
 
-LEVEL_ROLE_MAP = {
-    "DEPARTMENT": "OFFICER",
-    "PM": "PM", "CM": "CM",
-    "DISTRICT": "DISTRICT_OFFICER",
-    "BLOCK": "BLOCK_OFFICER",
-    "FIELD": "FIELD_OFFICER",
-}
-ROLE_LEVEL_MAP = {v: k for k, v in LEVEL_ROLE_MAP.items()}
-ROLE_LEVEL_MAP["ADMIN"] = "PM"
-ROLE_LEVEL_MAP["OFFICER"] = "FIELD"
-
-LEVEL_ORDER = ["PM", "CM", "DISTRICT", "BLOCK", "FIELD"]
-
-ROLE_WEIGHT = {
-    "ADMIN": 1,
-    "PM": 1,
-    "CM": 2,
-    "DISTRICT_OFFICER": 3,
-    "BLOCK_OFFICER": 4,
-    "FIELD_OFFICER": 5,
-    "OFFICER": 6,
-    "CITIZEN": 99,
-}
-
-MANAGEABLE_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"]
+DEFAULT_OFFICER_ROLE = "OFFICER"
 
 
 def _managed_department_ids(user):
@@ -77,7 +53,9 @@ def _managed_department_ids(user):
 def _actor_level(user):
     if Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True).exists():
         return "DEPARTMENT"
-    return ROLE_LEVEL_MAP.get(user.role, "FIELD")
+    if user.role == "ADMIN":
+        return "ADMIN"
+    return "OFFICER"
 
 
 def _complaint_owner_filter(user):
@@ -111,25 +89,18 @@ def _is_department_leader(user, department=None):
 
 
 def _can_create_role(creator, target_role, department=None):
-    if target_role not in MANAGEABLE_ROLES:
+    if target_role == "ADMIN":
+        return creator.role == "ADMIN"
+    if target_role == "CITIZEN":
         return False
     if creator.role == "ADMIN":
         return True
-    if creator.role == "PM":
-        return target_role != "PM"
-
-    creator_weight = ROLE_WEIGHT.get(creator.role, 99)
-    target_weight = ROLE_WEIGHT.get(target_role, 99)
-
-    if _is_department_leader(creator, department):
-        return target_weight >= creator_weight
-
-    return target_weight > creator_weight
+    return creator.role != "CITIZEN"
 
 
 def _build_user_payload(data, creator):
     dept = get_object_or_404(Department, id=data["department_id"]) if data.get("department_id") else None
-    target_role = data.get("role", "OFFICER")
+    target_role = data.get("role", DEFAULT_OFFICER_ROLE)
     if not _can_create_role(creator, target_role, dept):
         return None, Response({"error": f"You cannot create a {target_role} under your current hierarchy."}, status=403)
 
@@ -162,6 +133,28 @@ def _build_user_payload(data, creator):
         "is_active": bool(data.get("is_active", True)),
     }
     return payload, None
+
+
+def _escalation_target(user, complaint):
+    if user.reports_to_id and user.reports_to and user.reports_to.is_active:
+        return user.reports_to, "REPORTING_MANAGER"
+
+    if user.department_id:
+        parent_department = Department.objects.filter(id=user.department.parent_id, is_active=True).first() if user.department and user.department.parent_id else None
+        if parent_department:
+            candidate = parent_department.head_officer or parent_department.sub_head_officer
+            if candidate and candidate.is_active:
+                return candidate, "PARENT_DEPARTMENT"
+
+    creator = user.created_by
+    if creator and creator.is_active and creator.role != "CITIZEN":
+        return creator, "CREATOR"
+
+    admin = User.objects.filter(role="ADMIN", is_active=True).exclude(id=user.id).first()
+    if admin:
+        return admin, "ADMIN"
+
+    return None, None
 
 
 def _can_manage_department(user, department=None, parent=None):
@@ -327,7 +320,7 @@ def forward_complaint(request, pk):
 
     # Determine levels
     from_level = _actor_level(user)
-    to_level = ROLE_LEVEL_MAP.get(to_user.role, "FIELD")
+    to_level = "DEPARTMENT" if Department.objects.filter(Q(head_officer=to_user) | Q(sub_head_officer=to_user), is_active=True).exists() else "OFFICER"
 
     # Record forwarding
     ForwardingRecord.objects.create(
@@ -342,7 +335,7 @@ def forward_complaint(request, pk):
 
     complaint.forwarded_to = to_user
     complaint.assigned_officer = to_user
-    complaint.current_level = "DEPARTMENT" if Department.objects.filter(head_officer=to_user, is_active=True).exists() else to_level
+    complaint.current_level = to_level
     complaint.status = "FORWARDED"
     complaint.save()
 
@@ -362,7 +355,7 @@ def forward_complaint(request, pk):
     # Notify citizen
     _notify(complaint.citizen, complaint, "STATUS_UPDATE",
             f"Complaint #{complaint.ticket_id} Forwarded",
-            f"Your complaint has been forwarded to {to_user.role.replace('_', ' ').title()} level for action.")
+            f"Your complaint has been forwarded to {to_user.get_full_name() or to_user.username} for action.")
 
     return Response(ComplaintSerializer(complaint).data)
 
@@ -375,19 +368,11 @@ def escalate_complaint(request, pk):
     note = request.data.get("note", "")
     user = request.user
 
-    from_level = ROLE_LEVEL_MAP.get(user.role, "FIELD")
-    from_idx = LEVEL_ORDER.index(from_level) if from_level in LEVEL_ORDER else len(LEVEL_ORDER) - 1
-
-    if from_idx == 0:
-        return Response({"error": "Already at the highest level"}, status=400)
-
-    to_level = LEVEL_ORDER[from_idx - 1]
-
-    # Find a user at the target level
-    to_role = LEVEL_ROLE_MAP.get(to_level, "PM")
-    to_user = User.objects.filter(role=to_role).first()
+    from_level = _actor_level(user)
+    to_user, escalation_path = _escalation_target(user, complaint)
     if not to_user:
-        to_user = User.objects.filter(role__in=["ADMIN", "PM"]).first()
+        return Response({"error": "No higher officer is available in this reporting chain."}, status=400)
+    to_level = "DEPARTMENT" if Department.objects.filter(Q(head_officer=to_user) | Q(sub_head_officer=to_user), is_active=True).exists() else "OFFICER"
 
     ForwardingRecord.objects.create(
         complaint=complaint,
@@ -412,7 +397,7 @@ def escalate_complaint(request, pk):
         changed_by=user,
         old_status=old_status,
         new_status="ESCALATED",
-        note=f"Escalated from {from_level} to {to_level}. {note}",
+        note=f"Escalated from {from_level} to {to_level} via {escalation_path}. {note}",
     )
 
     if to_user:
@@ -450,7 +435,7 @@ def my_subordinates(request):
         User.objects
         .filter(_department_peer_filter(request.user))
         .exclude(id=request.user.id)
-        .exclude(role__in=["CITIZEN", "ADMIN", "PM"])
+        .exclude(role="CITIZEN")
         .distinct()
     )
     return Response(UserSerializer(subs, many=True).data)
@@ -465,7 +450,7 @@ class HierarchyComplaintListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ("PM", "ADMIN"):
+        if user.role == "ADMIN":
             qs = Complaint.objects.all()
         else:
             qs = Complaint.objects.filter(_complaint_owner_filter(user))
@@ -547,7 +532,7 @@ class AdminComplaintUpdateView(generics.UpdateAPIView):
         complaint = serializer.save()
         if complaint.assigned_officer and complaint.assigned_officer != old_officer:
             complaint.forwarded_to = complaint.assigned_officer
-            complaint.current_level = "DEPARTMENT" if Department.objects.filter(head_officer=complaint.assigned_officer, is_active=True).exists() else ROLE_LEVEL_MAP.get(complaint.assigned_officer.role, "FIELD")
+            complaint.current_level = "DEPARTMENT" if Department.objects.filter(Q(head_officer=complaint.assigned_officer) | Q(sub_head_officer=complaint.assigned_officer), is_active=True).exists() else "OFFICER"
             if complaint.status == "PENDING":
                 complaint.status = "ASSIGNED"
             complaint.save(update_fields=["forwarded_to", "current_level", "status"])

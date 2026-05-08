@@ -3,7 +3,7 @@ from rest_framework.permissions import BasePermission
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ("ADMIN", "PM")
+        return request.user.is_authenticated and request.user.role == "ADMIN"
 
 
 class IsPM(BasePermission):
@@ -32,7 +32,7 @@ class IsFieldOfficer(BasePermission):
 
 
 class IsAnyOfficer(BasePermission):
-    """Any level of officer (non-citizen, non-PM/CM)"""
+    """Any authenticated non-citizen user that participates in handling or managing work."""
     OFFICER_ROLES = ("OFFICER", "FIELD_OFFICER", "BLOCK_OFFICER", "DISTRICT_OFFICER", "CM", "PM", "ADMIN")
 
     def has_permission(self, request, view):
@@ -51,7 +51,7 @@ class IsCitizen(BasePermission):
 
 
 class IsHierarchyOfficer(BasePermission):
-    """PM, CM, District, Block, Field — anyone who can handle complaints"""
+    """Any authenticated non-citizen user who can handle complaints or manage staff."""
     HANDLER_ROLES = ("PM", "ADMIN", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER")
 
     def has_permission(self, request, view):

@@ -13,16 +13,16 @@ import {
 } from "lucide-react";
 
 const ROLE_LABELS = {
-  PM: "PM / Super Admin",
-  CM: "CM / State Admin",
-  DISTRICT_OFFICER: "District Officer",
-  BLOCK_OFFICER: "Block Officer",
-  FIELD_OFFICER: "Field Officer",
-  OFFICER: "Department Officer",
+  PM: "Officer",
+  CM: "Officer",
+  DISTRICT_OFFICER: "Officer",
+  BLOCK_OFFICER: "Officer",
+  FIELD_OFFICER: "Officer",
+  OFFICER: "Officer",
   ADMIN: "Admin",
 };
 
-const MANAGEABLE_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
+const MANAGEABLE_ROLES = ["OFFICER"];
 
 function getOfficerLabel(user) {
   return user?.designation?.trim() || ROLE_LABELS[user?.role] || user?.role;
@@ -111,8 +111,8 @@ export default function HierarchyDashboard() {
     updateMutation.mutate({ id, fd });
   };
 
-  const canCreateOfficers = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "ADMIN"].includes(user?.role);
-  const canForwardEscalate = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "ADMIN"].includes(user?.role);
+  const canCreateOfficers = user?.role && user.role !== "CITIZEN";
+  const canForwardEscalate = user?.role && user.role !== "CITIZEN";
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
@@ -122,7 +122,7 @@ export default function HierarchyDashboard() {
           {user?.department_name ? `${user.department_name} Nodal Dashboard` : `${ROLE_LABELS[user?.role] || "Nodal Officer"} Dashboard`}
         </h1>
         <p className="text-gray-500 text-sm">
-          {user?.department_name && `${user.department_name} · Department/Nodal workflow · `}
+          {user?.department_name && `${user.department_name} · Department workflow · `}
           {user?.first_name} {user?.last_name}
           {user?.state && ` · ${user.district || user.state}`}
         </p>
@@ -167,7 +167,7 @@ export default function HierarchyDashboard() {
           {isLoading ? (
             <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
           ) : complaints.length === 0 ? (
-            <EmptyState icon="🎉" title="No grievances assigned" description="All clear for your department or desk." />
+            <EmptyState icon="🎉" title="No grievances assigned" description="All clear for your reporting branch." />
           ) : (
             <div className="space-y-3">
               {complaints.map((c) => (
@@ -230,7 +230,7 @@ export default function HierarchyDashboard() {
                           </button>
                         )}
                         {/* Escalate */}
-                        {canForwardEscalate && !["RESOLVED", "CLOSED", "ESCALATED"].includes(c.status) && user?.role !== "PM" && user?.role !== "ADMIN" && (
+                        {canForwardEscalate && !["RESOLVED", "CLOSED", "ESCALATED"].includes(c.status) && user?.role !== "ADMIN" && (
                           <button
                             onClick={() => { setEscalateModal(c); setEscalateNote(""); }}
                             className="btn-secondary text-xs py-1 px-2.5 flex items-center gap-1 text-orange-700 border-orange-300"
@@ -361,13 +361,13 @@ export default function HierarchyDashboard() {
           <p className="text-sm text-gray-600 mb-4">{forwardModal.title}</p>
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Forward to Department Officer *</label>
+              <label className="text-xs text-gray-500 mb-1 block">Forward to Officer *</label>
               <select className="input text-sm" value={forwardForm.to_user_id}
                 onChange={(e) => setForwardForm({ ...forwardForm, to_user_id: e.target.value })}>
-                <option value="">-- Select department/officer recipient --</option>
+                <option value="">-- Select officer recipient --</option>
                 {departmentOfficers.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.first_name} {s.last_name} ({ROLE_LABELS[s.role] || s.role})
+                    {s.first_name} {s.last_name} ({getOfficerLabel(s)})
                     {s.department_name ? ` · ${s.department_name}` : ""}
                   </option>
                 ))}
@@ -400,7 +400,7 @@ export default function HierarchyDashboard() {
         <Modal title={`Escalate Complaint #${escalateModal.ticket_id}`} onClose={() => setEscalateModal(null)}>
           <p className="text-sm text-gray-600 mb-2">{escalateModal.title}</p>
           <p className="text-xs text-orange-600 bg-orange-50 rounded-lg p-3 mb-4">
-            ⚠️ This will escalate the complaint to the next higher authority for urgent attention.
+            This sends the complaint upward in the reporting chain for urgent attention.
           </p>
           <div className="space-y-3">
             <div>
@@ -408,7 +408,7 @@ export default function HierarchyDashboard() {
               <textarea className="input text-sm" rows={3}
                 value={escalateNote}
                 onChange={(e) => setEscalateNote(e.target.value)}
-                placeholder="Explain why this needs escalation (e.g. repeated violation, SLA breach, complexity)..." />
+                placeholder="Explain why this needs escalation..." />
             </div>
             <div className="flex gap-2 pt-2">
               <button
@@ -417,7 +417,7 @@ export default function HierarchyDashboard() {
                 className="btn-danger text-sm flex items-center gap-1"
               >
                 <ArrowUpCircle size={14} />
-                {escalateMutation.isPending ? "Escalating..." : "Escalate to Higher Authority"}
+                {escalateMutation.isPending ? "Escalating..." : "Escalate Upward"}
               </button>
               <button onClick={() => setEscalateModal(null)} className="btn-secondary text-sm">Cancel</button>
             </div>
@@ -455,7 +455,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users size={18} className="text-gray-600" />
-          <h2 className="text-lg font-semibold">Department Officers ({departmentOfficers.length})</h2>
+          <h2 className="text-lg font-semibold">Officers In Your Branch ({departmentOfficers.length})</h2>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
           <UserPlus size={15} /> Add Officer
@@ -465,7 +465,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
       {/* Create officer form */}
       {showForm && (
         <div className="card p-5 mb-5">
-          <h3 className="font-medium mb-4">Create Department Officer</h3>
+          <h3 className="font-medium mb-4">Create Officer</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[["first_name","First Name"],["last_name","Last Name"],["username","Username"],
               ["email","Email"],["phone","Phone"],["employee_id","Employee ID"]].map(([k, l]) => (
@@ -481,7 +481,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                 onChange={(e) => setForm({ ...form, password: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Role *</label>
+              <label className="text-xs text-gray-500 mb-1 block">Access Role</label>
               <select className="input text-sm" value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}>
                 {MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
@@ -598,8 +598,8 @@ function DepartmentBranchManagement({ user, departments, departmentOfficers, onC
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold">Department Branches</h2>
-          <p className="text-sm text-gray-500">Create child departments inside your branch and assign the next head and sub head.</p>
+          <h2 className="text-lg font-semibold">Departments In Your Branch</h2>
+          <p className="text-sm text-gray-500">Create child departments and assign the next head and sub head under your branch.</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
           <UserPlus size={15} /> Add Department
