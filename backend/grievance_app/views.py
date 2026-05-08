@@ -32,15 +32,28 @@ ROLE_LEVEL_MAP["OFFICER"] = "FIELD"
 
 LEVEL_ORDER = ["PM", "CM", "DISTRICT", "BLOCK", "FIELD"]
 
+ROLE_WEIGHT = {
+    "ADMIN": 1,
+    "PM": 1,
+    "CM": 2,
+    "DISTRICT_OFFICER": 3,
+    "BLOCK_OFFICER": 4,
+    "FIELD_OFFICER": 5,
+    "OFFICER": 6,
+    "CITIZEN": 99,
+}
+
+MANAGEABLE_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"]
+
 
 def _actor_level(user):
-    if Department.objects.filter(head_officer=user, is_active=True).exists():
+    if Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True).exists():
         return "DEPARTMENT"
     return ROLE_LEVEL_MAP.get(user.role, "FIELD")
 
 
 def _complaint_owner_filter(user):
-    headed_departments = Department.objects.filter(head_officer=user, is_active=True)
+    headed_departments = Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True)
     q = Q(forwarded_to=user) | Q(assigned_officer=user)
     if headed_departments.exists():
         q |= Q(department__in=headed_departments)
@@ -49,12 +62,76 @@ def _complaint_owner_filter(user):
 
 def _department_peer_filter(user):
     q = Q(created_by=user)
+    q |= Q(reports_to=user)
     if user.department_id:
         q |= Q(department_id=user.department_id)
-    headed_departments = Department.objects.filter(head_officer=user, is_active=True)
+    headed_departments = Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True)
     if headed_departments.exists():
         q |= Q(department__in=headed_departments)
     return q
+
+
+def _is_department_leader(user, department=None):
+    if not user or not user.is_authenticated:
+        return False
+    qs = Department.objects.filter(is_active=True).filter(Q(head_officer=user) | Q(sub_head_officer=user))
+    if department:
+        qs = qs.filter(id=department.id)
+    return qs.exists()
+
+
+def _can_create_role(creator, target_role, department=None):
+    if target_role not in MANAGEABLE_ROLES:
+        return False
+    if creator.role == "ADMIN":
+        return True
+    if creator.role == "PM":
+        return target_role != "PM"
+
+    creator_weight = ROLE_WEIGHT.get(creator.role, 99)
+    target_weight = ROLE_WEIGHT.get(target_role, 99)
+
+    if _is_department_leader(creator, department):
+        return target_weight >= creator_weight
+
+    return target_weight > creator_weight
+
+
+def _build_user_payload(data, creator):
+    dept = get_object_or_404(Department, id=data["department_id"]) if data.get("department_id") else None
+    target_role = data.get("role", "OFFICER")
+    if not _can_create_role(creator, target_role, dept):
+        return None, Response({"error": f"You cannot create a {target_role} under your current hierarchy."}, status=403)
+
+    if User.objects.filter(username=data.get("username")).exists():
+        return None, Response({"error": "Username already exists."}, status=400)
+
+    reports_to = creator
+    if data.get("reports_to"):
+        reports_to = get_object_or_404(User, id=data["reports_to"])
+    elif dept and dept.head_officer and creator.role == "ADMIN":
+        reports_to = dept.head_officer
+
+    payload = {
+        "username": data["username"],
+        "email": data.get("email", ""),
+        "password": data["password"],
+        "role": target_role,
+        "phone": data.get("phone", ""),
+        "department": dept,
+        "employee_id": data.get("employee_id") or None,
+        "first_name": data.get("first_name", ""),
+        "last_name": data.get("last_name", ""),
+        "designation": data.get("designation", ""),
+        "state": data.get("state", ""),
+        "district": data.get("district", ""),
+        "block": data.get("block", ""),
+        "created_by": creator,
+        "reports_to": reports_to,
+        "is_verified": bool(data.get("is_verified", True)),
+        "is_active": bool(data.get("is_active", True)),
+    }
+    return payload, None
 
 
 # ─── Auth ───────────────────────────────────────────────────────────────────
@@ -84,10 +161,14 @@ class DepartmentListView(generics.ListCreateAPIView):
         return [IsAuthenticated()]
 
 
-class DepartmentDetailView(generics.RetrieveAPIView):
+class DepartmentDetailView(generics.RetrieveUpdateAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ("PUT", "PATCH"):
+            return [IsAdmin()]
+        return [IsAuthenticated()]
 
 
 # ─── Citizen Complaints ──────────────────────────────────────────────────────
@@ -277,46 +358,13 @@ def escalate_complaint(request, pk):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, IsHierarchyOfficer])
 def create_subordinate_officer(request):
-    """Any hierarchy officer can create officers below them."""
+    """Create a subordinate officer under the current reporting chain."""
     user = request.user
     data = request.data
-
-    # Determine what roles this user can create
-    CREATABLE = {
-        "PM": ["CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-        "ADMIN": ["CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-        "CM": ["DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-        "DISTRICT_OFFICER": ["BLOCK_OFFICER", "FIELD_OFFICER"],
-        "BLOCK_OFFICER": ["FIELD_OFFICER"],
-    }
-    allowed_roles = CREATABLE.get(user.role, [])
-    target_role = data.get("role", "FIELD_OFFICER")
-
-    if target_role not in allowed_roles:
-        return Response({"error": f"You cannot create a {target_role}"}, status=403)
-
-    if User.objects.filter(username=data.get("username")).exists():
-        return Response({"error": "Username already exists."}, status=400)
-
-    dept = None
-    if data.get("department_id"):
-        dept = get_object_or_404(Department, id=data["department_id"])
-
-    new_user = User.objects.create_user(
-        username=data["username"],
-        email=data.get("email", ""),
-        password=data["password"],
-        role=target_role,
-        phone=data.get("phone", ""),
-        department=dept,
-        employee_id=data.get("employee_id") or None,
-        first_name=data.get("first_name", ""),
-        last_name=data.get("last_name", ""),
-        state=data.get("state", ""),
-        district=data.get("district", ""),
-        block=data.get("block", ""),
-        created_by=user,
-    )
+    payload, error_response = _build_user_payload(data, user)
+    if error_response:
+        return error_response
+    new_user = User.objects.create_user(**payload)
     return Response(UserSerializer(new_user).data, status=201)
 
 
@@ -504,24 +552,10 @@ class AdminCreateOfficerView(generics.CreateAPIView):
 
     def post(self, request):
         data = request.data
-        if User.objects.filter(username=data.get("username")).exists():
-            return Response({"error": "Username already exists."}, status=400)
-        dept = get_object_or_404(Department, id=data.get("department_id")) if data.get("department_id") else None
-        user = User.objects.create_user(
-            username=data["username"],
-            email=data.get("email", ""),
-            password=data["password"],
-            role=data.get("role", "FIELD_OFFICER"),
-            phone=data.get("phone", ""),
-            department=dept,
-            employee_id=data.get("employee_id") or None,
-            first_name=data.get("first_name", ""),
-            last_name=data.get("last_name", ""),
-            state=data.get("state", ""),
-            district=data.get("district", ""),
-            block=data.get("block", ""),
-            created_by=request.user,
-        )
+        payload, error_response = _build_user_payload(data, request.user)
+        if error_response:
+            return error_response
+        user = User.objects.create_user(**payload)
         return Response(UserSerializer(user).data, status=201)
 
 

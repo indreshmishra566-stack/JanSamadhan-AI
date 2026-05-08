@@ -22,16 +22,11 @@ const ROLE_LABELS = {
   ADMIN: "Admin",
 };
 
-// What roles each role can create
-const CREATABLE_ROLES = {
-  PM: ["CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-  ADMIN: ["CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-  CM: ["DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER"],
-  DISTRICT_OFFICER: ["BLOCK_OFFICER", "FIELD_OFFICER"],
-  BLOCK_OFFICER: ["FIELD_OFFICER"],
-  FIELD_OFFICER: ["OFFICER"],
-  OFFICER: [],
-};
+const MANAGEABLE_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
+
+function getOfficerLabel(user) {
+  return user?.designation?.trim() || ROLE_LABELS[user?.role] || user?.role;
+}
 
 export default function HierarchyDashboard() {
   const { user } = useAuth();
@@ -116,7 +111,7 @@ export default function HierarchyDashboard() {
     updateMutation.mutate({ id, fd });
   };
 
-  const canCreateOfficers = (CREATABLE_ROLES[user?.role] || []).length > 0;
+  const canCreateOfficers = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "ADMIN"].includes(user?.role);
   const canForwardEscalate = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "ADMIN"].includes(user?.role);
 
   return (
@@ -423,11 +418,10 @@ export default function HierarchyDashboard() {
 
 // ─── Team Management Sub-Component ───────────────────────────────────────────
 function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
-  const creatableRoles = CREATABLE_ROLES[user?.role] || [];
   const emptyForm = {
     username: "", email: "", password: "", phone: "",
     first_name: "", last_name: "", employee_id: "",
-    department_id: "", role: creatableRoles[0] || "",
+    department_id: user?.department || "", role: "OFFICER", designation: "", reports_to: "",
     state: user?.state || "", district: user?.district || "", block: user?.block || "",
   };
   const [form, setForm] = useState(emptyForm);
@@ -451,11 +445,9 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
           <Users size={18} className="text-gray-600" />
           <h2 className="text-lg font-semibold">Department Officers ({departmentOfficers.length})</h2>
         </div>
-        {creatableRoles.length > 0 && (
-          <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
-            <UserPlus size={15} /> Add Officer
-          </button>
-        )}
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
+          <UserPlus size={15} /> Add Officer
+        </button>
       </div>
 
       {/* Create officer form */}
@@ -480,7 +472,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
               <label className="text-xs text-gray-500 mb-1 block">Role *</label>
               <select className="input text-sm" value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                {creatableRoles.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
+                {MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
               </select>
             </div>
             <div>
@@ -489,6 +481,21 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                 onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
                 <option value="">-- Select --</option>
                 {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Designation / Title</label>
+              <input className="input text-sm" value={form.designation}
+                onChange={(e) => setForm({ ...form, designation: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Reports To</label>
+              <select className="input text-sm" value={form.reports_to}
+                onChange={(e) => setForm({ ...form, reports_to: e.target.value })}>
+                <option value="">-- Me / auto assign --</option>
+                {departmentOfficers.map((member) => (
+                  <option key={member.id} value={member.id}>{member.first_name} {member.last_name} ({getOfficerLabel(member)})</option>
+                ))}
               </select>
             </div>
             {[["state","State"],["district","District"],["block","Block"]].map(([k, l]) => (
@@ -516,7 +523,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
       {departmentOfficers.length === 0 ? (
         <EmptyState icon="👥" title="No department officers yet"
           description="Create or assign officer accounts for this department."
-          action={creatableRoles.length > 0 && <button onClick={() => setShowForm(true)} className="btn-primary">Add Officer</button>} />
+          action={<button onClick={() => setShowForm(true)} className="btn-primary">Add Officer</button>} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {departmentOfficers.map((s) => (
@@ -531,8 +538,9 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                 </div>
               </div>
               <div className="mt-3 flex gap-2 flex-wrap">
-                <span className="badge bg-blue-50 text-blue-700">{ROLE_LABELS[s.role] || s.role}</span>
+                <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(s)}</span>
                 {s.department_name && <span className="badge bg-gray-100 text-gray-600">{s.department_name}</span>}
+                {s.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {s.reports_to_name}</span>}
                 {s.district && <span className="badge bg-green-50 text-green-700">{s.district}</span>}
               </div>
               {s.employee_id && <p className="text-xs text-gray-400 mt-2">ID: {s.employee_id}</p>}

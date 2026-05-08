@@ -16,6 +16,7 @@ class User(AbstractUser):
         ("OFFICER", "Officer"),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="CITIZEN")
+    designation = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=15, blank=True)
     department = models.ForeignKey(
         "Department", null=True, blank=True, on_delete=models.SET_NULL, related_name="officers"
@@ -27,6 +28,9 @@ class User(AbstractUser):
     block = models.CharField(max_length=100, blank=True)
     created_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="subordinates"
+    )
+    reports_to = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="direct_reports"
     )
 
     class Meta:
@@ -47,6 +51,9 @@ class Department(models.Model):
     description = models.TextField(blank=True)
     head_officer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="headed_departments"
+    )
+    sub_head_officer = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="sub_headed_departments"
     )
     email = models.EmailField(blank=True)
     is_active = models.BooleanField(default=True)

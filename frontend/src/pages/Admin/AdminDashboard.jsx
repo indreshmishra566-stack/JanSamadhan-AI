@@ -28,6 +28,10 @@ const ROLE_LABELS = {
 const ALL_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER", "CITIZEN", "ADMIN"];
 const OFFICER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
 
+function getOfficerLabel(user) {
+  return user?.designation?.trim() || ROLE_LABELS[user?.role] || user?.role;
+}
+
 export default function AdminDashboard() {
   const qc = useQueryClient();
   const [tab, setTab] = useState("complaints");
@@ -284,7 +288,7 @@ export default function AdminDashboard() {
                           onChange={(e) => setEditForm({ ...editForm, assigned_officer: e.target.value })}>
                           <option value="">-- Select --</option>
                           {officers.map((o) => (
-                            <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({o.department_name})</option>
+                            <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>
                           ))}
                         </select>
                       </div>
@@ -398,7 +402,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-4 py-3 text-gray-600 font-mono text-xs">{u.username}</td>
                       <td className="px-4 py-3">
-                        <span className="badge bg-blue-50 text-blue-700">{ROLE_LABELS[u.role] || u.role}</span>
+                        <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(u)}</span>
                       </td>
                       <td className="px-4 py-3 text-gray-500">{u.department_name || "—"}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs">{u.district || u.state || "—"}</td>
@@ -458,7 +462,11 @@ export default function AdminDashboard() {
 
 function OfficerManagement({ departments, officers, onChanged }) {
   const ROLES = ["PM","CM","DISTRICT_OFFICER","BLOCK_OFFICER","FIELD_OFFICER","OFFICER"];
-  const emptyForm = { username:"",email:"",password:"",phone:"",first_name:"",last_name:"",employee_id:"",department_id:"",role:"OFFICER",state:"",district:"",block:"" };
+  const emptyForm = {
+    username:"", email:"", password:"", phone:"", first_name:"", last_name:"",
+    employee_id:"", department_id:"", role:"OFFICER", designation:"",
+    state:"", district:"", block:"", reports_to:""
+  };
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [editingOfficer, setEditingOfficer] = useState(null);
@@ -487,7 +495,8 @@ function OfficerManagement({ departments, officers, onChanged }) {
     setEditForm({
       first_name: o.first_name||"", last_name: o.last_name||"", email: o.email||"",
       phone: o.phone||"", employee_id: o.employee_id||"", department: o.department||"",
-      role: o.role||"OFFICER", state: o.state||"", district: o.district||"", block: o.block||"",
+      role: o.role||"OFFICER", designation: o.designation||"", state: o.state||"",
+      district: o.district||"", block: o.block||"", reports_to: o.reports_to || "",
     });
   };
 
@@ -519,10 +528,21 @@ function OfficerManagement({ departments, officers, onChanged }) {
               </select>
             </div>
             <div>
+              <label className="text-xs text-gray-500 mb-1 block">Designation / Title</label>
+              <input className="input text-sm" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} placeholder="Joint Director, Area Lead, Sub Head..." />
+            </div>
+            <div>
               <label className="text-xs text-gray-500 mb-1 block">Department</label>
               <select className="input text-sm" value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
                 <option value="">-- Select --</option>
                 {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Reports To</label>
+              <select className="input text-sm" value={form.reports_to} onChange={(e) => setForm({ ...form, reports_to: e.target.value })}>
+                <option value="">-- Auto assign --</option>
+                {officers.map((o) => <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>)}
               </select>
             </div>
             {[["state","State"],["district","District"],["block","Block"]].map(([k,l]) => (
@@ -567,6 +587,19 @@ function OfficerManagement({ departments, officers, onChanged }) {
                       {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Designation</label>
+                    <input className="input text-xs py-1" value={editForm.designation} onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Reports To</label>
+                    <select className="input text-xs py-1" value={editForm.reports_to} onChange={(e) => setEditForm({ ...editForm, reports_to: e.target.value })}>
+                      <option value="">-- None --</option>
+                      {officers.filter((candidate) => candidate.id !== o.id).map((candidate) => (
+                        <option key={candidate.id} value={candidate.id}>{candidate.first_name} {candidate.last_name} ({getOfficerLabel(candidate)})</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => updateMutation.mutate({ id: o.id, data: editForm })} disabled={updateMutation.isPending} className="btn-primary text-xs py-1 px-3">
@@ -593,8 +626,9 @@ function OfficerManagement({ departments, officers, onChanged }) {
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2 flex-wrap">
-                  <span className="badge bg-blue-50 text-blue-700">{ROLE_LABELS[o.role] || o.role}</span>
+                  <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(o)}</span>
                   {o.department_name && <span className="badge bg-gray-100 text-gray-600">{o.department_name}</span>}
+                  {o.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {o.reports_to_name}</span>}
                   {o.employee_id && <span className="badge bg-gray-100 text-gray-600">ID: {o.employee_id}</span>}
                 </div>
               </>
@@ -607,9 +641,10 @@ function OfficerManagement({ departments, officers, onChanged }) {
 }
 
 function DepartmentManagement({ departments, officers, onChanged }) {
-  const emptyForm = { name: "", code: "", description: "", email: "", head_officer: "" };
+  const emptyForm = { name: "", code: "", description: "", email: "", head_officer: "", sub_head_officer: "" };
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [editingDepartment, setEditingDepartment] = useState(null);
 
   const createMutation = useMutation({
     mutationFn: (data) => departmentApi.create(data),
@@ -622,10 +657,21 @@ function DepartmentManagement({ departments, officers, onChanged }) {
     onError: (err) => toast.error(err.response?.data?.detail || "Failed to create department"),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => departmentApi.update(id, data),
+    onSuccess: () => {
+      toast.success("Department updated");
+      setEditingDepartment(null);
+      onChanged();
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to update department"),
+  });
+
   const submit = () => {
     createMutation.mutate({
       ...form,
       head_officer: form.head_officer || null,
+      sub_head_officer: form.sub_head_officer || null,
       code: form.code.trim().toUpperCase(),
     });
   };
@@ -667,11 +713,21 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                 onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
                 <option value="">-- Select --</option>
                 {officers.map((o) => (
-                  <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({ROLE_LABELS[o.role] || o.role})</option>
+                  <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>
                 ))}
               </select>
             </div>
-            <div className="md:col-span-2">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Sub Head Officer</label>
+              <select className="input text-sm" value={form.sub_head_officer}
+                onChange={(e) => setForm({ ...form, sub_head_officer: e.target.value })}>
+                <option value="">-- Select --</option>
+                {officers.map((o) => (
+                  <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-1">
               <label className="text-xs text-gray-500 mb-1 block">Description</label>
               <input className="input text-sm" value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })} />
@@ -692,21 +748,67 @@ function DepartmentManagement({ departments, officers, onChanged }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {departments.map((d) => (
             <div key={d.id} className="card p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-gray-900">{d.name}</p>
-                  <p className="text-xs font-mono text-gray-400">{d.code}</p>
+              {editingDepartment?.id === d.id ? (
+                <div className="space-y-3">
+                  <input className="input text-sm" value={editingDepartment.name}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, name: e.target.value })} />
+                  <input className="input text-sm uppercase" value={editingDepartment.code}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, code: e.target.value.toUpperCase() })} />
+                  <input className="input text-sm" value={editingDepartment.email || ""}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
+                  <input className="input text-sm" value={editingDepartment.description || ""}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, description: e.target.value })} />
+                  <select className="input text-sm" value={editingDepartment.head_officer || ""}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, head_officer: e.target.value || null })}>
+                    <option value="">-- Head officer --</option>
+                    {officers.map((o) => <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>)}
+                  </select>
+                  <select className="input text-sm" value={editingDepartment.sub_head_officer || ""}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, sub_head_officer: e.target.value || null })}>
+                    <option value="">-- Sub head officer --</option>
+                    {officers.map((o) => <option key={o.id} value={o.id}>{o.first_name} {o.last_name} ({getOfficerLabel(o)})</option>)}
+                  </select>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => updateMutation.mutate({
+                        id: d.id,
+                        data: {
+                          ...editingDepartment,
+                          head_officer: editingDepartment.head_officer || null,
+                          sub_head_officer: editingDepartment.sub_head_officer || null,
+                        },
+                      })}
+                      disabled={updateMutation.isPending}
+                      className="btn-primary text-xs py-1 px-3"
+                    >
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </button>
+                    <button onClick={() => setEditingDepartment(null)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
+                  </div>
                 </div>
-                <span className={`badge ${d.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>
-                  {d.is_active ? "Active" : "Inactive"}
-                </span>
-              </div>
-              {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
-              <div className="mt-3 flex gap-2 flex-wrap">
-                <span className="badge bg-blue-50 text-blue-700">{d.complaint_count || 0} active complaints</span>
-                {d.head_officer_name && <span className="badge bg-purple-50 text-purple-700">Nodal: {d.head_officer_name}</span>}
-                {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
-              </div>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-gray-900">{d.name}</p>
+                      <p className="text-xs font-mono text-gray-400">{d.code}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`badge ${d.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                        {d.is_active ? "Active" : "Inactive"}
+                      </span>
+                      <button onClick={() => setEditingDepartment({ ...d })} className="text-xs text-blue-600 hover:underline">Edit</button>
+                    </div>
+                  </div>
+                  {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    <span className="badge bg-blue-50 text-blue-700">{d.complaint_count || 0} active complaints</span>
+                    {d.head_officer_name && <span className="badge bg-indigo-50 text-indigo-700">Head: {d.head_officer_name}</span>}
+                    {d.sub_head_officer_name && <span className="badge bg-amber-50 text-amber-700">Sub Head: {d.sub_head_officer_name}</span>}
+                    {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

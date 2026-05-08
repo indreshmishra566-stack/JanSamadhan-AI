@@ -24,23 +24,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source="department.name", read_only=True)
+    reports_to_name = serializers.CharField(source="reports_to.get_full_name", read_only=True)
 
     class Meta:
         model = User
         fields = ["id", "username", "email", "phone", "role", "first_name", "last_name",
-                  "department", "department_name", "employee_id", "is_verified", "date_joined",
-                  "state", "district", "block", "created_by"]
+                  "designation", "department", "department_name", "employee_id", "is_verified", "date_joined",
+                  "state", "district", "block", "created_by", "reports_to", "reports_to_name", "is_active"]
         read_only_fields = ["date_joined", "is_verified"]
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
     complaint_count = serializers.SerializerMethodField()
     head_officer_name = serializers.SerializerMethodField()
+    sub_head_officer_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Department
         fields = ["id", "name", "code", "description", "email", "is_active",
-                  "head_officer", "head_officer_name", "complaint_count", "created_at"]
+                  "head_officer", "head_officer_name", "sub_head_officer", "sub_head_officer_name",
+                  "complaint_count", "created_at"]
 
     def get_complaint_count(self, obj):
         return obj.complaints.filter(status__in=["PENDING", "ASSIGNED", "IN_PROGRESS"]).count()
@@ -48,6 +51,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
     def get_head_officer_name(self, obj):
         if obj.head_officer:
             return obj.head_officer.get_full_name() or obj.head_officer.username
+        return ""
+
+    def get_sub_head_officer_name(self, obj):
+        if obj.sub_head_officer:
+            return obj.sub_head_officer.get_full_name() or obj.sub_head_officer.username
         return ""
 
 

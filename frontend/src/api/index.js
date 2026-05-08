@@ -115,4 +115,5 @@ export const departmentApi = {
   list: () => api.get("/departments/"),
   get: (id) => api.get(`/departments/${id}/`),
   create: (data) => api.post("/departments/", data),
+  update: (id, data) => api.patch(`/departments/${id}/`, data),
 };
