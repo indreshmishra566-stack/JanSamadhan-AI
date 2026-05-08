@@ -196,6 +196,9 @@ export default function AdminDashboard() {
                               {c.assigned_officer === user?.id ? "Assigned to You" : `Assigned: ${c.officer_name}`}
                             </span>
                           )}
+                          {c.status === "ESCALATED" && c.assigned_officer === user?.id && (
+                            <span className="badge bg-orange-50 text-orange-700">Escalated to You</span>
+                          )}
                           {c.supervising_head_name && (
                             <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
                           )}
