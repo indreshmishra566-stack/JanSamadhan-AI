@@ -38,15 +38,21 @@ class DepartmentSerializer(serializers.ModelSerializer):
     complaint_count = serializers.SerializerMethodField()
     head_officer_name = serializers.SerializerMethodField()
     sub_head_officer_name = serializers.SerializerMethodField()
+    parent_name = serializers.CharField(source="parent.name", read_only=True)
+    child_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Department
         fields = ["id", "name", "code", "description", "email", "is_active",
+                  "parent", "parent_name",
                   "head_officer", "head_officer_name", "sub_head_officer", "sub_head_officer_name",
-                  "complaint_count", "created_at"]
+                  "complaint_count", "child_count", "created_by", "created_at"]
 
     def get_complaint_count(self, obj):
         return obj.complaints.filter(status__in=["PENDING", "ASSIGNED", "IN_PROGRESS"]).count()
+
+    def get_child_count(self, obj):
+        return obj.children.filter(is_active=True).count()
 
     def get_head_officer_name(self, obj):
         if obj.head_officer:

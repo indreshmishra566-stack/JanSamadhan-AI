@@ -641,7 +641,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
 }
 
 function DepartmentManagement({ departments, officers, onChanged }) {
-  const emptyForm = { name: "", code: "", description: "", email: "", head_officer: "", sub_head_officer: "" };
+  const emptyForm = { name: "", code: "", description: "", email: "", parent: "", head_officer: "", sub_head_officer: "" };
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingDepartment, setEditingDepartment] = useState(null);
@@ -670,6 +670,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
   const submit = () => {
     createMutation.mutate({
       ...form,
+      parent: form.parent || null,
       head_officer: form.head_officer || null,
       sub_head_officer: form.sub_head_officer || null,
       code: form.code.trim().toUpperCase(),
@@ -706,6 +707,16 @@ function DepartmentManagement({ departments, officers, onChanged }) {
               <label className="text-xs text-gray-500 mb-1 block">Email</label>
               <input className="input text-sm" type="email" value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Parent Department</label>
+              <select className="input text-sm" value={form.parent}
+                onChange={(e) => setForm({ ...form, parent: e.target.value })}>
+                <option value="">-- Root department --</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Nodal Officer</label>
@@ -758,6 +769,13 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
                   <input className="input text-sm" value={editingDepartment.description || ""}
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, description: e.target.value })} />
+                  <select className="input text-sm" value={editingDepartment.parent || ""}
+                    onChange={(e) => setEditingDepartment({ ...editingDepartment, parent: e.target.value || null })}>
+                    <option value="">-- Root department --</option>
+                    {departments.filter((dept) => dept.id !== d.id).map((dept) => (
+                      <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    ))}
+                  </select>
                   <select className="input text-sm" value={editingDepartment.head_officer || ""}
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, head_officer: e.target.value || null })}>
                     <option value="">-- Head officer --</option>
@@ -774,6 +792,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                         id: d.id,
                         data: {
                           ...editingDepartment,
+                          parent: editingDepartment.parent || null,
                           head_officer: editingDepartment.head_officer || null,
                           sub_head_officer: editingDepartment.sub_head_officer || null,
                         },
@@ -803,8 +822,10 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                   {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
                   <div className="mt-3 flex gap-2 flex-wrap">
                     <span className="badge bg-blue-50 text-blue-700">{d.complaint_count || 0} active complaints</span>
+                    {d.parent_name && <span className="badge bg-slate-100 text-slate-700">Parent: {d.parent_name}</span>}
                     {d.head_officer_name && <span className="badge bg-indigo-50 text-indigo-700">Head: {d.head_officer_name}</span>}
                     {d.sub_head_officer_name && <span className="badge bg-amber-50 text-amber-700">Sub Head: {d.sub_head_officer_name}</span>}
+                    {typeof d.child_count === "number" && <span className="badge bg-emerald-50 text-emerald-700">{d.child_count} child departments</span>}
                     {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
                   </div>
                 </>

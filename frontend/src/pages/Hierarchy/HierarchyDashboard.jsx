@@ -135,10 +135,10 @@ export default function HierarchyDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", canCreateOfficers && "team"].filter(Boolean).map((t) => (
+        {["complaints", canCreateOfficers && "team", "departments"].filter(Boolean).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
-            {t === "team" ? "Department Officers" : t}
+            {t === "team" ? "Department Officers" : t === "departments" ? "Departments" : t}
           </button>
         ))}
       </div>
@@ -340,6 +340,18 @@ export default function HierarchyDashboard() {
           departmentOfficers={departmentOfficers}
           departments={departments}
           onCreated={() => qc.invalidateQueries(["department-officers"])}
+        />
+      )}
+
+      {tab === "departments" && (
+        <DepartmentBranchManagement
+          user={user}
+          departments={departments}
+          departmentOfficers={departmentOfficers}
+          onChanged={() => {
+            qc.invalidateQueries(["departments"]);
+            qc.invalidateQueries(["department-officers"]);
+          }}
         />
       )}
 
@@ -548,6 +560,155 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function DepartmentBranchManagement({ user, departments, departmentOfficers, onChanged }) {
+  const emptyForm = {
+    name: "", code: "", description: "", email: "",
+    parent: user?.department || "", head_officer: "", sub_head_officer: "",
+  };
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [editingDepartment, setEditingDepartment] = useState(null);
+
+  const createMutation = useMutation({
+    mutationFn: (data) => departmentApi.create(data),
+    onSuccess: () => {
+      toast.success("Department branch created");
+      setShowForm(false);
+      setForm(emptyForm);
+      onChanged();
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to create department branch"),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => departmentApi.update(id, data),
+    onSuccess: () => {
+      toast.success("Department updated");
+      setEditingDepartment(null);
+      onChanged();
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to update department"),
+  });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold">Department Branches</h2>
+          <p className="text-sm text-gray-500">Create child departments inside your branch and assign the next head and sub head.</p>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm flex items-center gap-1">
+          <UserPlus size={15} /> Add Department
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="card p-5 mb-5">
+          <h3 className="font-medium mb-4">Create Department Branch</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input className="input text-sm" placeholder="Department name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <input className="input text-sm uppercase" placeholder="Code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+            <input className="input text-sm" placeholder="Department email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <select className="input text-sm" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })}>
+              <option value="">-- Root within my branch --</option>
+              {departments.map((dept) => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
+            </select>
+            <select className="input text-sm" value={form.head_officer} onChange={(e) => setForm({ ...form, head_officer: e.target.value })}>
+              <option value="">-- Assign head officer --</option>
+              {departmentOfficers.map((member) => <option key={member.id} value={member.id}>{member.first_name} {member.last_name} ({getOfficerLabel(member)})</option>)}
+            </select>
+            <select className="input text-sm" value={form.sub_head_officer} onChange={(e) => setForm({ ...form, sub_head_officer: e.target.value })}>
+              <option value="">-- Assign sub head officer --</option>
+              {departmentOfficers.map((member) => <option key={member.id} value={member.id}>{member.first_name} {member.last_name} ({getOfficerLabel(member)})</option>)}
+            </select>
+            <div className="md:col-span-3">
+              <input className="input text-sm" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => createMutation.mutate({
+                ...form,
+                parent: form.parent || null,
+                head_officer: form.head_officer || null,
+                sub_head_officer: form.sub_head_officer || null,
+                code: form.code.trim().toUpperCase(),
+              })}
+              disabled={createMutation.isPending || !form.name || !form.code}
+              className="btn-primary text-sm"
+            >
+              {createMutation.isPending ? "Creating..." : "Create Department"}
+            </button>
+            <button onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {departments.map((department) => (
+          <div key={department.id} className="card p-4">
+            {editingDepartment?.id === department.id ? (
+              <div className="space-y-3">
+                <input className="input text-sm" value={editingDepartment.name} onChange={(e) => setEditingDepartment({ ...editingDepartment, name: e.target.value })} />
+                <input className="input text-sm uppercase" value={editingDepartment.code} onChange={(e) => setEditingDepartment({ ...editingDepartment, code: e.target.value.toUpperCase() })} />
+                <input className="input text-sm" value={editingDepartment.email || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
+                <select className="input text-sm" value={editingDepartment.parent || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, parent: e.target.value || null })}>
+                  <option value="">-- Root within my branch --</option>
+                  {departments.filter((item) => item.id !== department.id).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+                <select className="input text-sm" value={editingDepartment.head_officer || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, head_officer: e.target.value || null })}>
+                  <option value="">-- Head officer --</option>
+                  {departmentOfficers.map((member) => <option key={member.id} value={member.id}>{member.first_name} {member.last_name} ({getOfficerLabel(member)})</option>)}
+                </select>
+                <select className="input text-sm" value={editingDepartment.sub_head_officer || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, sub_head_officer: e.target.value || null })}>
+                  <option value="">-- Sub head officer --</option>
+                  {departmentOfficers.map((member) => <option key={member.id} value={member.id}>{member.first_name} {member.last_name} ({getOfficerLabel(member)})</option>)}
+                </select>
+                <input className="input text-sm" value={editingDepartment.description || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, description: e.target.value })} />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateMutation.mutate({
+                      id: department.id,
+                      data: {
+                        ...editingDepartment,
+                        parent: editingDepartment.parent || null,
+                        head_officer: editingDepartment.head_officer || null,
+                        sub_head_officer: editingDepartment.sub_head_officer || null,
+                      },
+                    })}
+                    disabled={updateMutation.isPending}
+                    className="btn-primary text-xs py-1 px-3"
+                  >
+                    {updateMutation.isPending ? "Saving..." : "Save"}
+                  </button>
+                  <button onClick={() => setEditingDepartment(null)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-gray-900">{department.name}</p>
+                    <p className="text-xs font-mono text-gray-400">{department.code}</p>
+                  </div>
+                  <button onClick={() => setEditingDepartment({ ...department })} className="text-xs text-blue-600 hover:underline">Edit</button>
+                </div>
+                {department.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{department.description}</p>}
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  {department.parent_name && <span className="badge bg-slate-100 text-slate-700">Parent: {department.parent_name}</span>}
+                  {department.head_officer_name && <span className="badge bg-indigo-50 text-indigo-700">Head: {department.head_officer_name}</span>}
+                  {department.sub_head_officer_name && <span className="badge bg-amber-50 text-amber-700">Sub Head: {department.sub_head_officer_name}</span>}
+                  {typeof department.child_count === "number" && <span className="badge bg-emerald-50 text-emerald-700">{department.child_count} child</span>}
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

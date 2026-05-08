@@ -49,11 +49,17 @@ class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="children"
+    )
     head_officer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="headed_departments"
     )
     sub_head_officer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="sub_headed_departments"
+    )
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_departments"
     )
     email = models.EmailField(blank=True)
     is_active = models.BooleanField(default=True)

@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -46,6 +47,33 @@ ROLE_WEIGHT = {
 MANAGEABLE_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"]
 
 
+def _managed_department_ids(user):
+    if not user or not user.is_authenticated:
+        return set()
+    if user.role == "ADMIN":
+        return set(Department.objects.values_list("id", flat=True))
+
+    managed = set(
+        Department.objects.filter(is_active=True).filter(
+            Q(head_officer=user) | Q(sub_head_officer=user)
+        ).values_list("id", flat=True)
+    )
+    if not managed:
+        return set()
+
+    queue = list(managed)
+    while queue:
+        current_id = queue.pop(0)
+        child_ids = list(
+            Department.objects.filter(parent_id=current_id, is_active=True).values_list("id", flat=True)
+        )
+        for child_id in child_ids:
+            if child_id not in managed:
+                managed.add(child_id)
+                queue.append(child_id)
+    return managed
+
+
 def _actor_level(user):
     if Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True).exists():
         return "DEPARTMENT"
@@ -74,10 +102,12 @@ def _department_peer_filter(user):
 def _is_department_leader(user, department=None):
     if not user or not user.is_authenticated:
         return False
-    qs = Department.objects.filter(is_active=True).filter(Q(head_officer=user) | Q(sub_head_officer=user))
+    managed_ids = _managed_department_ids(user)
+    if not managed_ids:
+        return False
     if department:
-        qs = qs.filter(id=department.id)
-    return qs.exists()
+        return department.id in managed_ids
+    return True
 
 
 def _can_create_role(creator, target_role, department=None):
@@ -134,6 +164,19 @@ def _build_user_payload(data, creator):
     return payload, None
 
 
+def _can_manage_department(user, department=None, parent=None):
+    if not user or not user.is_authenticated:
+        return False
+    if user.role == "ADMIN":
+        return True
+    managed_ids = _managed_department_ids(user)
+    if department and department.id in managed_ids:
+        return True
+    if parent and parent.id in managed_ids:
+        return True
+    return False
+
+
 # ─── Auth ───────────────────────────────────────────────────────────────────
 
 class RegisterView(generics.CreateAPIView):
@@ -152,13 +195,30 @@ class MeView(generics.RetrieveUpdateAPIView):
 # ─── Departments ─────────────────────────────────────────────────────────────
 
 class DepartmentListView(generics.ListCreateAPIView):
-    queryset = Department.objects.filter(is_active=True)
     serializer_class = DepartmentSerializer
 
     def get_permissions(self):
         if self.request.method == "POST":
-            return [IsAdmin()]
+            return [IsAuthenticated(), IsHierarchyOfficer()]
         return [IsAuthenticated()]
+
+    def get_queryset(self):
+        qs = Department.objects.filter(is_active=True)
+        if self.request.user.role == "ADMIN":
+            return qs
+        managed_ids = _managed_department_ids(self.request.user)
+        if managed_ids:
+            return qs.filter(id__in=managed_ids)
+        return qs
+
+    def perform_create(self, serializer):
+        parent = None
+        parent_id = self.request.data.get("parent")
+        if parent_id:
+            parent = get_object_or_404(Department, id=parent_id, is_active=True)
+        if not _can_manage_department(self.request.user, parent=parent):
+            raise PermissionDenied("You cannot create a department under this branch.")
+        serializer.save(created_by=self.request.user, parent=parent)
 
 
 class DepartmentDetailView(generics.RetrieveUpdateAPIView):
@@ -167,8 +227,22 @@ class DepartmentDetailView(generics.RetrieveUpdateAPIView):
 
     def get_permissions(self):
         if self.request.method in ("PUT", "PATCH"):
-            return [IsAdmin()]
+            return [IsAuthenticated(), IsHierarchyOfficer()]
         return [IsAuthenticated()]
+
+    def perform_update(self, serializer):
+        department = self.get_object()
+        parent = department.parent
+        parent_id = self.request.data.get("parent")
+        if parent_id:
+            parent = get_object_or_404(Department, id=parent_id)
+        elif "parent" in self.request.data and not parent_id:
+            parent = None
+
+        if not _can_manage_department(self.request.user, department=department, parent=parent):
+            raise PermissionDenied("You cannot update this department.")
+
+        serializer.save(parent=parent)
 
 
 # ─── Citizen Complaints ──────────────────────────────────────────────────────
