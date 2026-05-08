@@ -9,6 +9,7 @@ from django.core.management import call_command
 from django.utils import timezone
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
+import traceback
 
 from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord
 from .serializers import (
@@ -786,7 +787,17 @@ def run_demo_seed(request):
     if not expected or token != expected:
         return Response({"detail": "Invalid seed token."}, status=403)
 
-    call_command("seed")
+    try:
+        call_command("seed")
+    except Exception as exc:
+        return Response(
+            {
+                "detail": "Seed failed.",
+                "error": str(exc),
+                "traceback": traceback.format_exc().splitlines()[-12:],
+            },
+            status=500,
+        )
     return Response({
         "status": "ok",
         "message": "National-to-village water department demo hierarchy, citizens, and grievances were seeded.",
