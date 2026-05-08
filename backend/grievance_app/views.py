@@ -280,25 +280,31 @@ class CitizenComplaintListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         complaint = serializer.save(citizen=self.request.user)
         if complaint.assigned_officer:
+            initial_level = complaint.current_level or "DEPARTMENT"
+            initial_note = (
+                "Auto-routed to the nearest available branch officer under the mapped department."
+                if initial_level == "OFFICER"
+                else "Auto-routed to department head or department desk."
+            )
             ForwardingRecord.objects.create(
                 complaint=complaint,
                 from_user=None,
                 to_user=complaint.assigned_officer,
                 from_level="SYSTEM",
-                to_level="DEPARTMENT",
+                to_level=initial_level,
                 action="ASSIGN",
-                note="Auto-routed to department head or officer.",
+                note=initial_note,
             )
             ComplaintHistory.objects.create(
                 complaint=complaint,
                 changed_by=None,
                 old_status="PENDING",
                 new_status=complaint.status,
-                note="Auto-routed to department head or officer.",
+                note=initial_note,
             )
             _notify(complaint.assigned_officer, complaint, "ASSIGNED",
                     f"New Department Grievance: #{complaint.ticket_id}",
-                    f"A new grievance was routed to {complaint.department.name}.")
+                    f"A new grievance was routed to you under {complaint.department.name}.")
         _notify(complaint.citizen, complaint, "ASSIGNED",
                 "Complaint Received",
                 f"Your complaint #{complaint.ticket_id} has been submitted successfully.")

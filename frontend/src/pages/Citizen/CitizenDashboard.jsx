@@ -12,7 +12,17 @@ export default function CitizenDashboard() {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
-  const emptyForm = { title: "", description: "", location: "", latitude: "", longitude: "", attachment: null };
+  const emptyForm = {
+    title: "",
+    description: "",
+    state: user?.state || "",
+    district: user?.district || "",
+    block: user?.block || "",
+    location: "",
+    latitude: "",
+    longitude: "",
+    attachment: null,
+  };
   const [form, setForm] = useState(emptyForm);
 
   const { data, isLoading } = useQuery({
@@ -38,6 +48,9 @@ export default function CitizenDashboard() {
     const fd = new FormData();
     fd.append("title", form.title);
     fd.append("description", form.description);
+    if (form.state) fd.append("state", form.state);
+    if (form.district) fd.append("district", form.district);
+    if (form.block) fd.append("block", form.block);
     fd.append("location", form.location);
     if (form.latitude) fd.append("latitude", form.latitude);
     if (form.longitude) fd.append("longitude", form.longitude);
@@ -119,6 +132,23 @@ export default function CitizenDashboard() {
                   <Navigation size={15} /> GPS
                 </button>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {[
+                ["state", "State", "Uttar Pradesh"],
+                ["district", "District", "Lucknow"],
+                ["block", "Area / Block", "Chinhat"],
+              ].map(([key, label, placeholder]) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                  <input
+                    className="input"
+                    value={form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    placeholder={placeholder}
+                  />
+                </div>
+              ))}
             </div>
             {(form.latitude || form.longitude) && (
               <div className="grid grid-cols-2 gap-3">

@@ -1,4 +1,6 @@
-from django.db.models import Case, IntegerField, Value, When
+from collections import deque
+
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from .models import Department, User
 
@@ -61,15 +63,171 @@ def find_department_owner(department):
     )
 
 
-def apply_initial_grievance_routing(validated_data, category):
+def _normalized(value):
+    return (value or "").strip().lower()
+
+
+def _department_branch_ids(department):
+    if not department:
+        return set()
+
+    branch_ids = {department.id}
+    queue = deque([department.id])
+    while queue:
+        current_id = queue.popleft()
+        child_ids = list(
+            Department.objects.filter(parent_id=current_id, is_active=True).values_list("id", flat=True)
+        )
+        for child_id in child_ids:
+            if child_id not in branch_ids:
+                branch_ids.add(child_id)
+                queue.append(child_id)
+    return branch_ids
+
+
+def _department_depth_map(department):
+    if not department:
+        return {}
+
+    depth_map = {department.id: 0}
+    queue = deque([(department.id, 0)])
+    while queue:
+        current_id, depth = queue.popleft()
+        child_ids = list(
+            Department.objects.filter(parent_id=current_id, is_active=True).values_list("id", flat=True)
+        )
+        for child_id in child_ids:
+            if child_id not in depth_map:
+                depth_map[child_id] = depth + 1
+                queue.append((child_id, depth + 1))
+    return depth_map
+
+
+def _is_department_leader(officer):
+    if not officer:
+        return False
+    return Department.objects.filter(
+        Q(head_officer=officer) | Q(sub_head_officer=officer),
+        is_active=True,
+    ).exists()
+
+
+def _candidate_location_score(officer, department, depth_map, target_state, target_district, target_block, location_text):
+    score = 0
+
+    officer_state = _normalized(officer.state)
+    officer_district = _normalized(officer.district)
+    officer_block = _normalized(officer.block)
+
+    if target_state and officer_state == target_state:
+        score += 100
+    if target_district and officer_district == target_district:
+        score += 220
+    if target_block and officer_block == target_block:
+        score += 320
+
+    if location_text:
+        if officer_block and officer_block in location_text:
+            score += 180
+        if officer_district and officer_district in location_text:
+            score += 120
+        if officer_state and officer_state in location_text:
+            score += 60
+
+    dept_depth = depth_map.get(officer.department_id or department.id, 0)
+    score += dept_depth * 40
+
+    if officer.department_id and officer.department_id != department.id:
+        score += 40
+
+    if officer.reports_to_id:
+        score += 20
+
+    if _is_department_leader(officer):
+        score -= 30
+
+    return score
+
+
+def find_nearest_branch_officer(department, validated_data, citizen=None):
+    if not department:
+        return None
+
+    branch_ids = _department_branch_ids(department)
+    depth_map = _department_depth_map(department)
+    target_state = _normalized(validated_data.get("state") or getattr(citizen, "state", ""))
+    target_district = _normalized(validated_data.get("district") or getattr(citizen, "district", ""))
+    target_block = _normalized(validated_data.get("block") or getattr(citizen, "block", ""))
+    location_text = _normalized(validated_data.get("location"))
+
+    candidates = list(
+        User.objects.filter(
+            department_id__in=branch_ids,
+            role__in=OFFICER_ROLES,
+            is_active=True,
+        )
+        .exclude(id=getattr(citizen, "id", None))
+        .select_related("department", "reports_to")
+        .order_by(ROLE_ORDER, "date_joined")
+    )
+    if not candidates:
+        return None
+
+    verified = [candidate for candidate in candidates if candidate.is_verified]
+    candidate_pool = verified or candidates
+
+    ranked = sorted(
+        candidate_pool,
+        key=lambda candidate: (
+            _candidate_location_score(
+                candidate,
+                department,
+                depth_map,
+                target_state,
+                target_district,
+                target_block,
+                location_text,
+            ),
+            int(candidate.is_verified),
+            int(bool(candidate.reports_to_id)),
+            depth_map.get(candidate.department_id or department.id, 0),
+            -candidate.id,
+        ),
+        reverse=True,
+    )
+
+    best = ranked[0] if ranked else None
+    if not best:
+        return None
+
+    best_score = _candidate_location_score(
+        best,
+        department,
+        depth_map,
+        target_state,
+        target_district,
+        target_block,
+        location_text,
+    )
+    return best if best_score > 0 else None
+
+
+def apply_initial_grievance_routing(validated_data, category, citizen=None):
     department = find_department_for_category(category)
     if not department:
         return None, None
 
     validated_data["department"] = department
-    validated_data["current_level"] = "DEPARTMENT"
+    validated_data["state"] = validated_data.get("state") or getattr(citizen, "state", "")
+    validated_data["district"] = validated_data.get("district") or getattr(citizen, "district", "")
+    validated_data["block"] = validated_data.get("block") or getattr(citizen, "block", "")
 
-    officer = find_department_owner(department)
+    officer = find_nearest_branch_officer(department, validated_data, citizen=citizen)
+    if officer:
+        validated_data["current_level"] = "OFFICER"
+    else:
+        validated_data["current_level"] = "DEPARTMENT"
+        officer = find_department_owner(department)
     if officer:
         validated_data["assigned_officer"] = officer
         validated_data["forwarded_to"] = officer

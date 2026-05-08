@@ -130,7 +130,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
 class ComplaintCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
-        fields = ["title", "description", "location", "latitude", "longitude", "attachment"]
+        fields = ["title", "description", "state", "district", "block", "location", "latitude", "longitude", "attachment"]
 
     def create(self, validated_data):
         from .ai_service import classify_complaint
@@ -147,9 +147,13 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         validated_data["original_language"] = ai_result.get("original_lang", "en")
         validated_data["translated_description"] = ai_result.get("translated_text", text)
 
-        # Auto-route to the mapped department ownership desk.
+        citizen = self.context["request"].user if self.context.get("request") else None
+
+        # Hybrid routing: category chooses the department, then the nearest
+        # officer in that department branch gets the first assignment while the
+        # category head still retains visibility through the department link.
         from .routing import apply_initial_grievance_routing
-        apply_initial_grievance_routing(validated_data, ai_result.get("category", "OTHER"))
+        apply_initial_grievance_routing(validated_data, ai_result.get("category", "OTHER"), citizen=citizen)
 
         hours = settings.SLA_HOURS.get(validated_data["priority"], 168)
         validated_data["sla_deadline"] = timezone.now() + timezone.timedelta(hours=hours)
