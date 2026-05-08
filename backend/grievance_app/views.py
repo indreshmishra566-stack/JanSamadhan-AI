@@ -789,19 +789,23 @@ def run_demo_seed(request):
     call_command("seed")
     return Response({
         "status": "ok",
-        "message": "Water department demo branch, officers, citizens, and grievances were seeded.",
+        "message": "National-to-village water department demo hierarchy, citizens, and grievances were seeded.",
         "logins": {
             "admin": "Admin@1234",
             "chief_public_grievance": "Officer@1234",
-            "state_grievance_director": "Officer@1234",
+            "central_water_mission_head": "Officer@1234",
+            "up_water_director": "Officer@1234",
             "lucknow_division_head": "Officer@1234",
+            "lucknow_district_water_head": "Officer@1234",
+            "bkt_block_water_head": "Officer@1234",
+            "itaunja_panchayat_head": "Officer@1234",
+            "nabinagar_village_operator": "Officer@1234",
+            "malihabad_block_water_head": "Officer@1234",
+            "rahimabad_panchayat_head": "Officer@1234",
+            "hasanapur_village_operator": "Officer@1234",
             "citizen_rahul": "Citizen@1234",
             "citizen_aisha": "Citizen@1234",
-            "water_head": "Officer@1234",
-            "water_sub_head": "Officer@1234",
-            "water_urban_head": "Officer@1234",
-            "water_chinhat_head": "Officer@1234",
-            "water_maint_head": "Officer@1234",
+            "citizen_neha": "Citizen@1234",
         },
     })
 

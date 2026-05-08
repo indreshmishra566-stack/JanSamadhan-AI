@@ -4,16 +4,44 @@ from grievance_app.models import Complaint, ComplaintHistory, Department, Forwar
 
 
 DEMO_USERNAMES = [
-    "pm_officer", "cm_officer", "district_officer", "block_officer", "field_officer",
-    "citizen_demo", "chief_public_grievance", "state_grievance_director", "lucknow_division_head",
-    "citizen_rahul", "citizen_aisha",
-    "water_head", "water_sub_head", "water_urban_head", "water_urban_sub",
-    "water_chinhat_head", "water_chinhat_sub", "water_maint_head", "water_maint_sub",
+    "chief_public_grievance",
+    "central_water_mission_head",
+    "central_water_ops",
+    "up_water_director",
+    "up_water_deputy",
+    "lucknow_division_head",
+    "lucknow_division_ops",
+    "lucknow_district_water_head",
+    "lucknow_district_water_sub",
+    "bkt_block_water_head",
+    "bkt_block_water_sub",
+    "itaunja_panchayat_head",
+    "itaunja_panchayat_sub",
+    "nabinagar_village_operator",
+    "nabinagar_village_support",
+    "malihabad_block_water_head",
+    "malihabad_block_water_sub",
+    "rahimabad_panchayat_head",
+    "rahimabad_panchayat_sub",
+    "hasanapur_village_operator",
+    "hasanapur_village_support",
+    "citizen_rahul",
+    "citizen_aisha",
+    "citizen_neha",
 ]
 
 DEMO_DEPARTMENT_CODES = [
     "WATER",
-    "WT_URBAN", "WT_CHNHAT", "WT_MAINT",
+    "WT_CENTRAL_OPS",
+    "WT_UP",
+    "WT_LKO_DIV",
+    "WT_LKO_DIST",
+    "WT_BKT",
+    "WT_ITAUNJA_GP",
+    "WT_NABINAGAR",
+    "WT_MALIHABAD",
+    "WT_RAHIMABAD_GP",
+    "WT_HASANAPUR",
 ]
 
 
