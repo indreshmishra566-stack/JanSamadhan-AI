@@ -147,7 +147,7 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         validated_data["original_language"] = ai_result.get("original_lang", "en")
         validated_data["translated_description"] = ai_result.get("translated_text", text)
 
-        # Auto-route to the mapped department's nodal desk.
+        # Auto-route to the mapped department ownership desk.
         from .routing import apply_initial_grievance_routing
         apply_initial_grievance_routing(validated_data, ai_result.get("category", "OTHER"))
 

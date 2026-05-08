@@ -27,8 +27,8 @@ const homeLinks = [
   { label: "Contact Us", to: "#contact" },
   { label: "About Us", to: "#about" },
   { label: "FAQ/Help", to: "#faq" },
-  { label: "Department Nodal Officers", to: "#officers" },
-  { label: "State / District Officers", to: "#officers" },
+  { label: "Department Officers", to: "#officers" },
+  { label: "Officer Branches", to: "#officers" },
   { label: "Redressal Process Flow", to: "/process-flow" },
 ];
 
@@ -39,7 +39,7 @@ const citizenSteps = [
   { icon: UserPlus, title: "User Module", text: "Citizen registration, secure login, profile context, and public ticket lookup." },
   { icon: Search, title: "Tracking Module", text: "Track ticket status, current level, SLA deadline, and forwarding trail." },
   { icon: MapPinned, title: "Ministry / State / Department Mapping", text: "AI-assisted routing maps grievances to the right department and officer level." },
-  { icon: ShieldCheck, title: "Grievance Officer Dashboard", text: "Nodal officers view assigned cases, priority, SLA breach, category, and history." },
+  { icon: ShieldCheck, title: "Grievance Officer Dashboard", text: "Officers view assigned cases, priority, SLA breach, category, and history." },
   { icon: Send, title: "Action / Forward / Resolve", text: "Officers update status, forward to field desks, escalate, and upload proof." },
   { icon: BarChart3, title: "Monitoring & Analytics System", text: "Admin and hierarchy dashboards monitor workload, progress, risk, and resolution." },
   { icon: Star, title: "Citizen Feedback / Appeal", text: "Resolved grievances collect citizen rating and comments for closure quality." },
@@ -97,10 +97,10 @@ function PortalHeader() {
       </div>
       <nav className="portal-nav" aria-label="Portal navigation">
         <Link to="/track"><Search size={14} /> View Status</Link>
-        <a href="#officers"><Users size={14} /> Nodal Officers</a>
+        <a href="#officers"><Users size={14} /> Officers</a>
         <Link to="/process-flow"><Network size={14} /> Redress Process</Link>
         <Link to="/citizen/dashboard"><FileText size={14} /> Grievance</Link>
-        <Link to="/nodal/dashboard"><ShieldCheck size={14} /> Nodal Authority for Appeal</Link>
+        <Link to="/officer/dashboard"><ShieldCheck size={14} /> Officer Dashboard</Link>
         <a href="#mobile"><Smartphone size={14} /> Mobile App</a>
         <Link to="/sitemap" className="ml-auto hidden lg:inline-flex"><Network size={14} /> Sitemap</Link>
       </nav>
@@ -116,7 +116,7 @@ function PortalFooter() {
         <span className="portal-social">x</span>
         <span className="portal-social">yt</span>
       </div>
-      <p>Jan Samadhan AI routes grievances to the right department, officer desk, and appeal path.</p>
+      <p>Jan Samadhan AI routes grievances to the right department, officer desk, and reporting branch.</p>
       <p className="text-[11px] opacity-80">Compatible with modern browsers. Version 1.0.0 | Updated on 07-05-2026</p>
     </footer>
   );
@@ -252,7 +252,7 @@ export default function PublicPortal() {
             <h2>Jan Samadhan AI</h2>
             <p>
               A modern grievance system for citizens, departments, and officers:
-              AI classification, nodal officer routing, forwarding, monitoring, feedback, and appeal-ready tracking.
+              AI classification, officer routing, forwarding, monitoring, feedback, and appeal-ready tracking.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/register" className="portal-primary"><UserPlus size={17} /> Register Citizen</Link>
@@ -296,9 +296,9 @@ export default function PublicPortal() {
         <section className="portal-page grid grid-cols-1 lg:grid-cols-3 gap-4" id="about">
           <div className="portal-info" id="officers">
             <ShieldCheck size={22} />
-            <h3>Nodal Officers</h3>
+            <h3>Officers</h3>
             <p>Officer dashboards support department cases, action notes, proof of resolution, forwarding, and escalation.</p>
-            <Link to="/nodal/dashboard">Open officer dashboard</Link>
+            <Link to="/officer/dashboard">Open officer dashboard</Link>
           </div>
           <div className="portal-info" id="faq">
             <MessageSquareText size={22} />

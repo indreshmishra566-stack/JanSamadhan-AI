@@ -17,16 +17,11 @@ const COLORS = ["#1D6FA5","#16a34a","#d97706","#dc2626","#7c3aed","#0891b2","#be
 const ROLE_LABELS = {
   CITIZEN: "Citizen",
   ADMIN: "Admin",
-  PM: "Officer",
-  CM: "Officer",
-  DISTRICT_OFFICER: "Officer",
-  BLOCK_OFFICER: "Officer",
-  FIELD_OFFICER: "Officer",
   OFFICER: "Officer",
 };
 
 const ALL_ROLES = ["OFFICER", "CITIZEN", "ADMIN"];
-const OFFICER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
+const OFFICER_ROLES = ["OFFICER"];
 
 function getOfficerLabel(user) {
   return user?.designation?.trim() || ROLE_LABELS[user?.role] || user?.role;

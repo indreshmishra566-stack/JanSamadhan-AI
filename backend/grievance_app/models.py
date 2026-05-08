@@ -8,11 +8,6 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ("CITIZEN", "Citizen"),
         ("ADMIN", "Admin"),
-        ("PM", "PM / Super Admin"),
-        ("CM", "CM / State Admin"),
-        ("DISTRICT_OFFICER", "District Officer"),
-        ("BLOCK_OFFICER", "Block Officer"),
-        ("FIELD_OFFICER", "Field Officer"),
         ("OFFICER", "Officer"),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="CITIZEN")
@@ -41,7 +36,7 @@ class User(AbstractUser):
 
     @property
     def hierarchy_level(self):
-        order = {"PM": 1, "ADMIN": 1, "CM": 2, "DISTRICT_OFFICER": 3, "BLOCK_OFFICER": 4, "FIELD_OFFICER": 5, "OFFICER": 5, "CITIZEN": 99}
+        order = {"ADMIN": 1, "OFFICER": 2, "CITIZEN": 99}
         return order.get(self.role, 99)
 
 
@@ -82,9 +77,9 @@ class Complaint(models.Model):
         ("HEALTH","Health"),("EDUCATION","Education"),("OTHER","Other"),
     ]
     LEVEL_CHOICES = [
-        ("DEPARTMENT","Department / Nodal Officer"),
-        ("PM","PM Level"),("CM","CM Level"),("DISTRICT","District Level"),
-        ("BLOCK","Block Level"),("FIELD","Field Level"),
+        ("DEPARTMENT","Department Head / Officer"),
+        ("OFFICER","Officer Level"),
+        ("ADMIN","Admin Level"),
     ]
 
     ticket_id = models.CharField(max_length=20, unique=True, editable=False)

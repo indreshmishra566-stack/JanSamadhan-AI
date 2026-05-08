@@ -7,7 +7,7 @@ import os
 
 
 class Command(BaseCommand):
-    help = "Seed departments, demo users, nodal mappings, and sample grievances"
+    help = "Seed departments, demo users, reporting branches, and sample grievances"
 
     def upsert_user(self, username, password, **defaults):
         user, created = User.objects.get_or_create(username=username, defaults=defaults)
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             "chief_public_grievance",
             officer_password,
             email="chief.public.grievance@jansamadhan.in",
-            role="PM",
+            role="OFFICER",
             is_active=True,
             is_staff=True,
             is_verified=True,
@@ -71,7 +71,7 @@ class Command(BaseCommand):
             "state_grievance_director",
             officer_password,
             email="state.director@jansamadhan.in",
-            role="CM",
+            role="OFFICER",
             is_active=True,
             is_staff=True,
             is_verified=True,
@@ -87,7 +87,7 @@ class Command(BaseCommand):
             "lucknow_division_head",
             officer_password,
             email="lucknow.division@jansamadhan.in",
-            role="DISTRICT_OFFICER",
+            role="OFFICER",
             is_active=True,
             is_staff=True,
             is_verified=True,
@@ -106,21 +106,21 @@ class Command(BaseCommand):
                 "code": "ELECTRICITY",
                 "name": "Electricity Department",
                 "email": "electricity@jansamadhan.in",
-                "head": ("electricity_head", "Priya", "Mehta", "Department Head - Electricity", "DISTRICT_OFFICER"),
-                "sub_head": ("electricity_sub_head", "Kunal", "Yadav", "Deputy Department Head - Electricity", "BLOCK_OFFICER"),
+                "head": ("electricity_head", "Priya", "Mehta", "Department Head - Electricity", "OFFICER"),
+                "sub_head": ("electricity_sub_head", "Kunal", "Yadav", "Deputy Department Head - Electricity", "OFFICER"),
                 "children": [
                     {
                         "code": "EL_URBAN",
                         "name": "Electricity Urban Circle",
                         "email": "electricity.urban@jansamadhan.in",
-                        "head": ("electricity_urban_head", "Ritu", "Saxena", "Urban Circle Head", "BLOCK_OFFICER"),
-                        "sub_head": ("electricity_urban_sub", "Deepak", "Rana", "Urban Circle Sub Head", "FIELD_OFFICER"),
+                        "head": ("electricity_urban_head", "Ritu", "Saxena", "Urban Circle Head", "OFFICER"),
+                        "sub_head": ("electricity_urban_sub", "Deepak", "Rana", "Urban Circle Sub Head", "OFFICER"),
                         "grandchildren": [
                             {
                                 "code": "EL_HAZRAT",
                                 "name": "Hazratganj Electricity Division",
                                 "email": "electricity.hazratganj@jansamadhan.in",
-                                "head": ("electricity_haz_head", "Anamika", "Sethi", "Division Head - Hazratganj", "FIELD_OFFICER"),
+                                "head": ("electricity_haz_head", "Anamika", "Sethi", "Division Head - Hazratganj", "OFFICER"),
                                 "sub_head": ("electricity_haz_sub", "Lokesh", "Tandon", "Division Sub Head - Hazratganj", "OFFICER"),
                             },
                         ],
@@ -129,8 +129,8 @@ class Command(BaseCommand):
                         "code": "EL_RURAL",
                         "name": "Electricity Rural Circle",
                         "email": "electricity.rural@jansamadhan.in",
-                        "head": ("electricity_rural_head", "Harsh", "Awasthi", "Rural Circle Head", "BLOCK_OFFICER"),
-                        "sub_head": ("electricity_rural_sub", "Mona", "Yusuf", "Rural Circle Sub Head", "FIELD_OFFICER"),
+                        "head": ("electricity_rural_head", "Harsh", "Awasthi", "Rural Circle Head", "OFFICER"),
+                        "sub_head": ("electricity_rural_sub", "Mona", "Yusuf", "Rural Circle Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -139,21 +139,21 @@ class Command(BaseCommand):
                 "code": "WATER",
                 "name": "Water Supply Department",
                 "email": "water@jansamadhan.in",
-                "head": ("water_head", "Sana", "Ali", "Department Head - Water Supply", "DISTRICT_OFFICER"),
-                "sub_head": ("water_sub_head", "Vivek", "Pandey", "Deputy Department Head - Water Supply", "BLOCK_OFFICER"),
+                "head": ("water_head", "Sana", "Ali", "Department Head - Water Supply", "OFFICER"),
+                "sub_head": ("water_sub_head", "Vivek", "Pandey", "Deputy Department Head - Water Supply", "OFFICER"),
                 "children": [
                     {
                         "code": "WT_URBAN",
                         "name": "Urban Water Operations",
                         "email": "water.urban@jansamadhan.in",
-                        "head": ("water_urban_head", "Mohit", "Kapoor", "Urban Operations Head", "BLOCK_OFFICER"),
-                        "sub_head": ("water_urban_sub", "Akash", "Tiwari", "Urban Operations Sub Head", "FIELD_OFFICER"),
+                        "head": ("water_urban_head", "Mohit", "Kapoor", "Urban Operations Head", "OFFICER"),
+                        "sub_head": ("water_urban_sub", "Akash", "Tiwari", "Urban Operations Sub Head", "OFFICER"),
                         "grandchildren": [
                             {
                                 "code": "WT_CHNHAT",
                                 "name": "Chinhat Water Division",
                                 "email": "water.chinhat@jansamadhan.in",
-                                "head": ("water_chinhat_head", "Sakshi", "Gupta", "Division Head - Chinhat", "FIELD_OFFICER"),
+                                "head": ("water_chinhat_head", "Sakshi", "Gupta", "Division Head - Chinhat", "OFFICER"),
                                 "sub_head": ("water_chinhat_sub", "Ramesh", "Shukla", "Division Sub Head - Chinhat", "OFFICER"),
                             },
                         ],
@@ -162,8 +162,8 @@ class Command(BaseCommand):
                         "code": "WT_MAINT",
                         "name": "Pipeline Maintenance Wing",
                         "email": "water.maintenance@jansamadhan.in",
-                        "head": ("water_maint_head", "Prabhat", "Nigam", "Maintenance Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("water_maint_sub", "Pallavi", "Bora", "Maintenance Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("water_maint_head", "Prabhat", "Nigam", "Maintenance Wing Head", "OFFICER"),
+                        "sub_head": ("water_maint_sub", "Pallavi", "Bora", "Maintenance Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -172,22 +172,22 @@ class Command(BaseCommand):
                 "code": "SANITATION",
                 "name": "Sanitation Department",
                 "email": "sanitation@jansamadhan.in",
-                "head": ("sanitation_head", "Neha", "Joshi", "Department Head - Sanitation", "DISTRICT_OFFICER"),
-                "sub_head": ("sanitation_sub_head", "Faizan", "Khan", "Deputy Department Head - Sanitation", "BLOCK_OFFICER"),
+                "head": ("sanitation_head", "Neha", "Joshi", "Department Head - Sanitation", "OFFICER"),
+                "sub_head": ("sanitation_sub_head", "Faizan", "Khan", "Deputy Department Head - Sanitation", "OFFICER"),
                 "children": [
                     {
                         "code": "SN_MARKET",
                         "name": "Market Sanitation Circle",
                         "email": "sanitation.market@jansamadhan.in",
-                        "head": ("sanitation_market_head", "Pooja", "Rawat", "Market Circle Head", "BLOCK_OFFICER"),
-                        "sub_head": ("sanitation_market_sub", "Harsh", "Gupta", "Market Circle Sub Head", "FIELD_OFFICER"),
+                        "head": ("sanitation_market_head", "Pooja", "Rawat", "Market Circle Head", "OFFICER"),
+                        "sub_head": ("sanitation_market_sub", "Harsh", "Gupta", "Market Circle Sub Head", "OFFICER"),
                     },
                     {
                         "code": "SN_WASTE",
                         "name": "Waste Transport Wing",
                         "email": "sanitation.transport@jansamadhan.in",
-                        "head": ("sanitation_waste_head", "Lalit", "Soni", "Waste Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("sanitation_waste_sub", "Shreya", "Rao", "Waste Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("sanitation_waste_head", "Lalit", "Soni", "Waste Wing Head", "OFFICER"),
+                        "sub_head": ("sanitation_waste_sub", "Shreya", "Rao", "Waste Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -196,22 +196,22 @@ class Command(BaseCommand):
                 "code": "ROADS",
                 "name": "Roads & Infrastructure",
                 "email": "roads@jansamadhan.in",
-                "head": ("roads_head", "Anjali", "Srivastava", "Department Head - Roads", "DISTRICT_OFFICER"),
-                "sub_head": ("roads_sub_head", "Rohit", "Sengar", "Deputy Department Head - Roads", "BLOCK_OFFICER"),
+                "head": ("roads_head", "Anjali", "Srivastava", "Department Head - Roads", "OFFICER"),
+                "sub_head": ("roads_sub_head", "Rohit", "Sengar", "Deputy Department Head - Roads", "OFFICER"),
                 "children": [
                     {
                         "code": "RD_RING",
                         "name": "Ring Road Circle",
                         "email": "roads.ring@jansamadhan.in",
-                        "head": ("roads_ring_head", "Kirti", "Awasthi", "Ring Road Circle Head", "BLOCK_OFFICER"),
-                        "sub_head": ("roads_ring_sub", "Nitin", "Pal", "Ring Road Circle Sub Head", "FIELD_OFFICER"),
+                        "head": ("roads_ring_head", "Kirti", "Awasthi", "Ring Road Circle Head", "OFFICER"),
+                        "sub_head": ("roads_ring_sub", "Nitin", "Pal", "Ring Road Circle Sub Head", "OFFICER"),
                     },
                     {
                         "code": "RD_REPAIR",
                         "name": "Rapid Repair Wing",
                         "email": "roads.repair@jansamadhan.in",
-                        "head": ("roads_repair_head", "Ira", "Bhatia", "Rapid Repair Head", "BLOCK_OFFICER"),
-                        "sub_head": ("roads_repair_sub", "Gaurav", "Pundir", "Rapid Repair Sub Head", "FIELD_OFFICER"),
+                        "head": ("roads_repair_head", "Ira", "Bhatia", "Rapid Repair Head", "OFFICER"),
+                        "sub_head": ("roads_repair_sub", "Gaurav", "Pundir", "Rapid Repair Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -220,22 +220,22 @@ class Command(BaseCommand):
                 "code": "PUBLIC_SERVICES",
                 "name": "Public Services",
                 "email": "public@jansamadhan.in",
-                "head": ("services_head", "Madhav", "Tripathi", "Department Head - Public Services", "DISTRICT_OFFICER"),
-                "sub_head": ("services_sub_head", "Isha", "Bajaj", "Deputy Department Head - Public Services", "BLOCK_OFFICER"),
+                "head": ("services_head", "Madhav", "Tripathi", "Department Head - Public Services", "OFFICER"),
+                "sub_head": ("services_sub_head", "Isha", "Bajaj", "Deputy Department Head - Public Services", "OFFICER"),
                 "children": [
                     {
                         "code": "PS_CERT",
                         "name": "Certificates & Records Wing",
                         "email": "public.certificates@jansamadhan.in",
-                        "head": ("services_cert_head", "Tanya", "Mishra", "Records Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("services_cert_sub", "Varun", "Das", "Records Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("services_cert_head", "Tanya", "Mishra", "Records Wing Head", "OFFICER"),
+                        "sub_head": ("services_cert_sub", "Varun", "Das", "Records Wing Sub Head", "OFFICER"),
                     },
                     {
                         "code": "PS_HELP",
                         "name": "Citizen Helpdesk Wing",
                         "email": "public.helpdesk@jansamadhan.in",
-                        "head": ("services_help_head", "Aman", "Sharma", "Helpdesk Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("services_help_sub", "Nidhi", "Sen", "Helpdesk Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("services_help_head", "Aman", "Sharma", "Helpdesk Wing Head", "OFFICER"),
+                        "sub_head": ("services_help_sub", "Nidhi", "Sen", "Helpdesk Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -244,22 +244,22 @@ class Command(BaseCommand):
                 "code": "HEALTH",
                 "name": "Health Department",
                 "email": "health@jansamadhan.in",
-                "head": ("health_head", "Aditi", "Sethi", "Department Head - Health", "DISTRICT_OFFICER"),
-                "sub_head": ("health_sub_head", "Sameer", "Nanda", "Deputy Department Head - Health", "BLOCK_OFFICER"),
+                "head": ("health_head", "Aditi", "Sethi", "Department Head - Health", "OFFICER"),
+                "sub_head": ("health_sub_head", "Sameer", "Nanda", "Deputy Department Head - Health", "OFFICER"),
                 "children": [
                     {
                         "code": "HL_CLINIC",
                         "name": "Clinic Monitoring Wing",
                         "email": "health.clinic@jansamadhan.in",
-                        "head": ("health_clinic_head", "Juhi", "Arora", "Clinic Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("health_clinic_sub", "Manoj", "Bisht", "Clinic Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("health_clinic_head", "Juhi", "Arora", "Clinic Wing Head", "OFFICER"),
+                        "sub_head": ("health_clinic_sub", "Manoj", "Bisht", "Clinic Wing Sub Head", "OFFICER"),
                     },
                     {
                         "code": "HL_OUTRCH",
                         "name": "Public Outreach Wing",
                         "email": "health.outreach@jansamadhan.in",
-                        "head": ("health_outreach_head", "Kavya", "Mathur", "Outreach Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("health_outreach_sub", "Dheeraj", "Paul", "Outreach Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("health_outreach_head", "Kavya", "Mathur", "Outreach Wing Head", "OFFICER"),
+                        "sub_head": ("health_outreach_sub", "Dheeraj", "Paul", "Outreach Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -268,22 +268,22 @@ class Command(BaseCommand):
                 "code": "EDUCATION",
                 "name": "Education Department",
                 "email": "education@jansamadhan.in",
-                "head": ("education_head", "Swati", "Kulshreshtha", "Department Head - Education", "DISTRICT_OFFICER"),
-                "sub_head": ("education_sub_head", "Arpit", "Nigam", "Deputy Department Head - Education", "BLOCK_OFFICER"),
+                "head": ("education_head", "Swati", "Kulshreshtha", "Department Head - Education", "OFFICER"),
+                "sub_head": ("education_sub_head", "Arpit", "Nigam", "Deputy Department Head - Education", "OFFICER"),
                 "children": [
                     {
                         "code": "ED_SCHOOL",
                         "name": "School Quality Wing",
                         "email": "education.school@jansamadhan.in",
-                        "head": ("education_school_head", "Meenal", "Puri", "School Quality Head", "BLOCK_OFFICER"),
-                        "sub_head": ("education_school_sub", "Tarun", "Bora", "School Quality Sub Head", "FIELD_OFFICER"),
+                        "head": ("education_school_head", "Meenal", "Puri", "School Quality Head", "OFFICER"),
+                        "sub_head": ("education_school_sub", "Tarun", "Bora", "School Quality Sub Head", "OFFICER"),
                     },
                     {
                         "code": "ED_SCHLR",
                         "name": "Scholarship Support Wing",
                         "email": "education.scholarship@jansamadhan.in",
-                        "head": ("education_scholar_head", "Komal", "Jain", "Scholarship Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("education_scholar_sub", "Ritik", "Chandra", "Scholarship Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("education_scholar_head", "Komal", "Jain", "Scholarship Wing Head", "OFFICER"),
+                        "sub_head": ("education_scholar_sub", "Ritik", "Chandra", "Scholarship Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -292,22 +292,22 @@ class Command(BaseCommand):
                 "code": "OTHER",
                 "name": "General / Other",
                 "email": "general@jansamadhan.in",
-                "head": ("general_head", "Reema", "Sood", "Department Head - General Grievances", "DISTRICT_OFFICER"),
-                "sub_head": ("general_sub_head", "Dev", "Madan", "Deputy Department Head - General Grievances", "BLOCK_OFFICER"),
+                "head": ("general_head", "Reema", "Sood", "Department Head - General Grievances", "OFFICER"),
+                "sub_head": ("general_sub_head", "Dev", "Madan", "Deputy Department Head - General Grievances", "OFFICER"),
                 "children": [
                     {
                         "code": "OT_CASE",
                         "name": "Casework Coordination Wing",
                         "email": "general.casework@jansamadhan.in",
-                        "head": ("general_case_head", "Nupur", "Chauhan", "Casework Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("general_case_sub", "Yash", "Suri", "Casework Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("general_case_head", "Nupur", "Chauhan", "Casework Wing Head", "OFFICER"),
+                        "sub_head": ("general_case_sub", "Yash", "Suri", "Casework Wing Sub Head", "OFFICER"),
                     },
                     {
                         "code": "OT_APPEAL",
                         "name": "Appeals & Review Wing",
                         "email": "general.appeals@jansamadhan.in",
-                        "head": ("general_appeal_head", "Rashi", "Vora", "Appeals Wing Head", "BLOCK_OFFICER"),
-                        "sub_head": ("general_appeal_sub", "Hemant", "Nair", "Appeals Wing Sub Head", "FIELD_OFFICER"),
+                        "head": ("general_appeal_head", "Rashi", "Vora", "Appeals Wing Head", "OFFICER"),
+                        "sub_head": ("general_appeal_sub", "Hemant", "Nair", "Appeals Wing Sub Head", "OFFICER"),
                     },
                 ],
             },
@@ -540,8 +540,8 @@ class Command(BaseCommand):
             "ED_SCHOOL", "ED_SCHLR",
             "OT_CASE", "OT_APPEAL",
         ]
-        stale_nodal = list(User.objects.filter(username__startswith="nodal_").values_list("username", flat=True))
-        usernames_to_clear = demo_usernames + stale_nodal
+        stale_officer_aliases = list(User.objects.filter(username__startswith="nodal_").values_list("username", flat=True))
+        usernames_to_clear = demo_usernames + stale_officer_aliases
 
         demo_users = User.objects.filter(username__in=usernames_to_clear)
         demo_ids = list(demo_users.values_list("id", flat=True))
@@ -632,14 +632,14 @@ class Command(BaseCommand):
                     from_level="SYSTEM",
                     to_level="DEPARTMENT",
                     action="ASSIGN",
-                    note="Demo grievance auto-routed to department nodal officer.",
+                    note="Demo grievance auto-routed to department owner.",
                 )
                 ComplaintHistory.objects.create(
                     complaint=complaint,
                     changed_by=None,
                     old_status="PENDING",
                     new_status=complaint.status,
-                    note="Demo grievance auto-routed to department nodal officer.",
+                    note="Demo grievance auto-routed to department owner.",
                 )
                 Notification.objects.create(
                     recipient=complaint.assigned_officer,

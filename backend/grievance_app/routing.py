@@ -3,25 +3,12 @@ from django.db.models import Case, IntegerField, Value, When
 from .models import Department, User
 
 
-OFFICER_ROLES = [
-    "OFFICER",
-    "FIELD_OFFICER",
-    "BLOCK_OFFICER",
-    "DISTRICT_OFFICER",
-    "CM",
-    "PM",
-    "ADMIN",
-]
+OFFICER_ROLES = ["OFFICER", "ADMIN"]
 
 
 ROLE_ORDER = Case(
     When(role="ADMIN", then=Value(1)),
-    When(role="PM", then=Value(1)),
-    When(role="CM", then=Value(2)),
-    When(role="DISTRICT_OFFICER", then=Value(3)),
-    When(role="BLOCK_OFFICER", then=Value(4)),
-    When(role="FIELD_OFFICER", then=Value(5)),
-    When(role="OFFICER", then=Value(5)),
+    When(role="OFFICER", then=Value(2)),
     default=Value(99),
     output_field=IntegerField(),
 )
@@ -35,12 +22,12 @@ def find_department_for_category(category):
     return Department.objects.filter(code="OTHER", is_active=True).first()
 
 
-def find_nodal_officer(department):
+def find_department_owner(department):
     """
     Resolve the first grievance owner for a department.
 
     The preferred path mirrors a public grievance workflow: route to the
-    department's designated nodal/head officer. If that is not configured,
+    department's designated head officer. If that is not configured,
     keep the grievance moving by choosing another officer mapped to that
     department before falling back to a senior/admin desk.
     """
@@ -68,7 +55,7 @@ def find_nodal_officer(department):
 
     return (
         User.objects
-        .filter(role__in=["ADMIN", "PM"], is_active=True)
+        .filter(role="ADMIN", is_active=True)
         .order_by(ROLE_ORDER, "date_joined")
         .first()
     )
@@ -82,7 +69,7 @@ def apply_initial_grievance_routing(validated_data, category):
     validated_data["department"] = department
     validated_data["current_level"] = "DEPARTMENT"
 
-    officer = find_nodal_officer(department)
+    officer = find_department_owner(department)
     if officer:
         validated_data["assigned_officer"] = officer
         validated_data["forwarded_to"] = officer

@@ -5,12 +5,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CitizenDashboard from "./pages/Citizen/CitizenDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
-import NodalDashboard from "./pages/Hierarchy/HierarchyDashboard";
+import OfficerDashboard from "./pages/Hierarchy/HierarchyDashboard";
 import TrackComplaint from "./pages/TrackComplaint";
 import PublicPortal, { ProcessFlowPage, SitemapPage } from "./pages/PublicPortal";
 import { LoadingSpinner } from "./components/Shared";
 
-const HANDLER_ROLES = ["PM", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER"];
+const HANDLER_ROLES = ["OFFICER"];
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -25,7 +25,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 function getDashboardPath(role) {
   if (role === "ADMIN") return "/admin/dashboard";
-  if (HANDLER_ROLES.includes(role)) return "/nodal/dashboard";
+  if (HANDLER_ROLES.includes(role)) return "/officer/dashboard";
   return "/citizen/dashboard";
 }
 
@@ -73,14 +73,14 @@ export default function App() {
             </ProtectedRoute>
           } />
 
-          {/* Nodal and grievance handler officers */}
-          <Route path="/nodal/dashboard" element={
+          {/* Officer branch dashboard */}
+          <Route path="/officer/dashboard" element={
             <ProtectedRoute allowedRoles={HANDLER_ROLES}>
-              <Layout><NodalDashboard /></Layout>
+              <Layout><OfficerDashboard /></Layout>
             </ProtectedRoute>
           } />
-          <Route path="/hierarchy/dashboard" element={<Navigate to="/nodal/dashboard" replace />} />
-          <Route path="/officer/dashboard" element={<Navigate to="/nodal/dashboard" replace />} />
+          <Route path="/hierarchy/dashboard" element={<Navigate to="/officer/dashboard" replace />} />
+          <Route path="/nodal/dashboard" element={<Navigate to="/officer/dashboard" replace />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

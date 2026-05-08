@@ -5,11 +5,6 @@ import NotificationsPanel from "./NotificationsPanel";
 const ROLE_LABELS = {
   CITIZEN: "Citizen",
   ADMIN: "Admin",
-  PM: "PM / Super Admin",
-  CM: "CM / State Admin",
-  DISTRICT_OFFICER: "District Officer",
-  BLOCK_OFFICER: "Block Officer",
-  FIELD_OFFICER: "Field Officer",
   OFFICER: "Officer",
 };
 

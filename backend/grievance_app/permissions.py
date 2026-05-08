@@ -8,32 +8,32 @@ class IsAdmin(BasePermission):
 
 class IsPM(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ("PM", "ADMIN")
+        return request.user.is_authenticated and request.user.role == "ADMIN"
 
 
 class IsCM(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "CM"
+        return request.user.is_authenticated and request.user.role == "OFFICER"
 
 
 class IsDistrictOfficer(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "DISTRICT_OFFICER"
+        return request.user.is_authenticated and request.user.role == "OFFICER"
 
 
 class IsBlockOfficer(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "BLOCK_OFFICER"
+        return request.user.is_authenticated and request.user.role == "OFFICER"
 
 
 class IsFieldOfficer(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ("FIELD_OFFICER", "OFFICER")
+        return request.user.is_authenticated and request.user.role == "OFFICER"
 
 
 class IsAnyOfficer(BasePermission):
     """Any authenticated non-citizen user that participates in handling or managing work."""
-    OFFICER_ROLES = ("OFFICER", "FIELD_OFFICER", "BLOCK_OFFICER", "DISTRICT_OFFICER", "CM", "PM", "ADMIN")
+    OFFICER_ROLES = ("OFFICER", "ADMIN")
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role in self.OFFICER_ROLES
@@ -42,7 +42,7 @@ class IsAnyOfficer(BasePermission):
 class IsOfficer(BasePermission):
     """Legacy: field-level officer"""
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ("OFFICER", "FIELD_OFFICER")
+        return request.user.is_authenticated and request.user.role == "OFFICER"
 
 
 class IsCitizen(BasePermission):
@@ -52,7 +52,7 @@ class IsCitizen(BasePermission):
 
 class IsHierarchyOfficer(BasePermission):
     """Any authenticated non-citizen user who can handle complaints or manage staff."""
-    HANDLER_ROLES = ("PM", "ADMIN", "CM", "DISTRICT_OFFICER", "BLOCK_OFFICER", "FIELD_OFFICER", "OFFICER")
+    HANDLER_ROLES = ("ADMIN", "OFFICER")
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role in self.HANDLER_ROLES

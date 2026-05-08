@@ -95,7 +95,7 @@ def _can_create_role(creator, target_role, department=None):
         return False
     if creator.role == "ADMIN":
         return True
-    return creator.role != "CITIZEN"
+    return creator.role == "OFFICER"
 
 
 def _build_user_payload(data, creator):
@@ -261,14 +261,14 @@ class CitizenComplaintListCreateView(generics.ListCreateAPIView):
                 from_level="SYSTEM",
                 to_level="DEPARTMENT",
                 action="ASSIGN",
-                note="Auto-routed to department nodal officer.",
+                note="Auto-routed to department head or officer.",
             )
             ComplaintHistory.objects.create(
                 complaint=complaint,
                 changed_by=None,
                 old_status="PENDING",
                 new_status=complaint.status,
-                note="Auto-routed to department nodal officer.",
+                note="Auto-routed to department head or officer.",
             )
             _notify(complaint.assigned_officer, complaint, "ASSIGNED",
                     f"New Department Grievance: #{complaint.ticket_id}",
@@ -444,7 +444,7 @@ def my_subordinates(request):
 # ─── Hierarchy Complaint Views ────────────────────────────────────────────────
 
 class HierarchyComplaintListView(generics.ListAPIView):
-    """Department/nodal complaints owned by this officer, plus forwarded work."""
+    """Department complaints owned by this officer, plus forwarded work."""
     serializer_class = ComplaintSerializer
     permission_classes = [IsAuthenticated, IsHierarchyOfficer]
 

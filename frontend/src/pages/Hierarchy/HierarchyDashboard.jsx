@@ -13,11 +13,6 @@ import {
 } from "lucide-react";
 
 const ROLE_LABELS = {
-  PM: "Officer",
-  CM: "Officer",
-  DISTRICT_OFFICER: "Officer",
-  BLOCK_OFFICER: "Officer",
-  FIELD_OFFICER: "Officer",
   OFFICER: "Officer",
   ADMIN: "Admin",
 };
@@ -119,7 +114,7 @@ export default function HierarchyDashboard() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          {user?.department_name ? `${user.department_name} Nodal Dashboard` : `${ROLE_LABELS[user?.role] || "Nodal Officer"} Dashboard`}
+          {user?.department_name ? `${user.department_name} Officer Dashboard` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
         </h1>
         <p className="text-gray-500 text-sm">
           {user?.department_name && `${user.department_name} · Department workflow · `}

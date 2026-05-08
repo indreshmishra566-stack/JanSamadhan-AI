@@ -42,8 +42,8 @@ class Command(BaseCommand):
     help = "Delete seeded demo hierarchy data while keeping admin and non-demo data."
 
     def handle(self, *args, **kwargs):
-        stale_nodal = list(User.objects.filter(username__startswith="nodal_").values_list("username", flat=True))
-        usernames_to_clear = DEMO_USERNAMES + stale_nodal
+        stale_officer_aliases = list(User.objects.filter(username__startswith="nodal_").values_list("username", flat=True))
+        usernames_to_clear = DEMO_USERNAMES + stale_officer_aliases
 
         demo_users = User.objects.filter(username__in=usernames_to_clear)
         demo_ids = list(demo_users.values_list("id", flat=True))
