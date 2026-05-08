@@ -491,7 +491,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
       first_name: o.first_name||"", last_name: o.last_name||"", email: o.email||"",
       phone: o.phone||"", employee_id: o.employee_id||"", department: o.department||"",
       role: o.role||"OFFICER", designation: o.designation||"", state: o.state||"",
-      district: o.district||"", block: o.block||"", reports_to: o.reports_to || "",
+      district: o.district||"", block: o.block||"", reports_to: o.reports_to || "", password: "",
     });
   };
 
@@ -570,10 +570,20 @@ function OfficerManagement({ departments, officers, onChanged }) {
                     </div>
                   ))}
                   <div>
+                    <label className="text-xs text-gray-500 mb-1 block">New Password</label>
+                    <input
+                      className="input text-xs py-1"
+                      type="text"
+                      value={editForm.password || ""}
+                      onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                      placeholder="Leave blank to keep current password"
+                    />
+                  </div>
+                  <div>
                     <label className="text-xs text-gray-500 mb-1 block">Role</label>
                     <select className="input text-xs py-1" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
-              </select>
+                      {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
+                    </select>
             </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Department</label>
@@ -640,6 +650,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingDepartment, setEditingDepartment] = useState(null);
+  const [deleteDepartmentId, setDeleteDepartmentId] = useState(null);
 
   const createMutation = useMutation({
     mutationFn: (data) => departmentApi.create(data),
@@ -660,6 +671,16 @@ function DepartmentManagement({ departments, officers, onChanged }) {
       onChanged();
     },
     onError: (err) => toast.error(err.response?.data?.detail || "Failed to update department"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => departmentApi.delete(id),
+    onSuccess: () => {
+      toast.success("Department deleted");
+      setDeleteDepartmentId(null);
+      onChanged();
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to delete department"),
   });
 
   const submit = () => {
@@ -812,6 +833,7 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                         {d.is_active ? "Active" : "Inactive"}
                       </span>
                       <button onClick={() => setEditingDepartment({ ...d })} className="text-xs text-blue-600 hover:underline">Edit</button>
+                      <button onClick={() => setDeleteDepartmentId(d.id)} className="text-xs text-red-600 hover:underline">Delete</button>
                     </div>
                   </div>
                   {d.description && <p className="text-sm text-gray-500 mt-3 line-clamp-2">{d.description}</p>}
@@ -827,6 +849,27 @@ function DepartmentManagement({ departments, officers, onChanged }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {deleteDepartmentId && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h3 className="font-semibold text-gray-900 mb-2">Delete Department</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              This will hide the department from active use. Existing history stays safe.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => deleteMutation.mutate(deleteDepartmentId)}
+                disabled={deleteMutation.isPending}
+                className="btn-danger text-sm flex-1"
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Yes, Delete"}
+              </button>
+              <button onClick={() => setDeleteDepartmentId(null)} className="btn-secondary text-sm flex-1">Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -214,12 +214,12 @@ class DepartmentListView(generics.ListCreateAPIView):
         serializer.save(created_by=self.request.user, parent=parent)
 
 
-class DepartmentDetailView(generics.RetrieveUpdateAPIView):
+class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
 
     def get_permissions(self):
-        if self.request.method in ("PUT", "PATCH"):
+        if self.request.method in ("PUT", "PATCH", "DELETE"):
             return [IsAuthenticated(), IsHierarchyOfficer()]
         return [IsAuthenticated()]
 
@@ -236,6 +236,12 @@ class DepartmentDetailView(generics.RetrieveUpdateAPIView):
             raise PermissionDenied("You cannot update this department.")
 
         serializer.save(parent=parent)
+
+    def perform_destroy(self, instance):
+        if not _can_manage_department(self.request.user, department=instance, parent=instance.parent):
+            raise PermissionDenied("You cannot delete this department.")
+        instance.is_active = False
+        instance.save(update_fields=["is_active"])
 
 
 # ─── Citizen Complaints ──────────────────────────────────────────────────────
@@ -604,6 +610,13 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
     queryset = User.objects.all()
+
+    def perform_update(self, serializer):
+        user = serializer.save()
+        password = self.request.data.get("password")
+        if password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
 
 
 class AdminCreateOfficerView(generics.CreateAPIView):
