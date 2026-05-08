@@ -449,6 +449,8 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   };
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [editingOfficer, setEditingOfficer] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   const createMutation = useMutation({
     mutationFn: (data) => hierarchyApi.createOfficer(data),
@@ -460,6 +462,35 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
     },
     onError: (err) => toast.error(err.response?.data?.error || "Failed to create officer"),
   });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => hierarchyApi.updateOfficer(id, data),
+    onSuccess: () => {
+      toast.success("Officer updated!");
+      setEditingOfficer(null);
+      onCreated();
+    },
+    onError: (err) => toast.error(err.response?.data?.error || "Failed to update officer"),
+  });
+
+  const startEdit = (officer) => {
+    setEditingOfficer(officer.id);
+    setEditForm({
+      first_name: officer.first_name || "",
+      last_name: officer.last_name || "",
+      email: officer.email || "",
+      phone: officer.phone || "",
+      employee_id: officer.employee_id || "",
+      department: officer.department || "",
+      role: officer.role || "OFFICER",
+      designation: officer.designation || "",
+      state: officer.state || "",
+      district: officer.district || "",
+      block: officer.block || "",
+      reports_to: officer.reports_to || "",
+      password: "",
+    });
+  };
 
   return (
     <div>
@@ -551,22 +582,81 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {departmentOfficers.map((s) => (
             <div key={s.id} className="card p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold shrink-0">
-                  {s.first_name?.[0] || s.username?.[0]?.toUpperCase()}
+              {editingOfficer === s.id ? (
+                <div>
+                  <h4 className="font-medium mb-3 text-sm">Edit Officer</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[["first_name","First Name"],["last_name","Last Name"],["email","Email"],["phone","Phone"],["employee_id","Employee ID"],["state","State"],["district","District"],["block","Block"]].map(([k,l]) => (
+                      <div key={k}>
+                        <label className="text-xs text-gray-500 mb-1 block">{l}</label>
+                        <input className="input text-xs py-1" value={editForm[k]} onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })} />
+                      </div>
+                    ))}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">New Password</label>
+                      <input
+                        className="input text-xs py-1"
+                        type="text"
+                        value={editForm.password || ""}
+                        onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                        placeholder="Leave blank to keep current password"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Department</label>
+                      <select className="input text-xs py-1" value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
+                        <option value="">-- Select --</option>
+                        {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Designation</label>
+                      <input className="input text-xs py-1" value={editForm.designation} onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Reports To</label>
+                      <select className="input text-xs py-1" value={editForm.reports_to} onChange={(e) => setEditForm({ ...editForm, reports_to: e.target.value })}>
+                        <option value="">-- None --</option>
+                        {departmentOfficers.filter((candidate) => candidate.id !== s.id).map((candidate) => (
+                          <option key={candidate.id} value={candidate.id}>{candidate.first_name} {candidate.last_name} ({getOfficerLabel(candidate)})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => updateMutation.mutate({ id: s.id, data: editForm })}
+                      disabled={updateMutation.isPending}
+                      className="btn-primary text-xs py-1 px-3"
+                    >
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </button>
+                    <button onClick={() => setEditingOfficer(null)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{s.first_name} {s.last_name}</p>
-                  <p className="text-xs text-gray-500 truncate">{s.email || s.username}</p>
-                </div>
-              </div>
-              <div className="mt-3 flex gap-2 flex-wrap">
-                <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(s)}</span>
-                {s.department_name && <span className="badge bg-gray-100 text-gray-600">{s.department_name}</span>}
-                {s.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {s.reports_to_name}</span>}
-                {s.district && <span className="badge bg-green-50 text-green-700">{s.district}</span>}
-              </div>
-              {s.employee_id && <p className="text-xs text-gray-400 mt-2">ID: {s.employee_id}</p>}
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold shrink-0">
+                      {s.first_name?.[0] || s.username?.[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{s.first_name} {s.last_name}</p>
+                      <p className="text-xs text-gray-500 truncate">{s.email || s.username}</p>
+                    </div>
+                    {(s.created_by === user?.id || s.reports_to === user?.id) && (
+                      <button onClick={() => startEdit(s)} className="text-xs text-blue-600 hover:underline px-2">Edit</button>
+                    )}
+                  </div>
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(s)}</span>
+                    {s.department_name && <span className="badge bg-gray-100 text-gray-600">{s.department_name}</span>}
+                    {s.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {s.reports_to_name}</span>}
+                    {s.district && <span className="badge bg-green-50 text-green-700">{s.district}</span>}
+                  </div>
+                  {s.employee_id && <p className="text-xs text-gray-400 mt-2">ID: {s.employee_id}</p>}
+                </>
+              )}
             </div>
           ))}
         </div>

@@ -66,6 +66,14 @@ def _visible_user_queryset(user):
     return User.objects.filter(Q(id=user.id) | Q(created_by=user) | Q(reports_to=user)).distinct()
 
 
+def _manageable_officer_queryset(user):
+    if not user or not user.is_authenticated:
+        return User.objects.none()
+    if user.role == "ADMIN":
+        return User.objects.filter(created_by=user).exclude(role="CITIZEN").distinct()
+    return User.objects.filter(Q(created_by=user) | Q(reports_to=user)).exclude(role="CITIZEN").exclude(id=user.id).distinct()
+
+
 def _actor_level(user):
     if Department.objects.filter(Q(head_officer=user) | Q(sub_head_officer=user), is_active=True).exists():
         return "DEPARTMENT"
@@ -457,6 +465,21 @@ def my_subordinates(request):
         .distinct()
     )
     return Response(UserSerializer(subs, many=True).data)
+
+
+class HierarchyOfficerDetailView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsHierarchyOfficer]
+
+    def get_queryset(self):
+        return _manageable_officer_queryset(self.request.user)
+
+    def perform_update(self, serializer):
+        user = serializer.save()
+        password = self.request.data.get("password")
+        if password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
 
 
 # ─── Hierarchy Complaint Views ────────────────────────────────────────────────

@@ -103,6 +103,7 @@ export const hierarchyApi = {
   forwardComplaint: (id, data) => api.post(`/complaints/${id}/forward/`, data),
   escalateComplaint: (id, data) => api.post(`/complaints/${id}/escalate/`, data),
   createOfficer: (data) => api.post("/hierarchy/create-officer/", data),
+  updateOfficer: (id, data) => api.patch(`/hierarchy/officers/${id}/`, data),
   departmentOfficers: () => api.get("/hierarchy/subordinates/"),
 };
 

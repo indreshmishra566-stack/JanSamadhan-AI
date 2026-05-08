@@ -27,6 +27,7 @@ urlpatterns = [
     path("hierarchy/complaints/<int:pk>/", views.HierarchyComplaintUpdateView.as_view()),
     path("hierarchy/create-officer/", views.create_subordinate_officer),
     path("hierarchy/subordinates/", views.my_subordinates),
+    path("hierarchy/officers/<int:pk>/", views.HierarchyOfficerDetailView.as_view()),
 
     # Admin
     path("admin/complaints/", views.AdminComplaintListView.as_view()),
