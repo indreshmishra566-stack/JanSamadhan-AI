@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { complaintApi, departmentApi } from "../../api";
-import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState } from "../../components/Shared";
+import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -228,23 +228,58 @@ export default function CitizenDashboard() {
               </div>
               {selected?.id === c.id && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                    <div><span className="text-gray-400">AI Category:</span> <span className="font-medium">{c.ai_category} ({Math.round(c.ai_confidence * 100)}%)</span></div>
-                    <div><span className="text-gray-400">SLA Deadline:</span> <span className="font-medium">{formatDate(c.sla_deadline)}</span></div>
-                    <div><span className="text-gray-400">Current Level:</span> <span className="font-medium">{c.current_level || "—"}</span></div>
-                    {c.officer_name && <div><span className="text-gray-400">Assigned Local Officer:</span> <span className="font-medium">{c.officer_name}</span></div>}
-                    {c.supervising_head_name && <div><span className="text-gray-400">Supervising Department Head:</span> <span className="font-medium">{c.supervising_head_name}</span></div>}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <InfoSection title="Routing" icon="🧭">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <DetailItem label="Department" value={c.department_name} accent />
+                        <DetailItem label="Current Level" value={c.current_level} accent />
+                        <DetailItem label="Assigned Local Officer" value={c.officer_name} />
+                        <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
+                        <DetailItem label="Location" value={c.location} />
+                      </div>
+                    </InfoSection>
+                    <InfoSection title="Status" icon="📌">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round(c.ai_confidence * 100)}%)`} accent />
+                        <DetailItem label="Priority" value={c.priority} />
+                        <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
+                        <DetailItem label="Submitted" value={formatDate(c.created_at)} />
+                      </div>
+                      {(c.attachment || c.proof_of_resolution) && (
+                        <div className="flex flex-wrap gap-3 mt-3 text-sm">
+                          {c.attachment && (
+                            <a href={c.attachment} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                              View attachment
+                            </a>
+                          )}
+                          {c.proof_of_resolution && (
+                            <a href={c.proof_of_resolution} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                              View proof of resolution
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </InfoSection>
+                    <InfoSection title="Timeline" icon="🕒">
+                      <TimelineList
+                        items={[
+                          ...(c.forwarding_records || []).slice(0, 4).map((r) => ({
+                            top: `${r.action} · ${r.from_level} → ${r.to_level}`,
+                            middle: `${r.from_user_name} → ${r.to_user_name}`,
+                            note: r.note,
+                            date: formatDate(r.created_at),
+                          })),
+                          ...(c.history || []).slice(0, 3).map((h) => ({
+                            top: "Status Update",
+                            middle: `${h.old_status || "—"} → ${h.new_status || "—"}`,
+                            note: h.note,
+                            date: formatDate(h.created_at),
+                          })),
+                        ].slice(0, 5)}
+                        emptyText="Routing and status updates will appear here."
+                      />
+                    </InfoSection>
                   </div>
-                  {c.attachment && (
-                    <a href={c.attachment} target="_blank" rel="noreferrer" className="inline-flex mt-3 text-sm text-blue-600 hover:underline">
-                      View attachment
-                    </a>
-                  )}
-                  {c.proof_of_resolution && (
-                    <a href={c.proof_of_resolution} target="_blank" rel="noreferrer" className="inline-flex mt-3 ml-4 text-sm text-blue-600 hover:underline">
-                      View proof of resolution
-                    </a>
-                  )}
                   {c.officer_remarks && (
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
                       <span className="font-medium text-blue-700">Officer remarks:</span> {c.officer_remarks}

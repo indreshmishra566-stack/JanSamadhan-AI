@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hierarchyApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -272,49 +272,48 @@ export default function HierarchyDashboard() {
                   {/* Expanded details */}
                   {selectedComplaint?.id === c.id && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-3">
-                        <div><span className="text-gray-400 text-xs">AI Category:</span> <p className="font-medium">{c.ai_category} ({Math.round((c.ai_confidence || 0) * 100)}%)</p></div>
-                        <div><span className="text-gray-400 text-xs">Current Level:</span> <p className="font-medium">{c.current_level}</p></div>
-                        {c.officer_name && <div><span className="text-gray-400 text-xs">Assigned Local Officer:</span> <p className="font-medium">{c.officer_name}</p></div>}
-                        {c.supervising_head_name && <div><span className="text-gray-400 text-xs">Supervising Department Head:</span> <p className="font-medium">{c.supervising_head_name}</p></div>}
+                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-3">
+                        <InfoSection title="Routing" icon="🧭">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <DetailItem label="Department" value={c.department_name} accent />
+                            <DetailItem label="Current Level" value={c.current_level} accent />
+                            <DetailItem label="Assigned Local Officer" value={c.officer_name} />
+                            <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
+                            <DetailItem label="Citizen" value={c.citizen_name} />
+                            <DetailItem label="Location" value={c.location} />
+                          </div>
+                        </InfoSection>
+                        <InfoSection title="Status" icon="📌">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round((c.ai_confidence || 0) * 100)}%)`} accent />
+                            <DetailItem label="Priority" value={c.priority} />
+                            <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
+                            <DetailItem label="Created" value={formatDate(c.created_at)} />
+                          </div>
+                        </InfoSection>
+                        <InfoSection title="Timeline" icon="🕒">
+                          <TimelineList
+                            items={[
+                              ...(c.forwarding_records || []).slice(0, 4).map((r) => ({
+                                top: `${r.action} · ${r.from_level} → ${r.to_level}`,
+                                middle: `${r.from_user_name} → ${r.to_user_name}`,
+                                note: r.note,
+                                date: formatDate(r.created_at),
+                              })),
+                              ...(c.history || []).slice(0, 3).map((h) => ({
+                                top: "Status Update",
+                                middle: `${h.old_status || "—"} → ${h.new_status || "—"}`,
+                                note: h.note,
+                                date: formatDate(h.created_at),
+                              })),
+                            ].slice(0, 5)}
+                            emptyText="Forwarding and status updates will appear here."
+                          />
+                        </InfoSection>
                       </div>
                       {c.officer_remarks && (
                         <div className="p-3 bg-blue-50 rounded-lg text-sm mb-3">
                           <span className="font-medium text-blue-700">Officer remarks: </span>{c.officer_remarks}
-                        </div>
-                      )}
-                      {/* Forwarding trail */}
-                      {c.forwarding_records?.length > 0 && (
-                        <div>
-                          <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Forwarding Trail</p>
-                          <div className="space-y-1.5">
-                            {c.forwarding_records.map((r, i) => (
-                              <div key={i} className="flex items-center gap-2 text-xs bg-gray-50 rounded-lg px-3 py-2">
-                                <span className={`font-medium px-2 py-0.5 rounded-full ${r.action === "ESCALATE" ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"}`}>
-                                  {r.action}
-                                </span>
-                                <span className="text-gray-600">{r.from_level} → {r.to_level}</span>
-                                {r.note && <span className="text-gray-400">"{r.note}"</span>}
-                                <span className="text-gray-400 ml-auto">{formatDate(r.created_at)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {/* History */}
-                      {c.history?.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Status History</p>
-                          <div className="space-y-1">
-                            {c.history.slice(0, 5).map((h, i) => (
-                              <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
-                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full shrink-0" />
-                                <span>{h.old_status} → {h.new_status}</span>
-                                {h.note && <span className="text-gray-400 truncate">({h.note})</span>}
-                                <span className="ml-auto shrink-0">{formatDate(h.created_at)}</span>
-                              </div>
-                            ))}
-                          </div>
                         </div>
                       )}
                     </div>

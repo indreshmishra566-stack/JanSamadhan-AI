@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { complaintApi } from "../api";
-import { StatusBadge, PriorityBadge } from "../components/Shared";
+import { StatusBadge, PriorityBadge, InfoSection, DetailItem, TimelineList } from "../components/Shared";
 import { formatDate } from "../utils/helpers";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -68,46 +68,38 @@ export default function TrackComplaint() {
                   <span className="badge bg-blue-50 text-blue-700">Department: {result.department}</span>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-gray-400 text-xs">Category</p>
-                  <p className="font-medium">{result.category}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Priority</p>
-                  <PriorityBadge priority={result.priority} />
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Department</p>
-                  <p className="font-medium">{result.department || "Being assigned"}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Assigned Local Officer</p>
-                  <p className="font-medium">{result.assigned_officer || "Being assigned"}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Supervising Department Head</p>
-                  <p className="font-medium">{result.supervising_head || "Will monitor once assigned"}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Current Level</p>
-                  <p className="font-medium">{result.current_level || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">SLA Deadline</p>
-                  <p className={`font-medium text-xs ${result.is_sla_breached ? "text-red-600" : ""}`}>
-                    {formatDate(result.sla_deadline)}
-                    {result.is_sla_breached && " ⚠️ Breached"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Submitted</p>
-                  <p className="font-medium text-xs">{formatDate(result.created_at)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Last Updated</p>
-                  <p className="font-medium text-xs">{formatDate(result.updated_at)}</p>
-                </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <InfoSection title="Routing" icon="🧭" className="bg-white/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <DetailItem label="Department" value={result.department || "Being assigned"} accent />
+                    <DetailItem label="Current Level" value={result.current_level} accent />
+                    <DetailItem label="Assigned Local Officer" value={result.assigned_officer || "Being assigned"} />
+                    <DetailItem label="Supervising Department Head" value={result.supervising_head || "Will monitor once assigned"} />
+                  </div>
+                </InfoSection>
+                <InfoSection title="Status" icon="📌" className="bg-white/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <DetailItem label="Category" value={result.category} accent />
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-gray-400">Priority</p>
+                      <div className="mt-1"><PriorityBadge priority={result.priority} /></div>
+                    </div>
+                    <DetailItem label="SLA Deadline" value={`${formatDate(result.sla_deadline)}${result.is_sla_breached ? " ⚠️ Breached" : ""}`} />
+                    <DetailItem label="Submitted" value={formatDate(result.created_at)} />
+                    <DetailItem label="Last Updated" value={formatDate(result.updated_at)} />
+                  </div>
+                </InfoSection>
+                <InfoSection title="Timeline" icon="🕒" className="bg-white/70">
+                  <TimelineList
+                    items={(result.forwarding_trail || []).map((item) => ({
+                      top: `${item.action} · ${item.from_level} → ${item.to_level}`,
+                      middle: `${item.from} → ${item.to}`,
+                      note: item.note,
+                      date: formatDate(item.date),
+                    }))}
+                    emptyText="Routing and escalation updates will appear here."
+                  />
+                </InfoSection>
               </div>
             </div>
 
@@ -117,27 +109,6 @@ export default function TrackComplaint() {
               <span className="badge bg-indigo-50 text-indigo-700">Head</span>
               <span className="badge bg-blue-50 text-blue-700">Department</span>
             </div>
-
-            {result.forwarding_trail?.length > 0 && (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                <h3 className="font-semibold text-gray-800 text-sm mb-3">Forwarding Trail</h3>
-                <div className="space-y-2">
-                  {result.forwarding_trail.map((item, index) => (
-                    <div key={index} className="text-xs bg-white rounded-lg border border-gray-100 p-3">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className={`font-semibold ${item.action === "ESCALATE" ? "text-orange-700" : "text-blue-700"}`}>
-                          {item.action}: {item.from_level} → {item.to_level}
-                        </span>
-                        <span className="text-gray-400">{formatDate(item.date)}</span>
-                      </div>
-                      <p className="text-gray-600">{item.from} → {item.to}</p>
-                      {item.note && <p className="text-gray-400 mt-1">{item.note}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Status timeline */}
             <div className="flex items-center gap-2 text-xs text-center">
               {["PENDING", "DEPARTMENT", "ASSIGNED", "IN_PROGRESS", "RESOLVED"].map((s, i) => {
