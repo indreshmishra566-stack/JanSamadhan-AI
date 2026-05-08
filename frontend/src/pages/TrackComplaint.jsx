@@ -69,6 +69,14 @@ export default function TrackComplaint() {
                   <p className="font-medium">{result.department || "Being assigned"}</p>
                 </div>
                 <div>
+                  <p className="text-gray-400 text-xs">Assigned Local Officer</p>
+                  <p className="font-medium">{result.assigned_officer || "Being assigned"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-xs">Supervising Department Head</p>
+                  <p className="font-medium">{result.supervising_head || "Will monitor once assigned"}</p>
+                </div>
+                <div>
                   <p className="text-gray-400 text-xs">Current Level</p>
                   <p className="font-medium">{result.current_level || "—"}</p>
                 </div>

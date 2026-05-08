@@ -214,7 +214,8 @@ export default function CitizenDashboard() {
                     <div><span className="text-gray-400">AI Category:</span> <span className="font-medium">{c.ai_category} ({Math.round(c.ai_confidence * 100)}%)</span></div>
                     <div><span className="text-gray-400">SLA Deadline:</span> <span className="font-medium">{formatDate(c.sla_deadline)}</span></div>
                     <div><span className="text-gray-400">Current Level:</span> <span className="font-medium">{c.current_level || "—"}</span></div>
-                    {c.officer_name && <div><span className="text-gray-400">Officer:</span> <span className="font-medium">{c.officer_name}</span></div>}
+                    {c.officer_name && <div><span className="text-gray-400">Assigned Local Officer:</span> <span className="font-medium">{c.officer_name}</span></div>}
+                    {c.supervising_head_name && <div><span className="text-gray-400">Supervising Department Head:</span> <span className="font-medium">{c.supervising_head_name}</span></div>}
                   </div>
                   {c.attachment && (
                     <a href={c.attachment} target="_blank" rel="noreferrer" className="inline-flex mt-3 text-sm text-blue-600 hover:underline">

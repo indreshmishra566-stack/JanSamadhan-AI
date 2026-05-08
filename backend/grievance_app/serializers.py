@@ -96,6 +96,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
     citizen_name = serializers.CharField(source="citizen.get_full_name", read_only=True)
     department_name = serializers.CharField(source="department.name", read_only=True)
     officer_name = serializers.CharField(source="assigned_officer.get_full_name", read_only=True)
+    supervising_head_name = serializers.SerializerMethodField()
     history = ComplaintHistorySerializer(many=True, read_only=True)
     forwarding_records = ForwardingRecordSerializer(many=True, read_only=True)
     sla_remaining_hours = serializers.SerializerMethodField()
@@ -106,7 +107,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
             "id", "ticket_id", "title", "description", "original_language",
             "translated_description", "category", "ai_category", "ai_confidence",
             "priority", "status", "department", "department_name", "assigned_officer",
-            "officer_name", "citizen_name", "current_level", "forwarded_to",
+            "officer_name", "supervising_head_name", "citizen_name", "current_level", "forwarded_to",
             "state", "district", "block", "location", "latitude", "longitude",
             "attachment", "proof_of_resolution", "officer_remarks", "admin_override_note",
             "sla_deadline", "sla_remaining_hours", "is_sla_breached",
@@ -125,6 +126,15 @@ class ComplaintSerializer(serializers.ModelSerializer):
             delta = obj.sla_deadline - timezone.now()
             return round(delta.total_seconds() / 3600, 1)
         return None
+
+    def get_supervising_head_name(self, obj):
+        department = obj.department
+        if not department:
+            return ""
+        supervising_head = department.head_officer or department.sub_head_officer
+        if not supervising_head:
+            return ""
+        return supervising_head.get_full_name() or supervising_head.username
 
 
 class ComplaintCreateSerializer(serializers.ModelSerializer):

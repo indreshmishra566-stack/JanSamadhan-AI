@@ -218,7 +218,8 @@ export default function AdminDashboard() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-3">
                         <div><span className="text-xs text-gray-400">AI Category:</span><p className="font-medium">{c.ai_category} ({Math.round((c.ai_confidence||0)*100)}%)</p></div>
                         <div><span className="text-xs text-gray-400">Current Level:</span><p className="font-medium">{c.current_level}</p></div>
-                        {c.officer_name && <div><span className="text-xs text-gray-400">Officer:</span><p className="font-medium">{c.officer_name}</p></div>}
+                        {c.officer_name && <div><span className="text-xs text-gray-400">Assigned Local Officer:</span><p className="font-medium">{c.officer_name}</p></div>}
+                        {c.supervising_head_name && <div><span className="text-xs text-gray-400">Supervising Department Head:</span><p className="font-medium">{c.supervising_head_name}</p></div>}
                         {c.citizen_rating && <div><span className="text-xs text-gray-400">Rating:</span><p className="font-medium">{"★".repeat(c.citizen_rating)}</p></div>}
                       </div>
                       {/* Forwarding trail */}

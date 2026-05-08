@@ -757,6 +757,18 @@ def track_complaint(request, ticket_id):
         "priority": complaint.priority,
         "category": complaint.category,
         "department": complaint.department.name if complaint.department else None,
+        "assigned_officer": (
+            complaint.assigned_officer.get_full_name() or complaint.assigned_officer.username
+            if complaint.assigned_officer else None
+        ),
+        "supervising_head": (
+            (
+                (complaint.department.head_officer or complaint.department.sub_head_officer).get_full_name()
+                or (complaint.department.head_officer or complaint.department.sub_head_officer).username
+            )
+            if complaint.department and (complaint.department.head_officer or complaint.department.sub_head_officer)
+            else None
+        ),
         "current_level": complaint.current_level,
         "created_at": complaint.created_at,
         "updated_at": complaint.updated_at,

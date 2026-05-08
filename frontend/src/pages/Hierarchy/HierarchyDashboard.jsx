@@ -257,7 +257,8 @@ export default function HierarchyDashboard() {
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-3">
                         <div><span className="text-gray-400 text-xs">AI Category:</span> <p className="font-medium">{c.ai_category} ({Math.round((c.ai_confidence || 0) * 100)}%)</p></div>
                         <div><span className="text-gray-400 text-xs">Current Level:</span> <p className="font-medium">{c.current_level}</p></div>
-                        {c.officer_name && <div><span className="text-gray-400 text-xs">Assigned Officer:</span> <p className="font-medium">{c.officer_name}</p></div>}
+                        {c.officer_name && <div><span className="text-gray-400 text-xs">Assigned Local Officer:</span> <p className="font-medium">{c.officer_name}</p></div>}
+                        {c.supervising_head_name && <div><span className="text-gray-400 text-xs">Supervising Department Head:</span> <p className="font-medium">{c.supervising_head_name}</p></div>}
                       </div>
                       {c.officer_remarks && (
                         <div className="p-3 bg-blue-50 rounded-lg text-sm mb-3">
