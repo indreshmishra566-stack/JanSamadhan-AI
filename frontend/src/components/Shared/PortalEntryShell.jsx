@@ -61,7 +61,7 @@ export default function PortalEntryShell({
 
             <div className="mt-10 max-w-2xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200">
-                {language === "hi" ? "लाइव जल शिकायत डेमो" : "Live water grievance demo"}
+                {language === "hi" ? "लाइव जन शिकायत प्लेटफॉर्म" : "Live public grievance platform"}
               </p>
               <h2 className="mt-3 text-4xl font-extrabold leading-tight md:text-5xl">{description}</h2>
               <div className="mt-6 flex flex-wrap gap-2">

@@ -8,9 +8,9 @@ const copy = {
   en: {
     eyebrow: "Trusted digital public grievance system",
     title: "Jan Samadhan AI",
-    subtitle: "AI-assisted water grievance redressal portal",
+    subtitle: "AI-assisted public grievance redressal portal",
     language: "Language",
-    heroTitle: "Public Water Grievance Access",
+    heroTitle: "Public Grievance Access",
     heroText:
       "A clean public entry for citizens: register, sign in, or track an existing grievance ticket.",
     cardTitle: "Available public actions",
@@ -30,9 +30,9 @@ const copy = {
   hi: {
     eyebrow: "विश्वसनीय डिजिटल जन शिकायत प्रणाली",
     title: "जन समाधान एआई",
-    subtitle: "एआई-सहायित जल शिकायत निवारण पोर्टल",
+    subtitle: "एआई-सहायित जन शिकायत निवारण पोर्टल",
     language: "भाषा",
-    heroTitle: "सार्वजनिक जल शिकायत प्रवेश",
+    heroTitle: "सार्वजनिक शिकायत प्रवेश",
     heroText:
       "नागरिकों के लिए सरल सार्वजनिक प्रवेश: पंजीकरण करें, साइन इन करें, या मौजूदा शिकायत टिकट ट्रैक करें।",
     cardTitle: "उपलब्ध सार्वजनिक सेवाएँ",
@@ -146,7 +146,7 @@ export default function PublicPortal() {
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
                 <Waves size={15} />
-                Water Department Access
+                Public Service Access
               </div>
               <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">
                 {t.heroTitle}

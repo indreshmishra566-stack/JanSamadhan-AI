@@ -17,12 +17,12 @@ export default function LoginPage() {
   const isHindi = language === "hi";
   const text = {
     title: "Jan Samadhan AI",
-    subtitle: isHindi ? "जल शिकायत निवारण पोर्टल" : "Water grievance redressal portal",
+    subtitle: isHindi ? "जन शिकायत निवारण पोर्टल" : "Public grievance redressal portal",
     eyebrow: isHindi ? "विश्वसनीय डिजिटल जन शिकायत प्रणाली" : "Trusted digital public grievance system",
-    description: isHindi ? "केंद्र से गांव तक जल शिकायत समाधान के लिए सुरक्षित लॉगिन" : "Secure sign-in for the water grievance command flow from national desk to village operator.",
+    description: isHindi ? "राष्ट्रीय डेस्क से स्थानीय अधिकारी तक शिकायत समाधान प्रवाह के लिए सुरक्षित लॉगिन" : "Secure sign-in for the grievance resolution flow from command desk to local operator.",
     badges: isHindi ? ["एडमिन", "अधिकारी", "नागरिक ट्रैकिंग"] : ["Admin", "Officer", "Citizen tracking"],
     asideTitle: isHindi ? "यह स्क्रीन क्या खोलती है" : "What this screen unlocks",
-    asideText: isHindi ? "लॉगिन के बाद अधिकारी एस्केलेशन, विभागीय दृश्यता, प्रोफाइल प्रबंधन और जल शिकायत रूटिंग की पूरी कमांड परत खुलती है।" : "Once signed in, the command layer opens: officer escalation, supervisory visibility, profile management, and end-to-end water complaint routing.",
+    asideText: isHindi ? "लॉगिन के बाद अधिकारी एस्केलेशन, विभागीय दृश्यता, प्रोफाइल प्रबंधन और शिकायत रूटिंग की पूरी कमांड परत खुलती है।" : "Once signed in, the command layer opens: officer escalation, supervisory visibility, profile management, and end-to-end complaint routing.",
     username: isHindi ? "यूज़रनेम" : "Username",
     password: isHindi ? "पासवर्ड" : "Password",
     enterUsername: isHindi ? "यूज़रनेम दर्ज करें" : "Enter username",
@@ -82,8 +82,8 @@ export default function LoginPage() {
         },
         {
           icon: Waves,
-          title: isHindi ? "जल विभाग फोकस" : "Water-first rollout",
-          text: isHindi ? "वर्तमान बिल्ड भारत-स्तरीय जल विभाग पदानुक्रम के अनुरूप कॉन्फ़िगर है।" : "The current build is configured around an India-style water department hierarchy.",
+          title: isHindi ? "मल्टी-डिपार्टमेंट फोकस" : "Multi-department ready",
+          text: isHindi ? "वर्तमान बिल्ड किसी भी विभागीय शिकायत संरचना के लिए कॉन्फ़िगर किया जा सकता है।" : "The current build can be configured for any department grievance hierarchy.",
         },
       ]}
       footer={

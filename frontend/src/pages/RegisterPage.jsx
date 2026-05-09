@@ -18,7 +18,7 @@ export default function RegisterPage() {
     title: "Jan Samadhan AI",
     subtitle: isHindi ? "नागरिक पंजीकरण" : "Citizen registration",
     eyebrow: isHindi ? "विश्वसनीय डिजिटल जन शिकायत प्रणाली" : "Trusted digital public grievance system",
-    description: isHindi ? "नागरिकों के लिए त्वरित खाता निर्माण ताकि वे जल शिकायत दर्ज कर सकें, ट्रैक कर सकें और समाधान के बाद फीडबैक दे सकें।" : "Fast citizen onboarding for filing water grievances, tracking progress, and giving closure feedback.",
+    description: isHindi ? "नागरिकों के लिए त्वरित खाता निर्माण ताकि वे किसी भी विभाग की शिकायत दर्ज कर सकें, ट्रैक कर सकें और समाधान के बाद फीडबैक दे सकें।" : "Fast citizen onboarding for filing grievances, tracking progress, and giving closure feedback across departments.",
     badges: isHindi ? ["हिंदी इनपुट", "टिकट ट्रैकिंग", "मोबाइल रेडी"] : ["Hindi input", "Ticket tracking", "Mobile ready"],
     asideTitle: isHindi ? "यह स्क्रीन क्यों महत्वपूर्ण है" : "Why this screen matters",
     asideText: isHindi ? "यही एंट्री नागरिक भरोसे को बनाती है — आसान पंजीकरण, स्पष्ट पहचान और शिकायत प्रवाह तक तेज पहुंच।" : "This is the citizen trust moment: fast onboarding, clear identity, and a direct path into the grievance workflow.",
@@ -109,7 +109,7 @@ export default function RegisterPage() {
         {
           icon: MapPinned,
           title: isHindi ? "लोकेशन-सक्षम शिकायतें" : "Location-aware complaints",
-          text: isHindi ? "पंजीकरण के बाद नागरिक जल शिकायत दर्ज करते समय लोकेशन, ब्लॉक और GPS जोड़ सकता है।" : "Once registered, the citizen can add location, block, and GPS context to water complaints.",
+          text: isHindi ? "पंजीकरण के बाद नागरिक शिकायत दर्ज करते समय लोकेशन, ब्लॉक और GPS संदर्भ जोड़ सकता है।" : "Once registered, the citizen can add location, block, and GPS context to complaints.",
         },
         {
           icon: Globe2,
