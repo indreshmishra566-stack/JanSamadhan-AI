@@ -27,6 +27,8 @@ import {
   Users,
   Waves,
   ArrowRight,
+  Menu,
+  X,
 } from "lucide-react";
 
 const PORTAL_LANGUAGE_KEY = "portal_language";
@@ -294,7 +296,7 @@ function authAwarePath(user, role) {
   return user ? getDashboardPath(user.role) : role === "CITIZEN" ? "/register" : "/login";
 }
 
-function PortalHeader({ t, language, setLanguage, user }) {
+function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpen }) {
   const signInTarget = user ? getDashboardPath(user.role) : "/login";
 
   return (
@@ -311,6 +313,15 @@ function PortalHeader({ t, language, setLanguage, user }) {
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-600">
+          <button
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            className="portal-menu-toggle md:hidden"
+            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
           <Languages size={15} />
           <span className="hidden sm:inline">{t.language}</span>
           <select className="portal-select" aria-label={t.language} value={language} onChange={(e) => setLanguage(e.target.value)}>
@@ -322,7 +333,7 @@ function PortalHeader({ t, language, setLanguage, user }) {
           </Link>
         </div>
       </div>
-      <nav className="portal-nav" aria-label="Portal navigation">
+      <nav className="portal-nav hidden md:flex" aria-label="Portal navigation">
         <Link to="/track"><Search size={14} /> {t.viewStatus}</Link>
         <a href="#hierarchy"><Users size={14} /> {t.officers}</a>
         <Link to="/process-flow"><Network size={14} /> {t.process}</Link>
@@ -331,6 +342,17 @@ function PortalHeader({ t, language, setLanguage, user }) {
         <a href="#mobile"><Smartphone size={14} /> {t.mobileApp}</a>
         <Link to="/sitemap" className="ml-auto hidden lg:inline-flex"><Network size={14} /> {t.sitemap}</Link>
       </nav>
+      {mobileOpen && (
+        <nav className="portal-mobile-nav md:hidden" aria-label="Mobile portal navigation">
+          <Link to="/track" onClick={() => setMobileOpen(false)}><Search size={14} /> {t.viewStatus}</Link>
+          <a href="#hierarchy" onClick={() => setMobileOpen(false)}><Users size={14} /> {t.officers}</a>
+          <Link to="/process-flow" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.process}</Link>
+          <Link to="/citizen/dashboard" onClick={() => setMobileOpen(false)}><FileText size={14} /> {t.grievance}</Link>
+          <Link to="/officer/dashboard" onClick={() => setMobileOpen(false)}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
+          <a href="#mobile" onClick={() => setMobileOpen(false)}><Smartphone size={14} /> {t.mobileApp}</a>
+          <Link to="/sitemap" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.sitemap}</Link>
+        </nav>
+      )}
     </header>
   );
 }
@@ -351,12 +373,13 @@ function PortalFooter({ t }) {
 
 export function ProcessFlowPage() {
   const [language, setLanguage] = usePortalLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
   const t = copy[language];
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} />
+      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className="portal-page">
         <section className="portal-panel">
           <p className="text-center text-sm font-semibold text-slate-700 mb-6">{t.processTitle}</p>
@@ -408,12 +431,13 @@ export function ProcessFlowPage() {
 
 export function SitemapPage() {
   const [language, setLanguage] = usePortalLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
   const t = copy[language];
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} />
+      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className="portal-page">
         <section className="portal-panel overflow-x-auto">
           <h2 className="text-xl font-semibold text-slate-900 mb-8">{t.sitemapTitle}</h2>
@@ -465,6 +489,8 @@ export function SitemapPage() {
 export default function PublicPortal() {
   const [language, setLanguage] = usePortalLanguage();
   const [faqOpen, setFaqOpen] = useState(0);
+  const [heroScenario, setHeroScenario] = useState("citizen");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
   const t = copy[language];
   const heroStats = useMemo(() => t.stats, [t]);
@@ -484,10 +510,62 @@ export default function PublicPortal() {
       })),
     [t, user]
   );
+  const heroScenarios = useMemo(
+    () =>
+      language === "hi"
+        ? [
+            {
+              key: "citizen",
+              label: "नागरिक",
+              title: "नागरिक से फील्ड अधिकारी तक",
+              text: "एक नागरिक जल रिसाव दर्ज करता है, एआई उसे वर्गीकृत करता है और सिस्टम निकटतम पंचायत या गांव ऑपरेटर तक शिकायत पहुंचाता है।",
+              metrics: ["भाषा इनपुट", "GPS + ब्लॉक", "पब्लिक ट्रैकिंग"],
+            },
+            {
+              key: "field",
+              label: "फील्ड",
+              title: "स्थानीय समाधान पहले",
+              text: "ब्लॉक, पंचायत और गांव स्तर का अधिकारी केस को संभालता है, फोटो प्रूफ जोड़ता है और आवश्यकता होने पर ऊपर एस्केलेट करता है।",
+              metrics: ["निकटतम असाइनमेंट", "फोटो प्रूफ", "एस्केलेशन"],
+            },
+            {
+              key: "command",
+              label: "कमांड",
+              title: "हेड की निगरानी बनी रहती है",
+              text: "सुपरवाइजिंग विभागीय हेड पूरे केस को लाइव देखता है, SLA जोखिम पकड़ता है और शाखा स्तर पर हस्तक्षेप कर सकता है।",
+              metrics: ["हेड दृश्यता", "SLA मॉनिटरिंग", "डुप्लिकेट कंट्रोल"],
+            },
+          ]
+        : [
+            {
+              key: "citizen",
+              label: "Citizen",
+              title: "Citizen to field response",
+              text: "A resident reports a water issue, AI classifies it, and the system routes it straight to the nearest panchayat or village operator.",
+              metrics: ["Language input", "GPS + block", "Public tracking"],
+            },
+            {
+              key: "field",
+              label: "Field",
+              title: "Local resolution happens first",
+              text: "The block, panchayat, or village officer works the case, uploads proof, and escalates upward only when local resolution is not enough.",
+              metrics: ["Nearest assignment", "Photo proof", "Escalation"],
+            },
+            {
+              key: "command",
+              label: "Command",
+              title: "Department head never loses visibility",
+              text: "The supervising head sees the complaint live, catches SLA risk, and can intervene across the branch without waiting for manual forwarding.",
+              metrics: ["Head visibility", "SLA watch", "Duplicate control"],
+            },
+          ],
+    [language]
+  );
+  const activeScenario = heroScenarios.find((item) => item.key === heroScenario) || heroScenarios[0];
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} />
+      <PortalHeader t={t} language={language} setLanguage={setLanguage} user={user} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main>
         <section className="portal-hero">
           <div className="portal-hero-copy">
@@ -506,6 +584,32 @@ export default function PublicPortal() {
                   <strong>{item.value}</strong>
                 </div>
               ))}
+            </div>
+            <div className="portal-scenario-shell">
+              <div className="portal-scenario-tabs" role="tablist" aria-label="Demo scenarios">
+                {heroScenarios.map((scenario) => (
+                  <button
+                    key={scenario.key}
+                    type="button"
+                    className={scenario.key === activeScenario.key ? "portal-scenario-tab active" : "portal-scenario-tab"}
+                    onClick={() => setHeroScenario(scenario.key)}
+                  >
+                    {scenario.label}
+                  </button>
+                ))}
+              </div>
+              <div className="portal-scenario-panel portal-lift">
+                <div>
+                  <p className="portal-scenario-kicker">{language === "hi" ? "लाइव डेमो फोकस" : "Live demo focus"}</p>
+                  <h3>{activeScenario.title}</h3>
+                  <p>{activeScenario.text}</p>
+                </div>
+                <div className="portal-scenario-metrics">
+                  {activeScenario.metrics.map((metric) => (
+                    <span key={metric}>{metric}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
