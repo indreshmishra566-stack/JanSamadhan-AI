@@ -46,6 +46,15 @@
   .portal-signin {
     @apply inline-flex items-center gap-1 bg-amber-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-400;
   }
+  .portal-utility-nav {
+    @apply flex flex-wrap items-center gap-px border-b border-white/10 bg-[#7a0047] px-3 py-1 text-sm text-white;
+  }
+  .portal-utility-link {
+    @apply inline-flex items-center gap-2 rounded-sm border-r border-white/30 px-3 py-2 font-medium transition hover:bg-[#910056];
+  }
+  .portal-utility-link:last-child {
+    @apply border-r-0;
+  }
   .portal-menu-toggle {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700;
   }
@@ -387,6 +396,12 @@
 }
 
 @media (max-width: 767px) {
+  .portal-utility-nav {
+    @apply grid grid-cols-2 gap-1 border-b border-white/10 p-2;
+  }
+  .portal-utility-link {
+    @apply justify-center rounded border-r-0 border border-white/15 bg-white/5 text-xs;
+  }
   .portal-brandbar {
     @apply items-start;
   }

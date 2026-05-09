@@ -1,6 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowRight, FileText, Languages, LogIn, MapPinned, Search, ShieldCheck, UserPlus, Waves } from "lucide-react";
+import {
+  ArrowRight,
+  CircleHelp,
+  FileText,
+  Home,
+  Info,
+  Languages,
+  LogIn,
+  Mail,
+  Map,
+  MapPinned,
+  Phone,
+  Search,
+  ShieldCheck,
+  UserPlus,
+  Waves,
+} from "lucide-react";
 import { getPortalLanguage, setPortalLanguage, getPublicText, PORTAL_LANGUAGE_OPTIONS } from "../i18n/public";
 
 function usePortalLanguage() {
@@ -36,6 +52,15 @@ function ActionCard({ icon: Icon, title, text, action, to, accent }) {
   );
 }
 
+function UtilityLink({ href, icon: Icon, label }) {
+  return (
+    <a href={href} className="portal-utility-link">
+      <Icon size={14} />
+      <span>{label}</span>
+    </a>
+  );
+}
+
 export function ProcessFlowPage() {
   return <Navigate to="/" replace />;
 }
@@ -57,7 +82,15 @@ export default function PublicPortal() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[32px] border border-white/12 bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
-        <header className="border-b border-white/10 bg-white/92 px-5 py-4 md:px-8">
+        <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
+          <UtilityLink href="#top" icon={Home} label={portal.utilityHome} />
+          <UtilityLink href="#contact" icon={Phone} label={portal.utilityContact} />
+          <UtilityLink href="#about" icon={Info} label={portal.utilityAbout} />
+          <UtilityLink href="#faq" icon={CircleHelp} label={portal.utilityFaq} />
+          <UtilityLink href="#site-map" icon={Map} label={portal.utilitySiteMap} />
+        </nav>
+
+        <header id="top" className="border-b border-white/10 bg-white/92 px-5 py-4 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-950 text-xl font-bold text-white shadow-lg shadow-indigo-950/40 ring-2 ring-amber-400/70">
@@ -181,7 +214,7 @@ export default function PublicPortal() {
               <div className="max-w-3xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
                   <ShieldCheck size={14} />
-                  Citizen guide
+                  {portal.guideBadge}
                 </div>
                 <h3 className="mt-4 text-3xl font-bold text-white">{portal.guideTitle}</h3>
                 <p className="mt-3 text-sm leading-7 text-slate-200">{portal.guideText}</p>
@@ -222,7 +255,7 @@ export default function PublicPortal() {
                   </div>
                   <div>
                     <h4 className="text-lg font-semibold text-white">{portal.guideTipsTitle}</h4>
-                    <p className="text-sm text-slate-300">Make complaints easier to route and resolve.</p>
+                    <p className="text-sm text-slate-300">{portal.guideTipsText}</p>
                   </div>
                 </div>
 
@@ -252,6 +285,116 @@ export default function PublicPortal() {
                   </Link>
                 </div>
               </aside>
+            </div>
+          </section>
+
+          <section id="about" className="mt-12 rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+            <div className="max-w-4xl">
+              <h3 className="text-3xl font-bold text-white">{portal.aboutTitle}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-200">{portal.aboutText}</p>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {portal.aboutCards.map((card) => (
+                <article
+                  key={card.title}
+                  className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
+                >
+                  <h4 className="text-lg font-semibold text-white">{card.title}</h4>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="faq" className="mt-12 rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+            <h3 className="text-3xl font-bold text-white">{portal.faqTitle}</h3>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200">{portal.faqText}</p>
+            <div className="mt-6 space-y-4">
+              {portal.faqItems.map((item) => (
+                <details
+                  key={item.question}
+                  className="rounded-[22px] border border-white/12 bg-white/10 p-4 text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
+                >
+                  <summary className="cursor-pointer list-none text-base font-semibold">
+                    {item.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section id="contact" className="mt-12 rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+            <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+              <div>
+                <h3 className="text-3xl font-bold text-white">{portal.contactTitle}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-200">{portal.contactText}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                  >
+                    <UserPlus size={16} />
+                    {portal.actionRegister}
+                  </Link>
+                  <Link
+                    to="/track"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                  >
+                    <Search size={16} />
+                    {portal.actionTrack}
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <article className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                  <div className="flex items-center gap-3 text-white">
+                    <Phone size={18} />
+                    <h4 className="text-lg font-semibold">{portal.contactCallTitle}</h4>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{portal.contactCallText}</p>
+                </article>
+
+                <article className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                  <div className="flex items-center gap-3 text-white">
+                    <Mail size={18} />
+                    <h4 className="text-lg font-semibold">{portal.contactSupportTitle}</h4>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{portal.contactSupportText}</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section id="site-map" className="mt-12 rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+            <h3 className="text-3xl font-bold text-white">{portal.siteMapTitle}</h3>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200">{portal.siteMapText}</p>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <ActionCard
+                icon={UserPlus}
+                title={portal.register}
+                text={portal.siteMapRegisterText}
+                action={portal.actionRegister}
+                to="/register"
+                accent="bg-gradient-to-br from-amber-500 to-orange-500"
+              />
+              <ActionCard
+                icon={LogIn}
+                title={portal.login}
+                text={portal.siteMapLoginText}
+                action={portal.actionLogin}
+                to="/login"
+                accent="bg-gradient-to-br from-indigo-600 to-indigo-800"
+              />
+              <ActionCard
+                icon={Search}
+                title={portal.track}
+                text={portal.siteMapTrackText}
+                action={portal.actionTrack}
+                to="/track"
+                accent="bg-gradient-to-br from-sky-500 to-indigo-600"
+              />
             </div>
           </section>
         </main>

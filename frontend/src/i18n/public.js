@@ -61,6 +61,12 @@ const base = {
   },
   portal: {
     subtitle: "AI-assisted public grievance redressal portal",
+    utilityNavLabel: "Quick navigation",
+    utilityHome: "Home",
+    utilityContact: "Contact Us",
+    utilityAbout: "About Us",
+    utilityFaq: "FAQs / Help",
+    utilitySiteMap: "Site Map",
     heroTitle: "Public Grievance Access",
     heroText: "A clean public entry for citizens: register, sign in, or track an existing grievance ticket.",
     cardTitle: "Available public actions",
@@ -77,6 +83,7 @@ const base = {
     actionHowItWorks: "How it works",
     footer: "Citizen-facing entry only. Internal workflows remain protected after sign-in.",
     accessTag: "Public service access",
+    guideBadge: "Citizen guide",
     guideTitle: "How a citizen should use this platform",
     guideText: "This section explains the easiest complaint journey from account creation to final tracking, so citizens know exactly what to do before they start.",
     guideSteps: [
@@ -102,11 +109,55 @@ const base = {
       },
     ],
     guideTipsTitle: "Helpful tips before filing",
+    guideTipsText: "Make complaints easier to route and resolve.",
     guideTips: [
       "Use the language selector if you prefer a regional language on the public screens.",
       "Mention the exact area, block, or landmark so the nearest responsible officer can be matched faster.",
       "Write one problem per complaint for clearer routing and quicker action.",
     ],
+    aboutTitle: "About this platform",
+    aboutText: "Jan Samadhan AI helps citizens file complaints clearly, routes them to the right department, and keeps public tracking simple from submission to closure.",
+    aboutCards: [
+      {
+        title: "Simple public entry",
+        text: "Citizens only need registration, login, and ticket tracking to start using the service confidently.",
+      },
+      {
+        title: "Smart complaint routing",
+        text: "The backend classifies complaints, maps departments, and sends cases into the right handling branch.",
+      },
+      {
+        title: "Transparent status flow",
+        text: "Each complaint remains visible through ticket updates, officer action, and final feedback after resolution.",
+      },
+    ],
+    faqTitle: "FAQs / Help",
+    faqText: "These answers help citizens understand what to do before they file a grievance and how to track it later.",
+    faqItems: [
+      {
+        question: "What do I need before filing a complaint?",
+        answer: "Keep the complaint title, short description, and location details ready. Attach a photo or document if it helps explain the issue.",
+      },
+      {
+        question: "Can I track my complaint without logging in?",
+        answer: "Yes. If you already have a ticket ID, the public tracking page lets you check progress without signing in again.",
+      },
+      {
+        question: "What language should I use?",
+        answer: "Use the language you are comfortable with on the public screens. Clear location details are the most important part for correct routing.",
+      },
+    ],
+    contactTitle: "Need help getting started?",
+    contactText: "If you are filing a complaint for the first time, start with registration. If you already submitted a grievance, use tracking to view progress immediately.",
+    contactCallTitle: "Citizen support path",
+    contactCallText: "Create your citizen account first so future complaints, updates, and closure feedback stay linked to your profile.",
+    contactSupportTitle: "Existing ticket support",
+    contactSupportText: "Use the tracking page if you already have a complaint ID and want the latest status, routing, or officer information.",
+    siteMapTitle: "Site Map",
+    siteMapText: "Use this quick map to move directly to the public action you need without searching through the page.",
+    siteMapRegisterText: "Create a citizen account and start filing grievances.",
+    siteMapLoginText: "Open the sign-in page for citizen, officer, or admin access.",
+    siteMapTrackText: "Look up an existing complaint using the ticket ID.",
   },
   login: {
     subtitle: "Public grievance redressal portal",
@@ -261,6 +312,12 @@ const overrides = {
     },
     portal: {
       subtitle: "एआई-सहायित जन शिकायत निवारण पोर्टल",
+      utilityNavLabel: "त्वरित नेविगेशन",
+      utilityHome: "होम",
+      utilityContact: "संपर्क करें",
+      utilityAbout: "हमारे बारे में",
+      utilityFaq: "सहायता / प्रश्न",
+      utilitySiteMap: "साइट मैप",
       heroTitle: "सार्वजनिक शिकायत प्रवेश",
       heroText: "नागरिकों के लिए सरल सार्वजनिक प्रवेश: पंजीकरण करें, साइन इन करें, या मौजूदा शिकायत टिकट ट्रैक करें।",
       cardTitle: "उपलब्ध सार्वजनिक सेवाएँ",
@@ -277,6 +334,7 @@ const overrides = {
       actionHowItWorks: "कैसे काम करता है",
       footer: "केवल नागरिक प्रवेश। आंतरिक वर्कफ़्लो साइन-इन के बाद सुरक्षित हैं।",
       accessTag: "सार्वजनिक सेवा प्रवेश",
+      guideBadge: "नागरिक मार्गदर्शिका",
       guideTitle: "नागरिक इस प्लेटफॉर्म का उपयोग कैसे करें",
       guideText: "यह भाग खाता बनाने से लेकर अंतिम ट्रैकिंग तक सबसे आसान शिकायत यात्रा दिखाता है, ताकि नागरिक शुरू करने से पहले पूरी प्रक्रिया समझ सकें।",
       guideSteps: [
@@ -302,11 +360,55 @@ const overrides = {
         },
       ],
       guideTipsTitle: "शिकायत दर्ज करने से पहले उपयोगी सुझाव",
+      guideTipsText: "शिकायतों को सही जगह पहुँचाने और जल्दी हल करने में मदद करें।",
       guideTips: [
         "अगर आप चाहें तो सार्वजनिक स्क्रीन पर क्षेत्रीय भाषा के लिए भाषा चयनकर्ता का उपयोग करें।",
         "सटीक क्षेत्र, ब्लॉक या लैंडमार्क लिखें ताकि निकटतम जिम्मेदार अधिकारी जल्दी चुना जा सके।",
         "स्पष्ट रूटिंग और तेज़ कार्रवाई के लिए एक शिकायत में एक ही समस्या लिखें।",
       ],
+      aboutTitle: "इस प्लेटफॉर्म के बारे में",
+      aboutText: "जन समाधान एआई नागरिकों को शिकायत साफ़ तरीके से दर्ज करने, सही विभाग तक पहुँचाने और शुरुआत से समाधान तक सार्वजनिक ट्रैकिंग आसान रखने में मदद करता है।",
+      aboutCards: [
+        {
+          title: "सरल सार्वजनिक प्रवेश",
+          text: "नागरिकों को आत्मविश्वास से सेवा उपयोग करने के लिए केवल पंजीकरण, लॉगिन और टिकट ट्रैकिंग की ज़रूरत होती है।",
+        },
+        {
+          title: "स्मार्ट शिकायत रूटिंग",
+          text: "बैकएंड शिकायतों का वर्गीकरण करता है, विभाग मैप करता है और केस को सही शाखा तक भेजता है।",
+        },
+        {
+          title: "पारदर्शी स्थिति प्रवाह",
+          text: "हर शिकायत टिकट अपडेट, अधिकारी कार्रवाई और अंतिम प्रतिक्रिया के साथ दिखाई देती रहती है।",
+        },
+      ],
+      faqTitle: "सहायता / सामान्य प्रश्न",
+      faqText: "ये उत्तर नागरिकों को यह समझने में मदद करते हैं कि शिकायत दर्ज करने से पहले क्या करना है और बाद में उसे कैसे ट्रैक करना है।",
+      faqItems: [
+        {
+          question: "शिकायत दर्ज करने से पहले क्या चाहिए?",
+          answer: "शिकायत का शीर्षक, छोटा विवरण और स्थान की जानकारी तैयार रखें। यदि आवश्यक हो तो फ़ोटो या दस्तावेज़ भी जोड़ें।",
+        },
+        {
+          question: "क्या मैं बिना लॉगिन के शिकायत ट्रैक कर सकता हूँ?",
+          answer: "हाँ। यदि आपके पास टिकट आईडी है तो सार्वजनिक ट्रैकिंग पेज से बिना दोबारा लॉगिन किए प्रगति देख सकते हैं।",
+        },
+        {
+          question: "मुझे कौन-सी भाषा उपयोग करनी चाहिए?",
+          answer: "आप सार्वजनिक स्क्रीन पर अपनी सुविधानुसार भाषा चुन सकते हैं। सही रूटिंग के लिए स्पष्ट स्थान विवरण सबसे महत्वपूर्ण है।",
+        },
+      ],
+      contactTitle: "शुरू करने में मदद चाहिए?",
+      contactText: "यदि आप पहली बार शिकायत दर्ज कर रहे हैं तो पंजीकरण से शुरू करें। यदि आपने पहले ही शिकायत जमा की है तो उसकी प्रगति देखने के लिए ट्रैकिंग का उपयोग करें।",
+      contactCallTitle: "नागरिक सहायता मार्ग",
+      contactCallText: "पहले अपना नागरिक खाता बनाएँ ताकि भविष्य की शिकायतें, अपडेट और समाधान प्रतिक्रिया आपकी प्रोफ़ाइल से जुड़ी रहें।",
+      contactSupportTitle: "मौजूदा टिकट सहायता",
+      contactSupportText: "यदि आपके पास शिकायत आईडी है तो ट्रैकिंग पेज से नवीनतम स्थिति, रूटिंग और अधिकारी जानकारी देखें।",
+      siteMapTitle: "साइट मैप",
+      siteMapText: "जिस सार्वजनिक कार्य की ज़रूरत हो, वहाँ सीधे जाने के लिए इस त्वरित मानचित्र का उपयोग करें।",
+      siteMapRegisterText: "नागरिक खाता बनाएँ और शिकायत दर्ज करना शुरू करें।",
+      siteMapLoginText: "नागरिक, अधिकारी या एडमिन पहुँच के लिए साइन-इन पेज खोलें।",
+      siteMapTrackText: "टिकट आईडी के माध्यम से मौजूदा शिकायत देखें।",
     },
     login: {
       subtitle: "जन शिकायत निवारण पोर्टल",
