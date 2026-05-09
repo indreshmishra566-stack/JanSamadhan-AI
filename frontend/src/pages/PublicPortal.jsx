@@ -39,28 +39,13 @@ function UtilityLink({ to, icon: Icon, label }) {
 }
 
 function UtilityNav({ portal }) {
-  const location = useLocation();
-  const onHome = location.pathname === "/";
-
   return (
     <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
-      {onHome ? (
-        <>
-          <a href="#top" className="portal-utility-link"><Home size={14} /><span>{portal.utilityHome}</span></a>
-          <a href="#contact" className="portal-utility-link"><Phone size={14} /><span>{portal.utilityContact}</span></a>
-          <a href="#about" className="portal-utility-link"><Info size={14} /><span>{portal.utilityAbout}</span></a>
-          <a href="#faq" className="portal-utility-link"><CircleHelp size={14} /><span>{portal.utilityFaq}</span></a>
-          <a href="#site-map" className="portal-utility-link"><Map size={14} /><span>{portal.utilitySiteMap}</span></a>
-        </>
-      ) : (
-        <>
-          <UtilityLink to="/" icon={Home} label={portal.utilityHome} />
-          <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} />
-          <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} />
-          <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} />
-          <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} />
-        </>
-      )}
+      <UtilityLink to="/" icon={Home} label={portal.utilityHome} />
+      <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} />
+      <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} />
+      <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} />
+      <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} />
     </nav>
   );
 }
