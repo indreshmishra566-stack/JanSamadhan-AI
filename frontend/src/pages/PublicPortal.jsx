@@ -181,8 +181,8 @@ export default function PublicPortal() {
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
-      <main className="px-5 py-10 md:px-8 md:py-14">
-        <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      <main className="flex min-h-[calc(100vh-156px)] items-center px-5 py-8 md:px-8 md:py-10">
+        <section className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
               <Waves size={15} />
@@ -231,21 +231,6 @@ export default function PublicPortal() {
               <ActionCard icon={Search} title={portal.track} text={portal.trackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
             </div>
           </section>
-        </section>
-
-        <section className="mt-12 grid gap-4 md:grid-cols-3">
-          {portal.aboutCards.map((card, index) => (
-            <article
-              key={card.title}
-              className="rounded-[26px] bg-white/10 p-5 shadow-[0_18px_48px_rgba(15,23,42,0.22)] backdrop-blur"
-            >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg">
-                {index === 0 ? <UserPlus size={18} /> : index === 1 ? <MapPinned size={18} /> : <ShieldCheck size={18} />}
-              </div>
-              <h3 className="text-lg font-bold text-white">{card.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-200">{card.text}</p>
-            </article>
-          ))}
         </section>
       </main>
     </PublicShell>
