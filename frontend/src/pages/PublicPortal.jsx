@@ -77,7 +77,7 @@ function PublicShell({ language, setLanguage, children }) {
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
-                <h1 className="text-2xl font-bold text-lime-500">{common.title}</h1>
+                <h1 className="text-2xl font-bold text-white">{common.title}</h1>
                 <p className="text-sm text-slate-600">{portal.subtitle}</p>
               </div>
             </Link>
@@ -223,13 +223,46 @@ export default function PublicPortal() {
           </div>
 
           <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
-            <h3 className="text-2xl font-bold text-white">{portal.cardTitle}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.cardText}</p>
-            <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-1">
-              <ActionCard icon={LogIn} title={portal.login} text={portal.loginText} action={portal.actionLogin} to="/login" />
-              <ActionCard icon={UserPlus} title={portal.register} text={portal.registerText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-cyan-400 to-sky-500" />
-              <ActionCard icon={Search} title={portal.track} text={portal.trackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-cyan-500 to-blue-500" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
+              <ShieldCheck size={14} />
+              {portal.guideBadge}
             </div>
+            <h3 className="mt-4 text-2xl font-bold text-white">{portal.guideTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.guideText}</p>
+
+            <div className="mt-6 space-y-3">
+              {portal.guideSteps.map((step, index) => (
+                <article
+                  key={step.title}
+                  className="rounded-[24px] bg-white/10 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-semibold text-white">{step.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-200">{step.text}</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <article className="mt-6 rounded-[24px] bg-[#10192a]/70 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+              <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                {portal.guideTipsTitle}
+              </h4>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{portal.guideTipsText}</p>
+              <ul className="mt-3 space-y-2">
+                {portal.guideTips.map((tip) => (
+                  <li key={tip} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-300" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           </section>
         </section>
       </main>
