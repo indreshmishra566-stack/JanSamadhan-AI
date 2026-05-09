@@ -18,6 +18,7 @@ import {
   Waves,
 } from "lucide-react";
 import { getPortalLanguage, setPortalLanguage, getPublicText, PORTAL_LANGUAGE_OPTIONS } from "../i18n/public";
+import citizenGuidanceArt from "../assets/citizen-grievance-hero.svg";
 
 function usePortalLanguage() {
   const [language, setLanguageState] = useState(() => getPortalLanguage());
@@ -193,14 +194,13 @@ export default function PublicPortal() {
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
             <figure className="mt-6 overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/5 shadow-[0_24px_60px_rgba(8,15,32,0.24)]">
               <img
-                src="https://images.pexels.com/photos/20791613/pexels-photo-20791613/free-photo-of-person-using-an-app-on-the-smartphone.jpeg?auto=compress&cs=tinysrgb&dpr=1&h=750&w=1260"
-                alt="Citizen using a smartphone app to file or track a grievance"
-                className="h-52 w-full object-cover object-center md:h-60"
-                loading="lazy"
+                src={citizenGuidanceArt}
+                alt="Citizen using a phone to submit a grievance with location and department routing guidance"
+                className="h-64 w-full object-cover object-center md:h-[22rem]"
               />
               <figcaption className="flex items-center justify-between gap-3 bg-[#0f1728]/90 px-4 py-3 text-xs text-slate-300">
-                <span>Citizen-friendly mobile grievance access</span>
-                <span className="text-cyan-300">Photo: Pexels</span>
+                <span>Citizen-friendly complaint filing and smart routing</span>
+                <span className="text-cyan-300">Local project illustration</span>
               </figcaption>
             </figure>
             <div className="mt-8 flex flex-wrap gap-3">
