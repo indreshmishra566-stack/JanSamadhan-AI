@@ -134,6 +134,23 @@ function ActionCard({ icon: Icon, title, text, action, to, accent = "bg-gradient
   );
 }
 
+function FlowNode({ icon: Icon, step, title, text }) {
+  return (
+    <article className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+      <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-fuchsia-700 text-white shadow-lg">
+          <Icon size={18} />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200">{step}</p>
+          <h3 className="mt-1 text-lg font-semibold text-white">{title}</h3>
+          <p className="mt-2 text-sm leading-7 text-slate-200">{text}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function PublicPageSection({ title, intro, children }) {
   return (
     <main className="px-5 py-10 md:px-8 md:py-12">
@@ -329,6 +346,44 @@ export function SitemapPage() {
           <ActionCard icon={LogIn} title={portal.login} text={portal.siteMapLoginText} action={portal.actionLogin} to="/login" />
           <ActionCard icon={Search} title={portal.track} text={portal.siteMapTrackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
         </div>
+
+        <section className="portal-flow-shell mt-10">
+          <div className="max-w-4xl">
+            <h3 className="text-2xl font-bold text-white">{portal.siteMapFlowTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapFlowText}</p>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <FlowNode icon={UserPlus} step="01" title={portal.siteMapFlowSteps[0].title} text={portal.siteMapFlowSteps[0].text} />
+            <FlowNode icon={FileText} step="02" title={portal.siteMapFlowSteps[1].title} text={portal.siteMapFlowSteps[1].text} />
+            <FlowNode icon={MapPinned} step="03" title={portal.siteMapFlowSteps[2].title} text={portal.siteMapFlowSteps[2].text} />
+            <FlowNode icon={ShieldCheck} step="04" title={portal.siteMapFlowSteps[3].title} text={portal.siteMapFlowSteps[3].text} />
+            <FlowNode icon={Search} step="05" title={portal.siteMapFlowSteps[4].title} text={portal.siteMapFlowSteps[4].text} />
+            <FlowNode icon={ArrowRight} step="06" title={portal.siteMapFlowSteps[5].title} text={portal.siteMapFlowSteps[5].text} />
+          </div>
+        </section>
+
+        <section className="portal-flow-shell mt-10">
+          <div className="max-w-4xl">
+            <h3 className="text-2xl font-bold text-white">{portal.siteMapGuideTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapGuideText}</p>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {portal.siteMapGuides.map((guide) => (
+              <article key={guide.title} className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                <h4 className="text-lg font-semibold text-white">{guide.title}</h4>
+                <p className="mt-3 text-sm leading-7 text-slate-200">{guide.text}</p>
+                <ul className="mt-4 space-y-2">
+                  {guide.steps.map((step) => (
+                    <li key={step} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
+                      <span className="mt-2 inline-block h-2 w-2 rounded-full bg-amber-300" />
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
       </PublicPageSection>
     </PublicShell>
   );

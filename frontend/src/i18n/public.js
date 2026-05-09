@@ -158,6 +158,35 @@ const base = {
     siteMapRegisterText: "Create a citizen account and start filing grievances.",
     siteMapLoginText: "Open the sign-in page for citizen, officer, or admin access.",
     siteMapTrackText: "Look up an existing complaint using the ticket ID.",
+    siteMapFlowTitle: "How your project works",
+    siteMapFlowText: "This flowchart shows the real complaint journey in Jan Samadhan AI, from citizen filing to officer action, head visibility, and final tracking.",
+    siteMapFlowSteps: [
+      { title: "Citizen enters the platform", text: "The user starts with registration, login, or public ticket tracking depending on their need." },
+      { title: "Complaint is filed clearly", text: "The citizen adds title, issue details, location, and proof so the complaint has enough context." },
+      { title: "AI and department mapping happen", text: "The backend classifies the complaint and connects it to the right department branch." },
+      { title: "Nearest officer is assigned", text: "The system routes the complaint to the nearest responsible officer while keeping the head visible." },
+      { title: "Status stays transparent", text: "The citizen can track officer assignment, routing timeline, department, and current complaint status." },
+      { title: "Resolution or escalation completes the flow", text: "The complaint is resolved locally when possible, or escalated upward if the issue needs higher attention." },
+    ],
+    siteMapGuideTitle: "User navigation help",
+    siteMapGuideText: "These paths show how different users should move through the platform so the interface feels straightforward from the first click.",
+    siteMapGuides: [
+      {
+        title: "Citizen path",
+        text: "This is the public service journey for filing and following a complaint.",
+        steps: ["Open Register", "Create account", "Login to citizen workspace", "Submit complaint", "Track progress", "Give feedback after resolution"],
+      },
+      {
+        title: "Officer path",
+        text: "Officers work after sign-in inside the operational workspace.",
+        steps: ["Login", "Open officer dashboard", "Review assigned complaints", "Update, forward, or escalate", "Upload proof and remarks"],
+      },
+      {
+        title: "Admin path",
+        text: "Admins supervise the whole system from the command side.",
+        steps: ["Login", "Open admin dashboard", "Manage complaints", "Manage officers and departments", "Monitor analytics and SLA status"],
+      },
+    ],
   },
   login: {
     subtitle: "Public grievance redressal portal",
@@ -409,6 +438,35 @@ const overrides = {
       siteMapRegisterText: "नागरिक खाता बनाएँ और शिकायत दर्ज करना शुरू करें।",
       siteMapLoginText: "नागरिक, अधिकारी या एडमिन पहुँच के लिए साइन-इन पेज खोलें।",
       siteMapTrackText: "टिकट आईडी के माध्यम से मौजूदा शिकायत देखें।",
+      siteMapFlowTitle: "आपका प्रोजेक्ट कैसे काम करता है",
+      siteMapFlowText: "यह फ्लोचार्ट जन समाधान एआई में शिकायत की वास्तविक यात्रा दिखाता है — नागरिक द्वारा शिकायत दर्ज करने से लेकर अधिकारी कार्रवाई, हेड दृश्यता और अंतिम ट्रैकिंग तक।",
+      siteMapFlowSteps: [
+        { title: "नागरिक प्लेटफॉर्म पर आता है", text: "उपयोगकर्ता अपनी ज़रूरत के अनुसार पंजीकरण, लॉगिन या सार्वजनिक टिकट ट्रैकिंग से शुरुआत करता है।" },
+        { title: "शिकायत साफ़ रूप से दर्ज होती है", text: "नागरिक शीर्षक, समस्या का विवरण, स्थान और प्रमाण जोड़ता है ताकि शिकायत पूरी तरह समझी जा सके।" },
+        { title: "एआई और विभाग मैपिंग होती है", text: "बैकएंड शिकायत का वर्गीकरण करता है और उसे सही विभागीय शाखा से जोड़ता है।" },
+        { title: "निकटतम अधिकारी को असाइनमेंट मिलता है", text: "सिस्टम शिकायत को निकटतम जिम्मेदार अधिकारी तक भेजता है और साथ में विभागीय हेड को भी दृश्यता देता है।" },
+        { title: "स्थिति पारदर्शी रहती है", text: "नागरिक असाइन अधिकारी, रूटिंग टाइमलाइन, विभाग और वर्तमान स्थिति देख सकता है।" },
+        { title: "समाधान या एस्केलेशन से प्रवाह पूरा होता है", text: "जहाँ संभव हो शिकायत स्थानीय स्तर पर हल होती है, अन्यथा ऊपर की रिपोर्टिंग श्रृंखला में एस्केलेट होती है।" },
+      ],
+      siteMapGuideTitle: "उपयोगकर्ता नेविगेशन सहायता",
+      siteMapGuideText: "ये रास्ते दिखाते हैं कि अलग-अलग उपयोगकर्ताओं को प्लेटफॉर्म में कैसे आगे बढ़ना चाहिए ताकि पहली ही बार में इंटरफेस समझ आए।",
+      siteMapGuides: [
+        {
+          title: "नागरिक पथ",
+          text: "शिकायत दर्ज करने और उसकी प्रगति देखने के लिए यह सार्वजनिक सेवा यात्रा है।",
+          steps: ["पंजीकरण खोलें", "खाता बनाएँ", "सिटिजन वर्कस्पेस में लॉगिन करें", "शिकायत दर्ज करें", "प्रगति ट्रैक करें", "समाधान के बाद प्रतिक्रिया दें"],
+        },
+        {
+          title: "अधिकारी पथ",
+          text: "अधिकारी साइन-इन के बाद ऑपरेशनल वर्कस्पेस में काम करते हैं।",
+          steps: ["लॉगिन करें", "ऑफिसर डैशबोर्ड खोलें", "असाइन शिकायतें देखें", "अपडेट, फॉरवर्ड या एस्केलेट करें", "प्रमाण और टिप्पणी अपलोड करें"],
+        },
+        {
+          title: "एडमिन पथ",
+          text: "एडमिन पूरे सिस्टम को कमांड स्तर से देखता और संभालता है।",
+          steps: ["लॉगिन करें", "एडमिन डैशबोर्ड खोलें", "शिकायत प्रबंधन करें", "अधिकारी और विभाग प्रबंधन करें", "एनालिटिक्स और SLA स्थिति देखें"],
+        },
+      ],
     },
     login: {
       subtitle: "जन शिकायत निवारण पोर्टल",
