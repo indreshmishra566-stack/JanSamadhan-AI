@@ -3,69 +3,19 @@ import { Link } from "react-router-dom";
 import { Activity, MapPinned, Search, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { complaintApi } from "../api";
-import PortalEntryShell, { getPortalLanguage, setPortalLanguage } from "../components/Shared/PortalEntryShell";
+import PortalEntryShell from "../components/Shared/PortalEntryShell";
 import { StatusBadge, PriorityBadge, InfoSection, DetailItem, TimelineList } from "../components/Shared";
 import { formatDate } from "../utils/helpers";
+import { getPortalLanguage, setPortalLanguage, getPublicText } from "../i18n/public";
 
 export default function TrackComplaint() {
   const [ticketId, setTicketId] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
-  const isHindi = language === "hi";
-
-  const text = {
-    title: "Jan Samadhan AI",
-    subtitle: isHindi ? "पब्लिक टिकट ट्रैकिंग" : "Public ticket tracking",
-    eyebrow: isHindi ? "विश्वसनीय डिजिटल जन शिकायत प्रणाली" : "Trusted digital public grievance system",
-    description: isHindi
-      ? "बिना लॉगिन शिकायत की स्थिति, असाइन अधिकारी, विभागीय हेड और पूरी रूटिंग टाइमलाइन देखें।"
-      : "Track complaint status, assigned officer, department head, and the full routing timeline without signing in.",
-    badges: isHindi ? ["बिना लॉगिन", "SLA दृश्यता", "रूटिंग टाइमलाइन"] : ["No login required", "SLA visibility", "Routing timeline"],
-    asideTitle: isHindi ? "यह स्क्रीन क्या दिखाती है" : "What this screen reveals",
-    asideText: isHindi
-      ? "यह स्क्रीन नागरिक पारदर्शिता का सबूत है — टिकट आईडी डालते ही विभाग, स्थानीय अधिकारी, हेड दृश्यता और समयरेखा सामने आती है।"
-      : "This screen proves citizen transparency: one ticket ID reveals department, local officer, supervising head, and the exact complaint journey.",
-    trackTitle: isHindi ? "अपनी शिकायत ट्रैक करें" : "Track your complaint",
-    noLogin: isHindi ? "लॉगिन आवश्यक नहीं" : "No login required",
-    ticketPlaceholder: isHindi ? "टिकट आईडी दर्ज करें (उदा. JSAB12CD)" : "Enter Ticket ID (e.g. JSAB12CD)",
-    track: isHindi ? "ट्रैक करें" : "Track",
-    notFound: isHindi ? "टिकट नहीं मिला। कृपया आईडी जांचें।" : "Ticket not found. Please check the ID.",
-    backToLogin: isHindi ? "लॉगिन पर वापस जाएँ" : "Back to Login",
-    routing: isHindi ? "रूटिंग" : "Routing",
-    status: isHindi ? "स्थिति" : "Status",
-    timeline: isHindi ? "टाइमलाइन" : "Timeline",
-    department: isHindi ? "विभाग" : "Department",
-    currentLevel: isHindi ? "वर्तमान स्तर" : "Current Level",
-    assignedLocalOfficer: isHindi ? "स्थानीय अधिकारी" : "Assigned Local Officer",
-    supervisingHead: isHindi ? "सुपरवाइजिंग हेड" : "Supervising Department Head",
-    state: isHindi ? "राज्य" : "State",
-    district: isHindi ? "जिला" : "District",
-    block: isHindi ? "ब्लॉक / क्षेत्र" : "Block / Area",
-    address: isHindi ? "पता" : "Address",
-    coordinates: isHindi ? "कोऑर्डिनेट्स" : "Coordinates",
-    category: isHindi ? "श्रेणी" : "Category",
-    priority: isHindi ? "प्राथमिकता" : "Priority",
-    sla: isHindi ? "SLA समयसीमा" : "SLA Deadline",
-    submitted: isHindi ? "दर्ज" : "Submitted",
-    updated: isHindi ? "अंतिम अपडेट" : "Last Updated",
-    originalLanguage: isHindi ? "मूल भाषा" : "Original Language",
-    resolved: isHindi ? "समाधान समय" : "Resolved",
-    duplicateStatus: isHindi ? "डुप्लिकेट स्थिति" : "Duplicate Status",
-    translatedDescription: isHindi ? "अनूदित विवरण" : "Translated Description",
-    latestOfficerRemarks: isHindi ? "ताज़ा अधिकारी टिप्पणी" : "Latest officer remarks",
-    closureFeedback: isHindi ? "नागरिक क्लोज़र फीडबैक" : "Citizen closure feedback",
-    rating: isHindi ? "रेटिंग" : "Rating",
-    assignedOfficer: isHindi ? "असाइन अधिकारी" : "Assigned Officer",
-    escalatedOfficer: isHindi ? "एस्केलेट अधिकारी" : "Escalated Officer",
-    head: isHindi ? "हेड" : "Head",
-    primaryComplaint: isHindi ? "मुख्य शिकायत" : "Primary complaint",
-    beingAssigned: isHindi ? "असाइन हो रहा है" : "Being assigned",
-    willMonitor: isHindi ? "असाइनमेंट के बाद दिखेगा" : "Will monitor once assigned",
-    emptyTimeline: isHindi ? "रूटिंग और एस्केलेशन अपडेट यहाँ दिखेंगे।" : "Routing and escalation updates will appear here.",
-    openRegistration: isHindi ? "नागरिक पंजीकरण खोलें" : "Open citizen registration",
-    needMore: isHindi ? "और चाहिए?" : "Need more?",
-  };
+  const content = getPublicText(language);
+  const common = content.common;
+  const text = content.track;
 
   const handleLanguageChange = (next) => {
     setLanguage(next);
@@ -91,35 +41,17 @@ export default function TrackComplaint() {
     <PortalEntryShell
       language={language}
       onLanguageChange={handleLanguageChange}
-      title={text.title}
+      title={common.title}
       subtitle={text.subtitle}
-      eyebrow={text.eyebrow}
+      eyebrow={common.eyebrow}
       description={text.description}
       badges={text.badges}
       asideTitle={text.asideTitle}
       asideText={text.asideText}
       asidePoints={[
-        {
-          icon: Search,
-          title: isHindi ? "टिकट से तुरंत खोज" : "Instant ticket lookup",
-          text: isHindi
-            ? "शिकायत आईडी डालते ही वर्तमान स्थिति और जिम्मेदार अधिकारी सामने आ जाते हैं।"
-            : "A single ticket ID reveals the current status and responsible officers immediately.",
-        },
-        {
-          icon: MapPinned,
-          title: isHindi ? "लोकेशन संदर्भ" : "Location context",
-          text: isHindi
-            ? "राज्य, जिला, ब्लॉक और जीपीएस डेटा यह दिखाता है कि शिकायत किस शाखा तक गई।"
-            : "State, district, block, and GPS data make the field routing story understandable at a glance.",
-        },
-        {
-          icon: ShieldCheck,
-          title: isHindi ? "जवाबदेही स्पष्ट" : "Clear accountability",
-          text: isHindi
-            ? "असाइन अधिकारी और सुपरवाइजिंग हेड दोनों दिखते हैं, इसलिए शिकायत अंधेरे में नहीं जाती।"
-            : "Both the assigned officer and supervising head remain visible, so complaints never disappear into a black box.",
-        },
+        { icon: Search, ...text.points[0] },
+        { icon: MapPinned, ...text.points[1] },
+        { icon: ShieldCheck, ...text.points[2] },
       ]}
       footer={
         <div className="rounded-2xl border border-white/10 bg-slate-950/85 px-4 py-3 text-sm text-white">
@@ -206,7 +138,7 @@ export default function TrackComplaint() {
                   <DetailItem label={text.resolved} value={formatDate(result.resolved_at)} />
                   <DetailItem
                     label={text.duplicateStatus}
-                    value={result.is_duplicate ? `${isHindi ? "डुप्लिकेट ऑफ" : "Duplicate of"} #${result.duplicate_of || "master complaint"}` : text.primaryComplaint}
+                    value={result.is_duplicate ? `${text.duplicateOf} #${result.duplicate_of || "master complaint"}` : text.primaryComplaint}
                   />
                 </div>
 

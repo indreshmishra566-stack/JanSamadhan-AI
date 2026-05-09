@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authApi } from "../api";
-import PortalEntryShell, { getPortalLanguage, setPortalLanguage } from "../components/Shared/PortalEntryShell";
+import PortalEntryShell from "../components/Shared/PortalEntryShell";
 import { Globe2, MapPinned, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
+import { getPortalLanguage, setPortalLanguage, getPublicText } from "../i18n/public";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -12,44 +13,11 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
   const navigate = useNavigate();
-  const isHindi = language === "hi";
-
-  const text = {
-    title: "Jan Samadhan AI",
-    subtitle: isHindi ? "नागरिक पंजीकरण" : "Citizen registration",
-    eyebrow: isHindi ? "विश्वसनीय डिजिटल जन शिकायत प्रणाली" : "Trusted digital public grievance system",
-    description: isHindi ? "नागरिकों के लिए त्वरित खाता निर्माण ताकि वे किसी भी विभाग की शिकायत दर्ज कर सकें, ट्रैक कर सकें और समाधान के बाद फीडबैक दे सकें।" : "Fast citizen onboarding for filing grievances, tracking progress, and giving closure feedback across departments.",
-    badges: isHindi ? ["हिंदी इनपुट", "टिकट ट्रैकिंग", "मोबाइल रेडी"] : ["Hindi input", "Ticket tracking", "Mobile ready"],
-    asideTitle: isHindi ? "यह स्क्रीन क्यों महत्वपूर्ण है" : "Why this screen matters",
-    asideText: isHindi ? "यही एंट्री नागरिक भरोसे को बनाती है — आसान पंजीकरण, स्पष्ट पहचान और शिकायत प्रवाह तक तेज पहुंच।" : "This is the citizen trust moment: fast onboarding, clear identity, and a direct path into the grievance workflow.",
-    createAccount: isHindi ? "नागरिक खाता बनाएँ" : "Create citizen account",
-    creating: isHindi ? "खाता बनाया जा रहा है..." : "Creating account...",
-    accountCreated: isHindi ? "खाता बन गया। कृपया लॉगिन करें।" : "Account created! Please login.",
-    registrationFailed: isHindi ? "पंजीकरण असफल रहा" : "Registration failed",
-    passwordsMismatch: isHindi ? "पासवर्ड मेल नहीं खाते" : "Passwords do not match",
-    alreadyRegistered: isHindi ? "पहले से पंजीकृत?" : "Already registered?",
-    signIn: isHindi ? "साइन इन करें" : "Sign in",
-  };
-
-  const labels = {
-    first_name: isHindi ? "पहला नाम" : "First Name",
-    last_name: isHindi ? "अंतिम नाम" : "Last Name",
-    username: isHindi ? "यूज़रनेम" : "Username",
-    email: "Email",
-    phone: isHindi ? "मोबाइल नंबर" : "Phone",
-    password: isHindi ? "पासवर्ड" : "Password",
-    password2: isHindi ? "पासवर्ड की पुष्टि करें" : "Confirm Password",
-  };
-
-  const placeholders = {
-    first_name: isHindi ? "राहुल" : "Rahul",
-    last_name: isHindi ? "कुमार" : "Kumar",
-    username: isHindi ? "rahul_kumar" : "rahul_kumar",
-    email: "rahul@example.com",
-    phone: "+91 9876543210",
-    password: isHindi ? "कम से कम 8 अक्षर" : "Min 8 characters",
-    password2: isHindi ? "पासवर्ड दोहराएँ" : "Repeat password",
-  };
+  const content = getPublicText(language);
+  const common = content.common;
+  const text = content.register;
+  const labels = text.labels;
+  const placeholders = text.placeholders;
 
   const handleLanguageChange = (next) => {
     setLanguage(next);
@@ -93,29 +61,17 @@ export default function RegisterPage() {
     <PortalEntryShell
       language={language}
       onLanguageChange={handleLanguageChange}
-      title={text.title}
+      title={common.title}
       subtitle={text.subtitle}
-      eyebrow={text.eyebrow}
+      eyebrow={common.eyebrow}
       description={text.description}
       badges={text.badges}
       asideTitle={text.asideTitle}
       asideText={text.asideText}
       asidePoints={[
-        {
-          icon: UserPlus,
-          title: isHindi ? "तेज़ ऑनबोर्डिंग" : "Fast onboarding",
-          text: isHindi ? "केवल बुनियादी जानकारी से नागरिक खाता तैयार हो जाता है और उपयोगकर्ता सीधे शिकायत प्रवाह में जा सकता है।" : "A citizen can get into the complaint workflow quickly with just the essential identity fields.",
-        },
-        {
-          icon: MapPinned,
-          title: isHindi ? "लोकेशन-सक्षम शिकायतें" : "Location-aware complaints",
-          text: isHindi ? "पंजीकरण के बाद नागरिक शिकायत दर्ज करते समय लोकेशन, ब्लॉक और GPS संदर्भ जोड़ सकता है।" : "Once registered, the citizen can add location, block, and GPS context to complaints.",
-        },
-        {
-          icon: Globe2,
-          title: isHindi ? "भाषा लचीलेपन" : "Language flexibility",
-          text: isHindi ? "इंटरफेस हिंदी और अंग्रेज़ी दोनों के साथ द्विभाषी नागरिक अनुभव को सपोर्ट करता है।" : "The onboarding experience already supports a bilingual Hindi-English citizen journey.",
-        },
+        { icon: UserPlus, ...text.points[0] },
+        { icon: MapPinned, ...text.points[1] },
+        { icon: Globe2, ...text.points[2] },
       ]}
     >
       <div className="text-center mb-6">

@@ -1,18 +1,6 @@
 import { Link } from "react-router-dom";
 import { Languages, LogIn, ShieldCheck, Waves } from "lucide-react";
-
-const PORTAL_LANGUAGE_KEY = "portal_language";
-
-export function getPortalLanguage() {
-  if (typeof window === "undefined") return "en";
-  return localStorage.getItem(PORTAL_LANGUAGE_KEY) || "en";
-}
-
-export function setPortalLanguage(language) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(PORTAL_LANGUAGE_KEY, language);
-  document.documentElement.lang = language === "hi" ? "hi" : "en";
-}
+import { PORTAL_LANGUAGE_OPTIONS, getPublicText } from "../../i18n/public";
 
 export default function PortalEntryShell({
   language = "en",
@@ -28,6 +16,8 @@ export default function PortalEntryShell({
   children,
   footer,
 }) {
+  const commonText = getPublicText(language).common;
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.16),_transparent_18%),linear-gradient(140deg,_#0f172a,_#1d4ed8_48%,_#312e81)] p-4 md:p-6">
       <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-7xl grid-cols-1 overflow-hidden rounded-[28px] border border-white/15 bg-white/8 shadow-[0_32px_120px_rgba(15,23,42,0.45)] backdrop-blur xl:grid-cols-[1.05fr_0.95fr]">
@@ -51,17 +41,20 @@ export default function PortalEntryShell({
                   value={language}
                   onChange={(e) => onLanguageChange?.(e.target.value)}
                   className="bg-transparent outline-none"
-                  aria-label={language === "hi" ? "भाषा" : "Language"}
+                  aria-label={commonText.language}
                 >
-                  <option value="en" className="text-slate-900">English</option>
-                  <option value="hi" className="text-slate-900">Hindi</option>
+                  {PORTAL_LANGUAGE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="text-slate-900">
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             <div className="mt-10 max-w-2xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200">
-                {language === "hi" ? "लाइव जन शिकायत प्लेटफॉर्म" : "Live public grievance platform"}
+                {commonText.livePlatform}
               </p>
               <h2 className="mt-3 text-4xl font-extrabold leading-tight md:text-5xl">{description}</h2>
               <div className="mt-6 flex flex-wrap gap-2">
@@ -107,14 +100,14 @@ export default function PortalEntryShell({
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
                 >
                   <ShieldCheck size={15} />
-                  {language === "hi" ? "पोर्टल पर वापस जाएँ" : "Back to portal"}
+                  {commonText.backToPortal}
                 </Link>
                 <Link
                   to="/login"
                   className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300"
                 >
                   <LogIn size={15} />
-                  {language === "hi" ? "लॉगिन खोलें" : "Open login"}
+                  {commonText.openLogin}
                 </Link>
               </div>
             </div>

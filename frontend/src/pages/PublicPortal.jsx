@@ -1,66 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Languages, LogIn, Search, ShieldCheck, UserPlus, Waves } from "lucide-react";
-
-const PORTAL_LANGUAGE_KEY = "portal_language";
-
-const copy = {
-  en: {
-    eyebrow: "Trusted digital public grievance system",
-    title: "Jan Samadhan AI",
-    subtitle: "AI-assisted public grievance redressal portal",
-    language: "Language",
-    heroTitle: "Public Grievance Access",
-    heroText:
-      "A clean public entry for citizens: register, sign in, or track an existing grievance ticket.",
-    cardTitle: "Available public actions",
-    cardText:
-      "The public frontend is intentionally limited to only the working services. Internal officer and admin workflows stay behind sign-in.",
-    login: "Sign In",
-    loginText: "Access citizen, officer, or admin workspace using your account.",
-    register: "Register",
-    registerText: "Create a citizen account and start lodging grievances.",
-    track: "Track",
-    trackText: "Search an existing ticket without logging in.",
-    actionLogin: "Open Login",
-    actionRegister: "Open Registration",
-    actionTrack: "Track Complaint",
-    footer: "Citizen-facing entry only. Internal workflows remain protected after sign-in.",
-  },
-  hi: {
-    eyebrow: "विश्वसनीय डिजिटल जन शिकायत प्रणाली",
-    title: "जन समाधान एआई",
-    subtitle: "एआई-सहायित जन शिकायत निवारण पोर्टल",
-    language: "भाषा",
-    heroTitle: "सार्वजनिक शिकायत प्रवेश",
-    heroText:
-      "नागरिकों के लिए सरल सार्वजनिक प्रवेश: पंजीकरण करें, साइन इन करें, या मौजूदा शिकायत टिकट ट्रैक करें।",
-    cardTitle: "उपलब्ध सार्वजनिक सेवाएँ",
-    cardText:
-      "सार्वजनिक फ्रंटएंड को केवल कार्यशील सेवाओं तक सीमित रखा गया है। आंतरिक अधिकारी और एडमिन वर्कफ़्लो साइन-इन के बाद सुरक्षित रहते हैं।",
-    login: "साइन इन",
-    loginText: "अपने खाते से नागरिक, अधिकारी या एडमिन कार्यक्षेत्र में प्रवेश करें।",
-    register: "पंजीकरण",
-    registerText: "नागरिक खाता बनाएँ और शिकायत दर्ज करना शुरू करें।",
-    track: "ट्रैक करें",
-    trackText: "बिना लॉगिन मौजूदा टिकट खोजें।",
-    actionLogin: "लॉगिन खोलें",
-    actionRegister: "पंजीकरण खोलें",
-    actionTrack: "शिकायत ट्रैक करें",
-    footer: "केवल नागरिक प्रवेश। आंतरिक वर्कफ़्लो साइन-इन के बाद सुरक्षित हैं।",
-  },
-};
+import { getPortalLanguage, setPortalLanguage, getPublicText, PORTAL_LANGUAGE_OPTIONS } from "../i18n/public";
 
 function usePortalLanguage() {
   const [language, setLanguage] = useState(() => {
-    if (typeof window === "undefined") return "en";
-    return localStorage.getItem(PORTAL_LANGUAGE_KEY) || "en";
+    return getPortalLanguage();
   });
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(PORTAL_LANGUAGE_KEY, language);
-    document.documentElement.lang = language === "hi" ? "hi" : "en";
+    setPortalLanguage(language);
   }, [language]);
 
   return [language, setLanguage];
@@ -97,7 +46,9 @@ export function SitemapPage() {
 
 export default function PublicPortal() {
   const [language, setLanguage] = usePortalLanguage();
-  const t = useMemo(() => copy[language] || copy.en, [language]);
+  const t = useMemo(() => getPublicText(language), [language]);
+  const common = t.common;
+  const portal = t.portal;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
@@ -109,24 +60,25 @@ export default function PublicPortal() {
                 JS
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t.eyebrow}</p>
-                <h1 className="text-2xl font-bold text-slate-950">{t.title}</h1>
-                <p className="text-sm text-slate-600">{t.subtitle}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
+                <h1 className="text-2xl font-bold text-slate-950">{common.title}</h1>
+                <p className="text-sm text-slate-600">{portal.subtitle}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
                 <Languages size={16} />
-                <span>{t.language}</span>
+                <span>{common.language}</span>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   className="bg-transparent pr-1 outline-none"
-                  aria-label={t.language}
+                  aria-label={common.language}
                 >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
+                  {PORTAL_LANGUAGE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </label>
 
@@ -135,7 +87,7 @@ export default function PublicPortal() {
                 className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
               >
                 <LogIn size={16} />
-                {t.login}
+                {portal.login}
               </Link>
             </div>
           </div>
@@ -146,62 +98,62 @@ export default function PublicPortal() {
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
                 <Waves size={15} />
-                Public Service Access
+                {portal.accessTag}
               </div>
               <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">
-                {t.heroTitle}
+                {portal.heroTitle}
               </h2>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{t.heroText}</p>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to="/register"
                   className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
                 >
                   <UserPlus size={17} />
-                  {t.actionRegister}
+                  {portal.actionRegister}
                 </Link>
                 <Link
                   to="/login"
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
                 >
                   <LogIn size={17} />
-                  {t.actionLogin}
+                  {portal.actionLogin}
                 </Link>
                 <Link
                   to="/track"
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
                 >
                   <Search size={17} />
-                  {t.actionTrack}
+                  {portal.actionTrack}
                 </Link>
               </div>
             </div>
 
             <section className="rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
-              <h3 className="text-2xl font-bold text-white">{t.cardTitle}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-200">{t.cardText}</p>
+              <h3 className="text-2xl font-bold text-white">{portal.cardTitle}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-200">{portal.cardText}</p>
               <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-1">
                 <ActionCard
                   icon={LogIn}
-                  title={t.login}
-                  text={t.loginText}
-                  action={t.actionLogin}
+                  title={portal.login}
+                  text={portal.loginText}
+                  action={portal.actionLogin}
                   to="/login"
                   accent="bg-gradient-to-br from-indigo-600 to-indigo-800"
                 />
                 <ActionCard
                   icon={UserPlus}
-                  title={t.register}
-                  text={t.registerText}
-                  action={t.actionRegister}
+                  title={portal.register}
+                  text={portal.registerText}
+                  action={portal.actionRegister}
                   to="/register"
                   accent="bg-gradient-to-br from-amber-500 to-orange-500"
                 />
                 <ActionCard
                   icon={Search}
-                  title={t.track}
-                  text={t.trackText}
-                  action={t.actionTrack}
+                  title={portal.track}
+                  text={portal.trackText}
+                  action={portal.actionTrack}
                   to="/track"
                   accent="bg-gradient-to-br from-sky-500 to-indigo-600"
                 />
@@ -213,7 +165,7 @@ export default function PublicPortal() {
         <footer className="border-t border-white/10 bg-indigo-950/70 px-5 py-4 text-center text-sm text-slate-200 md:px-8">
           <div className="inline-flex items-center gap-2">
             <ShieldCheck size={16} />
-            <span>{t.footer}</span>
+            <span>{portal.footer}</span>
           </div>
         </footer>
       </div>

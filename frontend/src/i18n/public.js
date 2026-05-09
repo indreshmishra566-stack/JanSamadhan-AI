@@ -1,0 +1,434 @@
+export const PORTAL_LANGUAGE_KEY = "portal_language";
+
+export const PORTAL_LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "हिन्दी" },
+  { value: "bn", label: "বাংলা" },
+  { value: "ta", label: "தமிழ்" },
+  { value: "te", label: "తెలుగు" },
+  { value: "mr", label: "मराठी" },
+  { value: "gu", label: "ગુજરાતી" },
+  { value: "kn", label: "ಕನ್ನಡ" },
+  { value: "ml", label: "മലയാളം" },
+  { value: "pa", label: "ਪੰਜਾਬੀ" },
+  { value: "or", label: "ଓଡ଼ିଆ" },
+  { value: "ur", label: "اردو" },
+  { value: "as", label: "অসমীয়া" },
+];
+
+export function getPortalLanguage() {
+  if (typeof window === "undefined") return "en";
+  return localStorage.getItem(PORTAL_LANGUAGE_KEY) || "en";
+}
+
+export function setPortalLanguage(language) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PORTAL_LANGUAGE_KEY, language);
+  document.documentElement.lang = language || "en";
+}
+
+function mergeDeep(base, override) {
+  if (!override) return base;
+  const result = { ...base };
+  Object.keys(override).forEach((key) => {
+    const baseValue = base[key];
+    const overrideValue = override[key];
+    if (
+      baseValue &&
+      overrideValue &&
+      typeof baseValue === "object" &&
+      typeof overrideValue === "object" &&
+      !Array.isArray(baseValue) &&
+      !Array.isArray(overrideValue)
+    ) {
+      result[key] = mergeDeep(baseValue, overrideValue);
+    } else {
+      result[key] = overrideValue;
+    }
+  });
+  return result;
+}
+
+const base = {
+  common: {
+    title: "Jan Samadhan AI",
+    eyebrow: "Trusted digital public grievance system",
+    language: "Language",
+    portalSubtitle: "AI-assisted public grievance redressal portal",
+    livePlatform: "Live public grievance platform",
+    backToPortal: "Back to portal",
+    openLogin: "Open login",
+  },
+  portal: {
+    subtitle: "AI-assisted public grievance redressal portal",
+    heroTitle: "Public Grievance Access",
+    heroText: "A clean public entry for citizens: register, sign in, or track an existing grievance ticket.",
+    cardTitle: "Available public actions",
+    cardText: "The public frontend is intentionally limited to only the working services. Internal officer and admin workflows stay behind sign-in.",
+    login: "Sign In",
+    loginText: "Access citizen, officer, or admin workspace using your account.",
+    register: "Register",
+    registerText: "Create a citizen account and start lodging grievances.",
+    track: "Track",
+    trackText: "Search an existing ticket without logging in.",
+    actionLogin: "Open Login",
+    actionRegister: "Open Registration",
+    actionTrack: "Track Complaint",
+    footer: "Citizen-facing entry only. Internal workflows remain protected after sign-in.",
+    accessTag: "Public service access",
+  },
+  login: {
+    subtitle: "Public grievance redressal portal",
+    description: "Secure sign-in for the grievance resolution flow from command desk to local operator.",
+    badges: ["Admin", "Officer", "Citizen tracking"],
+    asideTitle: "What this screen unlocks",
+    asideText: "Once signed in, the command layer opens: officer escalation, supervisory visibility, profile management, and end-to-end complaint routing.",
+    username: "Username",
+    password: "Password",
+    enterUsername: "Enter username",
+    enterPassword: "Enter password",
+    signIn: "Sign In",
+    signingIn: "Signing in...",
+    newCitizen: "New citizen?",
+    registerHere: "Register here",
+    trackWithoutLogin: "Track complaint without login",
+    trackCta: "Track by Ticket ID",
+    invalidCredentials: "Invalid credentials",
+    points: [
+      {
+        title: "Complaint operations",
+        text: "The full workflow is ready from citizen intake to departmental resolution.",
+      },
+      {
+        title: "Officer controls",
+        text: "Forwarding, escalation, proof upload, and duplicate tagging are already in the working build.",
+      },
+      {
+        title: "Multi-department ready",
+        text: "The current build can be configured for any department grievance hierarchy.",
+      },
+    ],
+  },
+  register: {
+    subtitle: "Citizen registration",
+    description: "Fast citizen onboarding for filing grievances, tracking progress, and giving closure feedback across departments.",
+    badges: ["Hindi input", "Ticket tracking", "Mobile ready"],
+    asideTitle: "Why this screen matters",
+    asideText: "This is the citizen trust moment: fast onboarding, clear identity, and a direct path into the grievance workflow.",
+    createAccount: "Create citizen account",
+    creating: "Creating account...",
+    accountCreated: "Account created! Please login.",
+    registrationFailed: "Registration failed",
+    passwordsMismatch: "Passwords do not match",
+    alreadyRegistered: "Already registered?",
+    signIn: "Sign in",
+    labels: {
+      first_name: "First Name",
+      last_name: "Last Name",
+      username: "Username",
+      email: "Email",
+      phone: "Phone",
+      password: "Password",
+      password2: "Confirm Password",
+    },
+    placeholders: {
+      first_name: "Rahul",
+      last_name: "Kumar",
+      username: "rahul_kumar",
+      email: "rahul@example.com",
+      phone: "+91 9876543210",
+      password: "Min 8 characters",
+      password2: "Repeat password",
+    },
+    points: [
+      {
+        title: "Fast onboarding",
+        text: "A citizen can get into the complaint workflow quickly with just the essential identity fields.",
+      },
+      {
+        title: "Location-aware complaints",
+        text: "Once registered, the citizen can add location, block, and GPS context to complaints.",
+      },
+      {
+        title: "Language flexibility",
+        text: "The onboarding experience already supports a bilingual citizen journey.",
+      },
+    ],
+  },
+  track: {
+    subtitle: "Public ticket tracking",
+    description: "Track complaint status, assigned officer, department head, and the full routing timeline without signing in.",
+    badges: ["No login required", "SLA visibility", "Routing timeline"],
+    asideTitle: "What this screen reveals",
+    asideText: "This screen proves citizen transparency: one ticket ID reveals department, local officer, supervising head, and the exact complaint journey.",
+    trackTitle: "Track your complaint",
+    noLogin: "No login required",
+    ticketPlaceholder: "Enter Ticket ID (e.g. JSAB12CD)",
+    track: "Track",
+    notFound: "Ticket not found. Please check the ID.",
+    backToLogin: "Back to Login",
+    routing: "Routing",
+    status: "Status",
+    timeline: "Timeline",
+    department: "Department",
+    currentLevel: "Current Level",
+    assignedLocalOfficer: "Assigned Local Officer",
+    supervisingHead: "Supervising Department Head",
+    state: "State",
+    district: "District",
+    block: "Block / Area",
+    address: "Address",
+    coordinates: "Coordinates",
+    category: "Category",
+    priority: "Priority",
+    sla: "SLA Deadline",
+    submitted: "Submitted",
+    updated: "Last Updated",
+    originalLanguage: "Original Language",
+    resolved: "Resolved",
+    duplicateStatus: "Duplicate Status",
+    translatedDescription: "Translated Description",
+    latestOfficerRemarks: "Latest officer remarks",
+    closureFeedback: "Citizen closure feedback",
+    rating: "Rating",
+    assignedOfficer: "Assigned Officer",
+    escalatedOfficer: "Escalated Officer",
+    head: "Head",
+    primaryComplaint: "Primary complaint",
+    beingAssigned: "Being assigned",
+    willMonitor: "Will monitor once assigned",
+    emptyTimeline: "Routing and escalation updates will appear here.",
+    openRegistration: "Open citizen registration",
+    needMore: "Need more?",
+    duplicateOf: "Duplicate of",
+    points: [
+      {
+        title: "Instant ticket lookup",
+        text: "A single ticket ID reveals the current status and responsible officers immediately.",
+      },
+      {
+        title: "Location context",
+        text: "State, district, block, and GPS data make the field routing story understandable at a glance.",
+      },
+      {
+        title: "Clear accountability",
+        text: "Both the assigned officer and supervising head remain visible, so complaints never disappear into a black box.",
+      },
+    ],
+  },
+};
+
+const overrides = {
+  hi: {
+    common: {
+      eyebrow: "विश्वसनीय डिजिटल जन शिकायत प्रणाली",
+      language: "भाषा",
+      portalSubtitle: "एआई-सहायित जन शिकायत निवारण पोर्टल",
+      livePlatform: "लाइव जन शिकायत प्लेटफॉर्म",
+      backToPortal: "पोर्टल पर वापस जाएँ",
+      openLogin: "लॉगिन खोलें",
+    },
+    portal: {
+      subtitle: "एआई-सहायित जन शिकायत निवारण पोर्टल",
+      heroTitle: "सार्वजनिक शिकायत प्रवेश",
+      heroText: "नागरिकों के लिए सरल सार्वजनिक प्रवेश: पंजीकरण करें, साइन इन करें, या मौजूदा शिकायत टिकट ट्रैक करें।",
+      cardTitle: "उपलब्ध सार्वजनिक सेवाएँ",
+      cardText: "सार्वजनिक फ्रंटएंड को केवल कार्यशील सेवाओं तक सीमित रखा गया है। आंतरिक अधिकारी और एडमिन वर्कफ़्लो साइन-इन के बाद सुरक्षित रहते हैं।",
+      login: "साइन इन",
+      loginText: "अपने खाते से नागरिक, अधिकारी या एडमिन कार्यक्षेत्र में प्रवेश करें।",
+      register: "पंजीकरण",
+      registerText: "नागरिक खाता बनाएँ और शिकायत दर्ज करना शुरू करें।",
+      track: "ट्रैक करें",
+      trackText: "बिना लॉगिन मौजूदा टिकट खोजें।",
+      actionLogin: "लॉगिन खोलें",
+      actionRegister: "पंजीकरण खोलें",
+      actionTrack: "शिकायत ट्रैक करें",
+      footer: "केवल नागरिक प्रवेश। आंतरिक वर्कफ़्लो साइन-इन के बाद सुरक्षित हैं।",
+      accessTag: "सार्वजनिक सेवा प्रवेश",
+    },
+    login: {
+      subtitle: "जन शिकायत निवारण पोर्टल",
+      description: "राष्ट्रीय डेस्क से स्थानीय अधिकारी तक शिकायत समाधान प्रवाह के लिए सुरक्षित लॉगिन",
+      badges: ["एडमिन", "अधिकारी", "नागरिक ट्रैकिंग"],
+      asideTitle: "यह स्क्रीन क्या खोलती है",
+      asideText: "लॉगिन के बाद अधिकारी एस्केलेशन, विभागीय दृश्यता, प्रोफाइल प्रबंधन और शिकायत रूटिंग की पूरी कमांड परत खुलती है।",
+      username: "यूज़रनेम",
+      password: "पासवर्ड",
+      enterUsername: "यूज़रनेम दर्ज करें",
+      enterPassword: "पासवर्ड दर्ज करें",
+      signIn: "साइन इन",
+      signingIn: "साइन इन हो रहा है...",
+      newCitizen: "नए नागरिक?",
+      registerHere: "यहाँ पंजीकरण करें",
+      trackWithoutLogin: "बिना लॉगिन शिकायत ट्रैक करें",
+      trackCta: "टिकट आईडी से ट्रैक करें",
+      invalidCredentials: "अमान्य लॉगिन विवरण",
+      points: [
+        { title: "शिकायत संचालन", text: "नागरिक से लेकर विभागीय अधिकारी तक पूरा वर्कफ़्लो तैयार है।" },
+        { title: "अधिकारी नियंत्रण", text: "फॉरवर्ड, एस्केलेट, प्रूफ अपलोड और डुप्लिकेट चिन्हित करने जैसे एक्शन मौजूद हैं।" },
+        { title: "मल्टी-डिपार्टमेंट फोकस", text: "वर्तमान बिल्ड किसी भी विभागीय शिकायत संरचना के लिए कॉन्फ़िगर किया जा सकता है।" },
+      ],
+    },
+    register: {
+      subtitle: "नागरिक पंजीकरण",
+      description: "नागरिकों के लिए त्वरित खाता निर्माण ताकि वे किसी भी विभाग की शिकायत दर्ज कर सकें, ट्रैक कर सकें और समाधान के बाद फीडबैक दे सकें।",
+      badges: ["हिंदी इनपुट", "टिकट ट्रैकिंग", "मोबाइल रेडी"],
+      asideTitle: "यह स्क्रीन क्यों महत्वपूर्ण है",
+      asideText: "यही एंट्री नागरिक भरोसे को बनाती है — आसान पंजीकरण, स्पष्ट पहचान और शिकायत प्रवाह तक तेज पहुंच।",
+      createAccount: "नागरिक खाता बनाएँ",
+      creating: "खाता बनाया जा रहा है...",
+      accountCreated: "खाता बन गया। कृपया लॉगिन करें।",
+      registrationFailed: "पंजीकरण असफल रहा",
+      passwordsMismatch: "पासवर्ड मेल नहीं खाते",
+      alreadyRegistered: "पहले से पंजीकृत?",
+      signIn: "साइन इन करें",
+      labels: {
+        first_name: "पहला नाम",
+        last_name: "अंतिम नाम",
+        username: "यूज़रनेम",
+        phone: "मोबाइल नंबर",
+        password: "पासवर्ड",
+        password2: "पासवर्ड की पुष्टि करें",
+      },
+      placeholders: {
+        first_name: "राहुल",
+        last_name: "कुमार",
+        username: "rahul_kumar",
+        password: "कम से कम 8 अक्षर",
+        password2: "पासवर्ड दोहराएँ",
+      },
+      points: [
+        { title: "तेज़ ऑनबोर्डिंग", text: "केवल बुनियादी जानकारी से नागरिक खाता तैयार हो जाता है और उपयोगकर्ता सीधे शिकायत प्रवाह में जा सकता है।" },
+        { title: "लोकेशन-सक्षम शिकायतें", text: "पंजीकरण के बाद नागरिक शिकायत दर्ज करते समय लोकेशन, ब्लॉक और GPS संदर्भ जोड़ सकता है।" },
+        { title: "भाषा लचीलेपन", text: "इंटरफेस हिंदी और अंग्रेज़ी दोनों के साथ द्विभाषी नागरिक अनुभव को सपोर्ट करता है।" },
+      ],
+    },
+    track: {
+      subtitle: "पब्लिक टिकट ट्रैकिंग",
+      description: "बिना लॉगिन शिकायत की स्थिति, असाइन अधिकारी, विभागीय हेड और पूरी रूटिंग टाइमलाइन देखें।",
+      badges: ["बिना लॉगिन", "SLA दृश्यता", "रूटिंग टाइमलाइन"],
+      asideTitle: "यह स्क्रीन क्या दिखाती है",
+      asideText: "यह स्क्रीन नागरिक पारदर्शिता का सबूत है — टिकट आईडी डालते ही विभाग, स्थानीय अधिकारी, हेड दृश्यता और समयरेखा सामने आती है।",
+      trackTitle: "अपनी शिकायत ट्रैक करें",
+      noLogin: "लॉगिन आवश्यक नहीं",
+      ticketPlaceholder: "टिकट आईडी दर्ज करें (उदा. JSAB12CD)",
+      track: "ट्रैक करें",
+      notFound: "टिकट नहीं मिला। कृपया आईडी जांचें।",
+      backToLogin: "लॉगिन पर वापस जाएँ",
+      routing: "रूटिंग",
+      status: "स्थिति",
+      timeline: "टाइमलाइन",
+      department: "विभाग",
+      currentLevel: "वर्तमान स्तर",
+      assignedLocalOfficer: "स्थानीय अधिकारी",
+      supervisingHead: "सुपरवाइजिंग हेड",
+      state: "राज्य",
+      district: "जिला",
+      block: "ब्लॉक / क्षेत्र",
+      address: "पता",
+      coordinates: "कोऑर्डिनेट्स",
+      category: "श्रेणी",
+      priority: "प्राथमिकता",
+      sla: "SLA समयसीमा",
+      submitted: "दर्ज",
+      updated: "अंतिम अपडेट",
+      originalLanguage: "मूल भाषा",
+      resolved: "समाधान समय",
+      duplicateStatus: "डुप्लिकेट स्थिति",
+      translatedDescription: "अनूदित विवरण",
+      latestOfficerRemarks: "ताज़ा अधिकारी टिप्पणी",
+      closureFeedback: "नागरिक क्लोज़र फीडबैक",
+      rating: "रेटिंग",
+      assignedOfficer: "असाइन अधिकारी",
+      escalatedOfficer: "एस्केलेट अधिकारी",
+      head: "हेड",
+      primaryComplaint: "मुख्य शिकायत",
+      beingAssigned: "असाइन हो रहा है",
+      willMonitor: "असाइनमेंट के बाद दिखेगा",
+      emptyTimeline: "रूटिंग और एस्केलेशन अपडेट यहाँ दिखेंगे।",
+      openRegistration: "नागरिक पंजीकरण खोलें",
+      needMore: "और चाहिए?",
+      duplicateOf: "डुप्लिकेट ऑफ",
+      points: [
+        { title: "टिकट से तुरंत खोज", text: "शिकायत आईडी डालते ही वर्तमान स्थिति और जिम्मेदार अधिकारी सामने आ जाते हैं।" },
+        { title: "लोकेशन संदर्भ", text: "राज्य, जिला, ब्लॉक और जीपीएस डेटा यह दिखाता है कि शिकायत किस शाखा तक गई।" },
+        { title: "जवाबदेही स्पष्ट", text: "असाइन अधिकारी और सुपरवाइजिंग हेड दोनों दिखते हैं, इसलिए शिकायत अंधेरे में नहीं जाती।" },
+      ],
+    },
+  },
+  bn: {
+    common: { eyebrow: "বিশ্বস্ত ডিজিটাল গণঅভিযোগ ব্যবস্থা", language: "ভাষা", portalSubtitle: "এআই-সহায়িত গণঅভিযোগ নিষ্পত্তি পোর্টাল", livePlatform: "লাইভ গণঅভিযোগ প্ল্যাটফর্ম", backToPortal: "পোর্টালে ফিরুন", openLogin: "লগইন খুলুন" },
+    portal: { subtitle: "এআই-সহায়িত গণঅভিযোগ নিষ্পত্তি পোর্টাল", heroTitle: "পাবলিক অভিযোগ প্রবেশ", heroText: "নাগরিকদের জন্য সহজ পাবলিক প্রবেশ: নিবন্ধন করুন, সাইন ইন করুন, বা বিদ্যমান অভিযোগ টিকিট ট্র্যাক করুন।", cardTitle: "উপলব্ধ পাবলিক পরিষেবা", cardText: "পাবলিক ফ্রন্টএন্ড কেবল কার্যকরী পরিষেবাগুলিতেই সীমাবদ্ধ। অভ্যন্তরীণ অফিসার ও অ্যাডমিন ওয়ার্কফ্লো সাইন-ইনের পরে সুরক্ষিত থাকে।", login: "সাইন ইন", loginText: "আপনার অ্যাকাউন্ট দিয়ে নাগরিক, অফিসার বা অ্যাডমিন ওয়ার্কস্পেসে প্রবেশ করুন।", register: "নিবন্ধন", registerText: "নাগরিক অ্যাকাউন্ট তৈরি করুন এবং অভিযোগ দায়ের শুরু করুন।", track: "ট্র্যাক", trackText: "লগইন ছাড়াই বিদ্যমান টিকিট খুঁজুন।", actionLogin: "লগইন খুলুন", actionRegister: "নিবন্ধন খুলুন", actionTrack: "অভিযোগ ট্র্যাক করুন", footer: "শুধু নাগরিকমুখী প্রবেশ। অভ্যন্তরীণ ওয়ার্কফ্লো সাইন-ইনের পরে সুরক্ষিত থাকে।", accessTag: "পাবলিক সার্ভিস অ্যাক্সেস" },
+    login: { subtitle: "গণঅভিযোগ নিষ্পত্তি পোর্টাল", description: "কমান্ড ডেস্ক থেকে স্থানীয় অপারেটর পর্যন্ত অভিযোগ সমাধান প্রবাহের জন্য নিরাপদ সাইন-ইন।", asideTitle: "এই স্ক্রিন কী খুলে দেয়", asideText: "সাইন-ইনের পরে অফিসার এসকেলেশন, তদারকি দৃশ্যমানতা, প্রোফাইল ব্যবস্থাপনা এবং সম্পূর্ণ অভিযোগ রাউটিং উপলব্ধ হয়।", username: "ইউজারনেম", password: "পাসওয়ার্ড", enterUsername: "ইউজারনেম লিখুন", enterPassword: "পাসওয়ার্ড লিখুন", signIn: "সাইন ইন", signingIn: "সাইন ইন হচ্ছে...", newCitizen: "নতুন নাগরিক?", registerHere: "এখানে নিবন্ধন করুন", trackWithoutLogin: "লগইন ছাড়া অভিযোগ ট্র্যাক করুন", trackCta: "টিকিট আইডি দিয়ে ট্র্যাক করুন", invalidCredentials: "অবৈধ লগইন তথ্য" },
+    register: { subtitle: "নাগরিক নিবন্ধন", description: "যে কোনও বিভাগের অভিযোগ দায়ের, অগ্রগতি ট্র্যাক এবং সমাধানের পরে মতামত দেওয়ার জন্য দ্রুত নাগরিক অনবোর্ডিং।", asideTitle: "এই স্ক্রিন কেন গুরুত্বপূর্ণ", asideText: "এখানেই নাগরিক আস্থার শুরু — দ্রুত নিবন্ধন, পরিষ্কার পরিচয় এবং অভিযোগ প্রবাহে সরাসরি প্রবেশ।", createAccount: "নাগরিক অ্যাকাউন্ট তৈরি করুন", creating: "অ্যাকাউন্ট তৈরি হচ্ছে...", accountCreated: "অ্যাকাউন্ট তৈরি হয়েছে! অনুগ্রহ করে লগইন করুন।", registrationFailed: "নিবন্ধন ব্যর্থ হয়েছে", passwordsMismatch: "পাসওয়ার্ড মিলছে না", alreadyRegistered: "আগে থেকেই নিবন্ধিত?", signIn: "সাইন ইন করুন", labels: { first_name: "নাম", last_name: "পদবী", username: "ইউজারনেম", phone: "ফোন", password: "পাসওয়ার্ড", password2: "পাসওয়ার্ড নিশ্চিত করুন" } },
+    track: { subtitle: "পাবলিক টিকিট ট্র্যাকিং", description: "লগইন ছাড়াই অভিযোগের অবস্থা, নির্ধারিত কর্মকর্তা, বিভাগীয় প্রধান এবং সম্পূর্ণ রাউটিং টাইমলাইন দেখুন।", asideTitle: "এই স্ক্রিন কী দেখায়", asideText: "একটি টিকিট আইডি থেকেই বিভাগ, স্থানীয় কর্মকর্তা, তদারক প্রধান এবং অভিযোগের পূর্ণ যাত্রা দেখা যায়।", trackTitle: "আপনার অভিযোগ ট্র্যাক করুন", noLogin: "লগইন প্রয়োজন নেই", ticketPlaceholder: "টিকিট আইডি লিখুন", track: "ট্র্যাক", notFound: "টিকিট পাওয়া যায়নি। অনুগ্রহ করে আইডি পরীক্ষা করুন।", backToLogin: "লগইনে ফিরে যান", routing: "রাউটিং", status: "অবস্থা", timeline: "টাইমলাইন", department: "বিভাগ", currentLevel: "বর্তমান স্তর", assignedLocalOfficer: "নির্ধারিত স্থানীয় কর্মকর্তা", supervisingHead: "তদারকি প্রধান", state: "রাজ্য", district: "জেলা", block: "ব্লক / এলাকা", address: "ঠিকানা", coordinates: "কোঅর্ডিনেট", category: "শ্রেণি", priority: "অগ্রাধিকার", submitted: "দাখিল", updated: "শেষ আপডেট", openRegistration: "নাগরিক নিবন্ধন খুলুন", needMore: "আরও দরকার?" },
+  },
+  ta: {
+    common: { eyebrow: "நம்பகமான டிஜிட்டல் பொது குறைதீர் அமைப்பு", language: "மொழி", portalSubtitle: "ஏஐ உதவியுள்ள பொது குறைதீர் போர்டல்", livePlatform: "நேரடி பொது குறைதீர் தளம்", backToPortal: "போர்டலுக்கு திரும்பவும்", openLogin: "உள்நுழைவைத் திற" },
+    portal: { subtitle: "ஏஐ உதவியுள்ள பொது குறைதீர் போர்டல்", heroTitle: "பொது புகார் அணுகல்", heroText: "குடிமக்களுக்கான எளிய பொதுச் சொந்த நுழைவு: பதிவு செய்யவும், உள்நுழையவும் அல்லது ஏற்கனவே உள்ள புகார் டிக்கெட்டைத் தேடவும்.", cardTitle: "கிடைக்கும் பொது செயல்கள்", cardText: "இந்த பொது முன்பக்கம் செயலில் உள்ள சேவைகளுக்கு மட்டும் கட்டுப்படுத்தப்பட்டுள்ளது. உள்துறை அதிகாரி மற்றும் நிர்வாக வேலைப்பாடுகள் உள்நுழைவுக்குப் பிறகு பாதுகாக்கப்படுகின்றன.", login: "உள்நுழை", loginText: "உங்கள் கணக்கைப் பயன்படுத்தி குடிமக்கள், அதிகாரி அல்லது நிர்வாக பணியிடத்தைத் திறக்கவும்.", register: "பதிவு", registerText: "குடிமக்கள் கணக்கை உருவாக்கி புகார் பதிவு செய்யத் தொடங்கவும்.", track: "கண்காணிக்க", trackText: "உள்நுழையாமல் ஏற்கனவே உள்ள டிக்கெட்டைத் தேடவும்.", actionLogin: "உள்நுழைவைத் திற", actionRegister: "பதிவைத் திற", actionTrack: "புகாரைத் தேடு", footer: "குடிமக்கள் பயன்பாட்டுக்கான நுழைவு மட்டும். உள்துறை வேலைப்பாடுகள் உள்நுழைவுக்குப் பிறகு பாதுகாக்கப்படுகின்றன.", accessTag: "பொது சேவை அணுகல்" },
+    login: { subtitle: "பொது குறைதீர் போர்டல்", description: "மத்திய கட்டுப்பாட்டு மேசையிலிருந்து உள்ளூர் செயல்பாட்டு அதிகாரி வரை செல்லும் குறைதீர் ஓட்டத்திற்கான பாதுகாப்பான உள்நுழைவு.", username: "பயனர்பெயர்", password: "கடவுச்சொல்", enterUsername: "பயனர்பெயரை உள்ளிடவும்", enterPassword: "கடவுச்சொல்லை உள்ளிடவும்", signIn: "உள்நுழை", signingIn: "உள்நுழைகிறது...", newCitizen: "புதிய குடிமகனா?", registerHere: "இங்கே பதிவு செய்யவும்", trackWithoutLogin: "உள்நுழையாமல் புகாரைத் தேடவும்", trackCta: "டிக்கெட் ஐடியால் தேடவும்", invalidCredentials: "தவறான உள்நுழைவு விவரங்கள்" },
+    register: { subtitle: "குடிமக்கள் பதிவு", description: "எந்தத் துறையினதும் புகார்களை பதிவு செய்ய, முன்னேற்றத்தை கண்காணிக்க மற்றும் முடிவுக்குப் பிறகு கருத்து வழங்க விரைவான குடிமக்கள் சேர்த்தல்.", createAccount: "குடிமக்கள் கணக்கை உருவாக்கவும்", creating: "கணக்கு உருவாக்கப்படுகிறது...", accountCreated: "கணக்கு உருவானது! தயவு செய்து உள்நுழையவும்.", registrationFailed: "பதிவு தோல்வியுற்றது", passwordsMismatch: "கடவுச்சொற்கள் பொருந்தவில்லை", alreadyRegistered: "ஏற்கனவே பதிவுசெய்தவரா?", signIn: "உள்நுழை" },
+    track: { subtitle: "பொது டிக்கெட் கண்காணிப்பு", description: "உள்நுழையாமல் புகாரின் நிலை, நியமிக்கப்பட்ட அதிகாரி, துறைத் தலைவர் மற்றும் முழு வழிமுறை காலவரிசையைப் பார்க்கவும்.", trackTitle: "உங்கள் புகாரை கண்காணிக்கவும்", noLogin: "உள்நுழைவு தேவையில்லை", ticketPlaceholder: "டிக்கெட் ஐடியை உள்ளிடவும்", track: "கண்காணிக்க", notFound: "டிக்கெட் கிடைக்கவில்லை. ஐடியை சரிபார்க்கவும்.", backToLogin: "உள்நுழைவுக்கு திரும்பவும்", routing: "வழிமுறை", status: "நிலை", timeline: "காலவரிசை", department: "துறை", currentLevel: "தற்போதைய நிலை", assignedLocalOfficer: "நியமிக்கப்பட்ட உள்ளூர் அதிகாரி", supervisingHead: "மேற்பார்வைத் தலைவர்", state: "மாநிலம்", district: "மாவட்டம்", block: "பிளாக் / பகுதி", address: "முகவரி", coordinates: "இருப்பிட இணக்கம்", category: "வகை", priority: "முன்னுரிமை", submitted: "சமர்ப்பிப்பு", updated: "கடைசி புதுப்பிப்பு", openRegistration: "குடிமக்கள் பதிவைத் திற", needMore: "இன்னும் தேவை?" },
+  },
+  te: {
+    common: { eyebrow: "నమ్మకమైన డిజిటల్ ప్రజా ఫిర్యాదు వ్యవస్థ", language: "భాష", portalSubtitle: "ఏఐ ఆధారిత ప్రజా ఫిర్యాదు పరిష్కార పోర్టల్", livePlatform: "ప్రజా ఫిర్యాదు ప్రత్యక్ష వేదిక", backToPortal: "పోర్టల్‌కు తిరుగు", openLogin: "లాగిన్ తెరవండి" },
+    portal: { subtitle: "ఏఐ ఆధారిత ప్రజా ఫిర్యాదు పరిష్కార పోర్టల్", heroTitle: "ప్రజా ఫిర్యాదు ప్రవేశం", heroText: "పౌరుల కోసం సులభమైన ప్రవేశం: నమోదు చేయండి, సైన్ ఇన్ చేయండి లేదా ఉన్న ఫిర్యాదు టికెట్‌ను ట్రాక్ చేయండి.", cardTitle: "అందుబాటులో ఉన్న ప్రజా చర్యలు", cardText: "ఈ ప్రజా ఫ్రంట్ ఎండ్ పని చేస్తున్న సేవలకే పరిమితం. అంతర్గత అధికారి మరియు అడ్మిన్ వర్క్‌ఫ్లోలు సైన్-ఇన్ తర్వాత రక్షించబడతాయి.", login: "సైన్ ఇన్", register: "నమోదు", track: "ట్రాక్", loginText: "మీ ఖాతాతో పౌరుడు, అధికారి లేదా అడ్మిన్ వర్క్‌స్పేస్‌లోకి వెళ్లండి.", registerText: "పౌర ఖాతా సృష్టించి ఫిర్యాదులు నమోదు చేయడం ప్రారంభించండి.", trackText: "లాగిన్ లేకుండా ఉన్న టికెట్‌ను వెతకండి.", actionLogin: "లాగిన్ తెరవండి", actionRegister: "నమోదు తెరవండి", actionTrack: "ఫిర్యాదు ట్రాక్ చేయండి", footer: "పౌరులకు సంబంధించిన ప్రవేశం మాత్రమే. అంతర్గత వర్క్‌ఫ్లోలు సైన్-ఇన్ తరువాత రక్షించబడతాయి.", accessTag: "ప్రజా సేవా ప్రవేశం" },
+    login: { subtitle: "ప్రజా ఫిర్యాదు పరిష్కార పోర్టల్", description: "కమాండ్ డెస్క్ నుండి స్థానిక ఆపరేటర్ వరకు ఫిర్యాదు పరిష్కార ప్రవాహం కోసం భద్రమైన లాగిన్.", username: "యూజర్‌నేమ్", password: "పాస్‌వర్డ్", enterUsername: "యూజర్‌నేమ్ నమోదు చేయండి", enterPassword: "పాస్‌వర్డ్ నమోదు చేయండి", signIn: "సైన్ ఇన్", signingIn: "సైన్ ఇన్ అవుతోంది...", newCitizen: "కొత్త పౌరుడా?", registerHere: "ఇక్కడ నమోదు చేయండి", trackWithoutLogin: "లాగిన్ లేకుండా ఫిర్యాదు ట్రాక్ చేయండి", trackCta: "టికెట్ ఐడి ద్వారా ట్రాక్ చేయండి", invalidCredentials: "తప్పు లాగిన్ వివరాలు" },
+    register: { subtitle: "పౌరుల నమోదు", description: "ఏ విభాగ ఫిర్యాదైనా నమోదు చేయడానికి, పురోగతిని ట్రాక్ చేయడానికి మరియు పరిష్కారం తర్వాత ఫీడ్‌బ్యాక్ ఇవ్వడానికి వేగమైన నమోదు.", createAccount: "పౌర ఖాతా సృష్టించండి", creating: "ఖాతా సృష్టిస్తోంది...", accountCreated: "ఖాతా సృష్టించబడింది! దయచేసి లాగిన్ చేయండి.", registrationFailed: "నమోదు విఫలమైంది", passwordsMismatch: "పాస్‌వర్డ్లు సరిపోలలేదు", alreadyRegistered: "ఇప్పటికే నమోదయ్యారా?", signIn: "సైన్ ఇన్" },
+    track: { subtitle: "ప్రజా టికెట్ ట్రాకింగ్", description: "లాగిన్ లేకుండా ఫిర్యాదు స్థితి, అప్పగించిన అధికారి, విభాగాధిపతి మరియు పూర్తి రూటింగ్ టైమ్‌లైన్ చూడండి.", trackTitle: "మీ ఫిర్యాదును ట్రాక్ చేయండి", noLogin: "లాగిన్ అవసరం లేదు", ticketPlaceholder: "టికెట్ ఐడిని నమోదు చేయండి", track: "ట్రాక్", notFound: "టికెట్ కనపడలేదు. దయచేసి ఐడి పరిశీలించండి.", backToLogin: "లాగిన్‌కు తిరుగు", routing: "రూటింగ్", status: "స్థితి", timeline: "టైమ్‌లైన్", department: "శాఖ", currentLevel: "ప్రస్తుత స్థాయి", assignedLocalOfficer: "అప్పగించిన స్థానిక అధికారి", supervisingHead: "పర్యవేక్షణ అధిపతి", state: "రాష్ట్రం", district: "జిల్లా", block: "బ్లాక్ / ప్రాంతం", address: "చిరునామా", coordinates: "కోఆర్డినేట్లు", category: "వర్గం", priority: "ప్రాధాన్యత", submitted: "సమర్పితం", updated: "చివరి నవీకరణ", openRegistration: "పౌరుల నమోదు తెరవండి", needMore: "ఇంకా కావాలా?" },
+  },
+  mr: {
+    common: { eyebrow: "विश्वसनीय डिजिटल सार्वजनिक तक्रार प्रणाली", language: "भाषा", portalSubtitle: "एआय-सहाय्यित सार्वजनिक तक्रार निवारण पोर्टल", livePlatform: "लाईव्ह सार्वजनिक तक्रार प्लॅटफॉर्म", backToPortal: "पोर्टलवर परत जा", openLogin: "लॉगिन उघडा" },
+    portal: { subtitle: "एआय-सहाय्यित सार्वजनिक तक्रार निवारण पोर्टल", heroTitle: "सार्वजनिक तक्रार प्रवेश", heroText: "नागरिकांसाठी सोपा सार्वजनिक प्रवेश: नोंदणी करा, साइन इन करा किंवा विद्यमान तक्रार तिकीट ट्रॅक करा.", cardTitle: "उपलब्ध सार्वजनिक कृती", cardText: "हा सार्वजनिक फ्रंटएंड फक्त कार्यरत सेवांसाठी ठेवलेला आहे. अंतर्गत अधिकारी आणि अॅडमिन वर्कफ्लो साइन-इननंतर सुरक्षित राहतात.", login: "साइन इन", register: "नोंदणी", track: "ट्रॅक", loginText: "आपल्या खात्याने नागरिक, अधिकारी किंवा अॅडमिन कार्यक्षेत्रात प्रवेश करा.", registerText: "नागरिक खाते तयार करा आणि तक्रारी नोंदवण्यास सुरुवात करा.", trackText: "लॉगिनशिवाय विद्यमान तिकीट शोधा.", actionLogin: "लॉगिन उघडा", actionRegister: "नोंदणी उघडा", actionTrack: "तक्रार ट्रॅक करा", footer: "फक्त नागरिकांसाठी प्रवेश. अंतर्गत वर्कफ्लो साइन-इननंतर सुरक्षित आहेत.", accessTag: "सार्वजनिक सेवा प्रवेश" },
+    login: { subtitle: "सार्वजनिक तक्रार निवारण पोर्टल", description: "कमांड डेस्कपासून स्थानिक ऑपरेटरपर्यंतच्या तक्रार निवारण प्रवाहासाठी सुरक्षित लॉगिन.", username: "वापरकर्तानाव", password: "पासवर्ड", enterUsername: "वापरकर्तानाव टाका", enterPassword: "पासवर्ड टाका", signIn: "साइन इन", signingIn: "साइन इन सुरू आहे...", newCitizen: "नवीन नागरिक?", registerHere: "येथे नोंदणी करा", trackWithoutLogin: "लॉगिनशिवाय तक्रार ट्रॅक करा", trackCta: "तिकीट आयडीने ट्रॅक करा", invalidCredentials: "अवैध लॉगिन तपशील" },
+    register: { subtitle: "नागरिक नोंदणी", description: "कोणत्याही विभागाची तक्रार नोंदवण्यासाठी, प्रगती ट्रॅक करण्यासाठी आणि निराकरणानंतर अभिप्राय देण्यासाठी जलद नोंदणी.", createAccount: "नागरिक खाते तयार करा", creating: "खाते तयार होत आहे...", accountCreated: "खाते तयार झाले! कृपया लॉगिन करा.", registrationFailed: "नोंदणी अयशस्वी", passwordsMismatch: "पासवर्ड जुळत नाहीत", alreadyRegistered: "आधीच नोंदणी केली आहे?", signIn: "साइन इन" },
+    track: { subtitle: "सार्वजनिक तिकीट ट्रॅकिंग", description: "लॉगिनशिवाय तक्रारीची स्थिती, नियुक्त अधिकारी, विभाग प्रमुख आणि संपूर्ण रूटिंग टाइमलाइन पाहा.", trackTitle: "आपली तक्रार ट्रॅक करा", noLogin: "लॉगिन आवश्यक नाही", ticketPlaceholder: "तिकीट आयडी टाका", track: "ट्रॅक", notFound: "तिकीट सापडले नाही. कृपया आयडी तपासा.", backToLogin: "लॉगिनकडे परत", routing: "रूटिंग", status: "स्थिती", timeline: "टाइमलाइन", department: "विभाग", currentLevel: "सध्याचा स्तर", assignedLocalOfficer: "नियुक्त स्थानिक अधिकारी", supervisingHead: "नियंत्रक प्रमुख", state: "राज्य", district: "जिल्हा", block: "ब्लॉक / क्षेत्र", address: "पत्ता", coordinates: "निर्देशांक", category: "वर्ग", priority: "प्राधान्य", submitted: "सादर", updated: "शेवटचे अद्यतन", openRegistration: "नागरिक नोंदणी उघडा", needMore: "आणखी हवे?" },
+  },
+  gu: {
+    common: { eyebrow: "વિશ્વસનીય ડિજિટલ જાહેર ફરિયાદ પ્રણાલી", language: "ભાષા", portalSubtitle: "એઆઈ આધારિત જાહેર ફરિયાદ નિવારણ પોર્ટલ", livePlatform: "લાઇવ જાહેર ફરિયાદ પ્લેટફોર્મ", backToPortal: "પોર્ટલ પર પાછા જાઓ", openLogin: "લોગિન ખોલો" },
+    portal: { subtitle: "એઆઈ આધારિત જાહેર ફરિયાદ નિવારણ પોર્ટલ", heroTitle: "જાહેર ફરિયાદ પ્રવેશ", heroText: "નાગરિકો માટે સરળ જાહેર પ્રવેશ: નોંધણી કરો, સાઇન ઇન કરો અથવા હાલનું ફરિયાદ ટિકિટ ટ્રેક કરો.", cardTitle: "ઉપલબ્ધ જાહેર ક્રિયાઓ", cardText: "આ જાહેર ફ્રન્ટએન્ડ ફક્ત કાર્યરત સેવાઓ માટે મર્યાદિત છે. આંતરિક અધિકારી અને એડમિન વર્કફ્લો સાઇન-ઇન પછી સુરક્ષિત રહે છે.", login: "સાઇન ઇન", register: "નોંધણી", track: "ટ્રેક", loginText: "તમારા ખાતાથી નાગરિક, અધિકારી અથવા એડમિન વર્કસ્પેસમાં પ્રવેશ કરો.", registerText: "નાગરિક ખાતું બનાવો અને ફરિયાદ નોંધાવવાનું શરૂ કરો.", trackText: "લોગિન વગર હાલનું ટિકિટ શોધો.", actionLogin: "લોગિન ખોલો", actionRegister: "નોંધણી ખોલો", actionTrack: "ફરિયાદ ટ્રેક કરો", footer: "ફક્ત નાગરિક પ્રવેશ. આંતરિક વર્કફ્લો સાઇન-ઇન પછી સુરક્ષિત છે.", accessTag: "જાહેર સેવા પ્રવેશ" },
+    login: { subtitle: "જાહેર ફરિયાદ નિવારણ પોર્ટલ", description: "કમાન્ડ ડેસ્કથી સ્થાનિક ઓપરેટર સુધીની ફરિયાદ નિવારણ પ્રક્રિયા માટે સુરક્ષિત લોગિન.", username: "યૂઝરનેમ", password: "પાસવર્ડ", enterUsername: "યૂઝરનેમ દાખલ કરો", enterPassword: "પાસવર્ડ દાખલ કરો", signIn: "સાઇન ઇન", signingIn: "સાઇન ઇન થઈ રહ્યું છે...", newCitizen: "નવા નાગરિક?", registerHere: "અહીં નોંધણી કરો", trackWithoutLogin: "લોગિન વગર ફરિયાદ ટ્રેક કરો", trackCta: "ટિકિટ આઈડીથી ટ્રેક કરો", invalidCredentials: "અમાન્ય લોગિન વિગતો" },
+    register: { subtitle: "નાગરિક નોંધણી", description: "કોઈ પણ વિભાગની ફરિયાદ નોંધાવવા, પ્રગતિ ટ્રેક કરવા અને નિવારણ પછી પ્રતિસાદ આપવા માટે ઝડપી નોંધણી.", createAccount: "નાગરિક ખાતું બનાવો", creating: "ખાતું બની રહ્યું છે...", accountCreated: "ખાતું બની ગયું! કૃપા કરીને લોગિન કરો.", registrationFailed: "નોંધણી નિષ્ફળ", passwordsMismatch: "પાસવર્ડ મેળ ખાતા નથી", alreadyRegistered: "પહેલેથી નોંધાયેલા છો?", signIn: "સાઇન ઇન" },
+    track: { subtitle: "જાહેર ટિકિટ ટ્રેકિંગ", description: "લોગિન વગર ફરિયાદની સ્થિતિ, સોંપાયેલ અધિકારી, વિભાગીય વડા અને સંપૂર્ણ રૂટિંગ સમયરેખા જુઓ.", trackTitle: "તમારી ફરિયાદ ટ્રેક કરો", noLogin: "લોગિન જરૂરી નથી", ticketPlaceholder: "ટિકિટ આઈડી દાખલ કરો", track: "ટ્રેક", notFound: "ટિકિટ મળ્યું નથી. કૃપા કરીને આઈડી તપાસો.", backToLogin: "લોગિન પર પાછા", routing: "રૂટિંગ", status: "સ્થિતિ", timeline: "સમયરેખા", department: "વિભાગ", currentLevel: "હાલનું સ્તર", assignedLocalOfficer: "સોંપાયેલ સ્થાનિક અધિકારી", supervisingHead: "સુપરવિઝિંગ હેડ", state: "રાજ્ય", district: "જિલ્લો", block: "બ્લોક / વિસ્તાર", address: "સરનામું", coordinates: "કૉર્ડિનેટ્સ", category: "શ્રેણી", priority: "પ્રાથમિકતા", submitted: "સબમિટ", updated: "છેલ્લું અપડેટ", openRegistration: "નાગરિક નોંધણી ખોલો", needMore: "વધુ જોઈએ?" },
+  },
+  kn: {
+    common: { eyebrow: "ವಿಶ್ವಾಸಾರ್ಹ ಡಿಜಿಟಲ್ ಸಾರ್ವಜನಿಕ ದೂರು ವ್ಯವಸ್ಥೆ", language: "ಭಾಷೆ", portalSubtitle: "ಎಐ ಸಹಾಯಿತ ಸಾರ್ವಜನಿಕ ದೂರು ನಿವಾರಣಾ ಪೋರ್ಟಲ್", livePlatform: "ಲೈವ್ ಸಾರ್ವಜನಿಕ ದೂರು ವೇದಿಕೆ", backToPortal: "ಪೋರ್ಟಲ್‌ಗೆ ಹಿಂದಿರುಗಿ", openLogin: "ಲಾಗಿನ್ ತೆರೆಯಿರಿ" },
+    portal: { subtitle: "ಎಐ ಸಹಾಯಿತ ಸಾರ್ವಜನಿಕ ದೂರು ನಿವಾರಣಾ ಪೋರ್ಟಲ್", heroTitle: "ಸಾರ್ವಜನಿಕ ದೂರು ಪ್ರವೇಶ", heroText: "ನಾಗರಿಕರಿಗಾಗಿ ಸರಳ ಪ್ರವೇಶ: ನೋಂದಣಿ ಮಾಡಿ, ಸೈನ್ ಇನ್ ಮಾಡಿ ಅಥವಾ ಇರುವ ದೂರು ಟಿಕೆಟ್ ಅನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.", cardTitle: "ಲಭ್ಯ ಸಾರ್ವಜನಿಕ ಕ್ರಿಯೆಗಳು", cardText: "ಸಾರ್ವಜನಿಕ ಮುಂಭಾಗವನ್ನು ಕೆಲಸ ಮಾಡುತ್ತಿರುವ ಸೇವೆಗಳಿಗಷ್ಟೇ ಮಿತಿಗೊಳಿಸಲಾಗಿದೆ. ಒಳಾಂಗಣ ಅಧಿಕಾರಿ ಮತ್ತು ಆಡ್ಮಿನ್ ಕಾರ್ಯಪ್ರವಾಹಗಳು ಸೈನ್-ಇನ್ ನಂತರ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ.", login: "ಸೈನ್ ಇನ್", register: "ನೋಂದಣಿ", track: "ಟ್ರ್ಯಾಕ್", loginText: "ನಿಮ್ಮ ಖಾತೆಯಿಂದ ನಾಗರಿಕ, ಅಧಿಕಾರಿ ಅಥವಾ ಆಡ್ಮಿನ್ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ಪ್ರವೇಶಿಸಿ.", registerText: "ನಾಗರಿಕ ಖಾತೆ ರಚಿಸಿ ಮತ್ತು ದೂರು ದಾಖಲಿಸಲು ಪ್ರಾರಂಭಿಸಿ.", trackText: "ಲಾಗಿನ್ ಇಲ್ಲದೆ ಇರುವ ಟಿಕೆಟ್ ಅನ್ನು ಹುಡುಕಿ.", actionLogin: "ಲಾಗಿನ್ ತೆರೆಯಿರಿ", actionRegister: "ನೋಂದಣಿ ತೆರೆಯಿರಿ", actionTrack: "ದೂರು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ", footer: "ನಾಗರಿಕ ಪ್ರವೇಶ ಮಾತ್ರ. ಒಳಾಂಗಣ ಕಾರ್ಯಪ್ರವಾಹಗಳು ಸೈನ್-ಇನ್ ನಂತರ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ.", accessTag: "ಸಾರ್ವಜನಿಕ ಸೇವೆ ಪ್ರವೇಶ" },
+    login: { subtitle: "ಸಾರ್ವಜನಿಕ ದೂರು ನಿವಾರಣಾ ಪೋರ್ಟಲ್", description: "ಕಮಾಂಡ್ ಡೆಸ್ಕ್‌ನಿಂದ ಸ್ಥಳೀಯ ಕಾರ್ಯನಿರ್ವಹಣಾಧಿಕಾರಿವರೆಗೆ ಸಾಗುವ ದೂರು ಪರಿಹಾರ ಹರಿವಿಗಾಗಿ ಸುರಕ್ಷಿತ ಲಾಗಿನ್.", username: "ಬಳಕೆದಾರ ಹೆಸರು", password: "ಪಾಸ್‌ವರ್ಡ್", enterUsername: "ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ", enterPassword: "ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ", signIn: "ಸೈನ್ ಇನ್", signingIn: "ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...", newCitizen: "ಹೊಸ ನಾಗರಿಕನಾ?", registerHere: "ಇಲ್ಲಿ ನೋಂದಣಿ ಮಾಡಿ", trackWithoutLogin: "ಲಾಗಿನ್ ಇಲ್ಲದೆ ದೂರು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ", trackCta: "ಟಿಕೆಟ್ ಐಡಿಯಿಂದ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ", invalidCredentials: "ಅಮಾನ್ಯ ಲಾಗಿನ್ ವಿವರಗಳು" },
+    register: { subtitle: "ನಾಗರಿಕ ನೋಂದಣಿ", description: "ಯಾವುದೇ ಇಲಾಖೆಯ ದೂರು ದಾಖಲಿಸಲು, ಪ್ರಗತಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ಮತ್ತು ಪರಿಹಾರದ ನಂತರ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ವೇಗವಾದ ನೋಂದಣಿ.", createAccount: "ನಾಗರಿಕ ಖಾತೆ ರಚಿಸಿ", creating: "ಖಾತೆ ರಚಿಸಲಾಗುತ್ತಿದೆ...", accountCreated: "ಖಾತೆ ರಚಿಸಲಾಗಿದೆ! ದಯವಿಟ್ಟು ಲಾಗಿನ್ ಮಾಡಿ.", registrationFailed: "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ", passwordsMismatch: "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ", alreadyRegistered: "ಈಗಾಗಲೇ ನೋಂದಾಯಿತರಾ?", signIn: "ಸೈನ್ ಇನ್" },
+    track: { subtitle: "ಸಾರ್ವಜನಿಕ ಟಿಕೆಟ್ ಟ್ರ್ಯಾಕಿಂಗ್", description: "ಲಾಗಿನ್ ಇಲ್ಲದೆ ದೂರು ಸ್ಥಿತಿ, ನಿಯೋಜಿತ ಅಧಿಕಾರಿ, ಇಲಾಖಾ ಮುಖ್ಯಸ್ಥ ಮತ್ತು ಪೂರ್ಣ ಮಾರ್ಗಕ್ರಮ ಕಾಲರೇಖೆಯನ್ನು ನೋಡಿ.", trackTitle: "ನಿಮ್ಮ ದೂರನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ", noLogin: "ಲಾಗಿನ್ ಅಗತ್ಯವಿಲ್ಲ", ticketPlaceholder: "ಟಿಕೆಟ್ ಐಡಿ ನಮೂದಿಸಿ", track: "ಟ್ರ್ಯಾಕ್", notFound: "ಟಿಕೆಟ್ ಸಿಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಐಡಿಯನ್ನು ಪರಿಶೀಲಿಸಿ.", backToLogin: "ಲಾಗಿನ್‌ಗೆ ಹಿಂದಿರುಗಿ", routing: "ಮಾರ್ಗೀಕರಣ", status: "ಸ್ಥಿತಿ", timeline: "ಕಾಲರೇಖೆ", department: "ವಿಭಾಗ", currentLevel: "ಪ್ರಸ್ತುತ ಹಂತ", assignedLocalOfficer: "ನಿಯೋಜಿತ ಸ್ಥಳೀಯ ಅಧಿಕಾರಿ", supervisingHead: "ಪರಿವೀಕ್ಷಕ ಮುಖ್ಯಸ್ಥ", state: "ರಾಜ್ಯ", district: "ಜಿಲ್ಲೆ", block: "ಬ್ಲಾಕ್ / ಪ್ರದೇಶ", address: "ವಿಳಾಸ", coordinates: "ನಿರ್ದೇಶಾಂಕಗಳು", category: "ವರ್ಗ", priority: "ಆದ್ಯತೆ", submitted: "ಸಲ್ಲಿಸಲಾಗಿದೆ", updated: "ಕೊನೆಯ ನವೀಕರಣ", openRegistration: "ನಾಗರಿಕ ನೋಂದಣಿಯನ್ನು ತೆರೆಯಿರಿ", needMore: "ಇನ್ನಷ್ಟು ಬೇಕೇ?" },
+  },
+  ml: {
+    common: { eyebrow: "വിശ്വാസയോഗ്യമായ ഡിജിറ്റൽ പൊതുപരാതി സംവിധാനം", language: "ഭാഷ", portalSubtitle: "എഐ സഹായമുള്ള പൊതുപരാതി പരിഹാര പോർട്ടൽ", livePlatform: "ലൈവ് പൊതുപരാതി പ്ലാറ്റ്ഫോം", backToPortal: "പോർട്ടലിലേക്ക് മടങ്ങുക", openLogin: "ലോഗിൻ തുറക്കുക" },
+    portal: { subtitle: "എഐ സഹായമുള്ള പൊതുപരാതി പരിഹാര പോർട്ടൽ", heroTitle: "പൊതു പരാതിയിലേക്കുള്ള പ്രവേശനം", heroText: "പൗരന്മാർക്കായി ലളിതമായ പ്രവേശനം: രജിസ്റ്റർ ചെയ്യുക, സൈൻ ഇൻ ചെയ്യുക, അല്ലെങ്കിൽ നിലവിലുള്ള പരാതി ടിക്കറ്റ് പിന്തുടരുക.", cardTitle: "ലഭ്യമായ പൊതു സേവനങ്ങൾ", cardText: "പൊതു ഫ്രണ്ട്‌എൻഡ് പ്രവർത്തിക്കുന്ന സേവനങ്ങളിലേക്ക് മാത്രം പരിമിതപ്പെടുത്തിയിരിക്കുന്നു. ആഭ്യന്തര ഉദ്യോഗസ്ഥരും അഡ്മിൻ പ്രവാഹങ്ങളും സൈൻ-ഇൻ കഴിഞ്ഞ് സംരക്ഷിക്കപ്പെടുന്നു.", login: "സൈൻ ഇൻ", register: "രജിസ്റ്റർ", track: "ട്രാക്ക്", loginText: "നിങ്ങളുടെ അക്കൗണ്ട് ഉപയോഗിച്ച് പൗരൻ, ഉദ്യോഗസ്ഥൻ, അല്ലെങ്കിൽ അഡ്മിൻ പ്രവർത്തിസ്ഥലത്തിലേക്ക് പ്രവേശിക്കുക.", registerText: "പൗരൻ അക്കൗണ്ട് സൃഷ്ടിച്ച് പരാതികൾ നൽകാൻ തുടങ്ങുക.", trackText: "ലോഗിൻ ഇല്ലാതെ നിലവിലുള്ള ടിക്കറ്റ് തിരയുക.", actionLogin: "ലോഗിൻ തുറക്കുക", actionRegister: "രജിസ്ട്രേഷൻ തുറക്കുക", actionTrack: "പരാതി ട്രാക്ക് ചെയ്യുക", footer: "പൗരന്മാർക്കുള്ള പ്രവേശനം മാത്രം. ആഭ്യന്തര പ്രവർത്തനങ്ങൾ സൈൻ-ഇൻ കഴിഞ്ഞ് സംരക്ഷിക്കപ്പെടുന്നു.", accessTag: "പൊതു സേവന പ്രവേശനം" },
+    login: { subtitle: "പൊതുപരാതി പരിഹാര പോർട്ടൽ", description: "കമാൻഡ് ഡെസ്കിൽ നിന്ന് പ്രാദേശിക ഓപ്പറേറ്റർ വരെ പോകുന്ന പരാതി പരിഹാര പ്രവാഹത്തിനായുള്ള സുരക്ഷിത സൈൻ-ഇൻ.", username: "യൂസർനേം", password: "പാസ്‌വേഡ്", enterUsername: "യൂസർനേം നൽകുക", enterPassword: "പാസ്‌വേഡ് നൽകുക", signIn: "സൈൻ ഇൻ", signingIn: "സൈൻ ഇൻ ചെയ്യുന്നു...", newCitizen: "പുതിയ പൗരനാണോ?", registerHere: "ഇവിടെ രജിസ്റ്റർ ചെയ്യുക", trackWithoutLogin: "ലോഗിൻ ഇല്ലാതെ പരാതി ട്രാക്ക് ചെയ്യുക", trackCta: "ടിക്കറ്റ് ഐഡി ഉപയോഗിച്ച് ട്രാക്ക് ചെയ്യുക", invalidCredentials: "അസാധുവായ ലോഗിൻ വിവരങ്ങൾ" },
+    register: { subtitle: "പൗരൻ രജിസ്ട്രേഷൻ", description: "ഏത് വകുപ്പിലേയും പരാതികൾ നൽകാനും പുരോഗതി പിന്തുടരാനും പരിഹാരത്തിനു ശേഷം പ്രതികരണം നൽകാനും വേഗത്തിലുള്ള രജിസ്ട്രേഷൻ.", createAccount: "പൗരൻ അക്കൗണ്ട് സൃഷ്ടിക്കുക", creating: "അക്കൗണ്ട് സൃഷ്ടിക്കുന്നു...", accountCreated: "അക്കൗണ്ട് സൃഷ്ടിച്ചു! ദയവായി ലോഗിൻ ചെയ്യുക.", registrationFailed: "രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു", passwordsMismatch: "പാസ്‌വേഡുകൾ ഒത്തുപോകുന്നില്ല", alreadyRegistered: "ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ?", signIn: "സൈൻ ഇൻ" },
+    track: { subtitle: "പൊതു ടിക്കറ്റ് ട്രാക്കിംഗ്", description: "ലോഗിൻ ഇല്ലാതെ പരാതിയുടെ നില, ചുമതലപ്പെടുത്തിയ ഉദ്യോഗസ്ഥൻ, വിഭാഗം മേധാവി, പൂർണ്ണ റൂട്ടിംഗ് ടൈംലൈൻ എന്നിവ കാണുക.", trackTitle: "നിങ്ങളുടെ പരാതി ട്രാക്ക് ചെയ്യുക", noLogin: "ലോഗിൻ ആവശ്യമില്ല", ticketPlaceholder: "ടിക്കറ്റ് ഐഡി നൽകുക", track: "ട്രാക്ക്", notFound: "ടിക്കറ്റ് കണ്ടെത്തിയില്ല. ദയവായി ഐഡി പരിശോധിക്കുക.", backToLogin: "ലോഗിനിലേക്ക് മടങ്ങുക", routing: "റൂട്ടിംഗ്", status: "സ്ഥിതി", timeline: "ടൈംലൈൻ", department: "വകുപ്പ്", currentLevel: "നിലവിലെ നില", assignedLocalOfficer: "ചുമതലപ്പെടുത്തിയ പ്രാദേശിക ഉദ്യോഗസ്ഥൻ", supervisingHead: "പരിപാലന മേധാവി", state: "സംസ്ഥാനം", district: "ജില്ല", block: "ബ്ലോക്ക് / പ്രദേശം", address: "വിലാസം", coordinates: "കോഓർഡിനേറ്റുകൾ", category: "വിഭാഗം", priority: "പ്രാധാന്യം", submitted: "സമർപ്പിച്ചത്", updated: "അവസാന പുതുക്കൽ", openRegistration: "പൗരൻ രജിസ്ട്രേഷൻ തുറക്കുക", needMore: "ഇനിയും വേണോ?" },
+  },
+  pa: {
+    common: { eyebrow: "ਭਰੋਸੇਯੋਗ ਡਿਜ਼ਿਟਲ ਜਨ-ਸ਼ਿਕਾਇਤ ਪ੍ਰਣਾਲੀ", language: "ਭਾਸ਼ਾ", portalSubtitle: "ਏਆਈ-ਸਹਾਇਤ ਜਨ-ਸ਼ਿਕਾਇਤ ਨਿਵਾਰਣ ਪੋਰਟਲ", livePlatform: "ਲਾਈਵ ਜਨ-ਸ਼ਿਕਾਇਤ ਪਲੇਟਫਾਰਮ", backToPortal: "ਪੋਰਟਲ ‘ਤੇ ਵਾਪਸ ਜਾਓ", openLogin: "ਲੌਗਇਨ ਖੋਲ੍ਹੋ" },
+    portal: { subtitle: "ਏਆਈ-ਸਹਾਇਤ ਜਨ-ਸ਼ਿਕਾਇਤ ਨਿਵਾਰਣ ਪੋਰਟਲ", heroTitle: "ਜਨ-ਸ਼ਿਕਾਇਤ ਪ੍ਰਵੇਸ਼", heroText: "ਨਾਗਰਿਕਾਂ ਲਈ ਆਸਾਨ ਪ੍ਰਵੇਸ਼: ਰਜਿਸਟਰ ਕਰੋ, ਸਾਈਨ ਇਨ ਕਰੋ ਜਾਂ ਮੌਜੂਦਾ ਸ਼ਿਕਾਇਤ ਟਿਕਟ ਨੂੰ ਟ੍ਰੈਕ ਕਰੋ।", cardTitle: "ਉਪਲਬਧ ਜਨਤਕ ਕਾਰਵਾਈਆਂ", cardText: "ਇਹ ਜਨਤਕ ਫਰੰਟਐਂਡ ਕੇਵਲ ਕੰਮ ਕਰ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਤੱਕ ਸੀਮਿਤ ਹੈ। ਅੰਦਰੂਨੀ ਅਧਿਕਾਰੀ ਅਤੇ ਐਡਮਿਨ ਵਰਕਫਲੋ ਸਾਈਨ-ਇਨ ਤੋਂ ਬਾਅਦ ਸੁਰੱਖਿਅਤ ਰਹਿੰਦੇ ਹਨ।", login: "ਸਾਈਨ ਇਨ", register: "ਰਜਿਸਟਰ", track: "ਟ੍ਰੈਕ", loginText: "ਆਪਣੇ ਖਾਤੇ ਨਾਲ ਨਾਗਰਿਕ, ਅਧਿਕਾਰੀ ਜਾਂ ਐਡਮਿਨ ਵਰਕਸਪੇਸ ਵਿੱਚ ਪ੍ਰਵੇਸ਼ ਕਰੋ।", registerText: "ਨਾਗਰਿਕ ਖਾਤਾ ਬਣਾਓ ਅਤੇ ਸ਼ਿਕਾਇਤ ਦਰਜ ਕਰਨੀ ਸ਼ੁਰੂ ਕਰੋ।", trackText: "ਲੌਗਇਨ ਤੋਂ ਬਿਨਾ ਮੌਜੂਦਾ ਟਿਕਟ ਖੋਜੋ।", actionLogin: "ਲੌਗਇਨ ਖੋਲ੍ਹੋ", actionRegister: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਖੋਲ੍ਹੋ", actionTrack: "ਸ਼ਿਕਾਇਤ ਟ੍ਰੈਕ ਕਰੋ", footer: "ਕੇਵਲ ਨਾਗਰਿਕ ਪ੍ਰਵੇਸ਼। ਅੰਦਰੂਨੀ ਵਰਕਫਲੋ ਸਾਈਨ-ਇਨ ਤੋਂ ਬਾਅਦ ਸੁਰੱਖਿਅਤ ਰਹਿੰਦੇ ਹਨ।", accessTag: "ਜਨਤਕ ਸੇਵਾ ਪ੍ਰਵੇਸ਼" },
+    login: { subtitle: "ਜਨ-ਸ਼ਿਕਾਇਤ ਨਿਵਾਰਣ ਪੋਰਟਲ", description: "ਕਮਾਂਡ ਡੈਸਕ ਤੋਂ ਸਥਾਨਕ ਆਪਰੇਟਰ ਤੱਕ ਸ਼ਿਕਾਇਤ ਨਿਵਾਰਣ ਪ੍ਰਕਿਰਿਆ ਲਈ ਸੁਰੱਖਿਅਤ ਲੌਗਇਨ।", username: "ਯੂਜ਼ਰਨਾਮ", password: "ਪਾਸਵਰਡ", enterUsername: "ਯੂਜ਼ਰਨਾਮ ਦਰਜ ਕਰੋ", enterPassword: "ਪਾਸਵਰਡ ਦਰਜ ਕਰੋ", signIn: "ਸਾਈਨ ਇਨ", signingIn: "ਸਾਈਨ ਇਨ ਹੋ ਰਿਹਾ ਹੈ...", newCitizen: "ਨਵਾਂ ਨਾਗਰਿਕ?", registerHere: "ਇੱਥੇ ਰਜਿਸਟਰ ਕਰੋ", trackWithoutLogin: "ਲੌਗਇਨ ਤੋਂ ਬਿਨਾ ਸ਼ਿਕਾਇਤ ਟ੍ਰੈਕ ਕਰੋ", trackCta: "ਟਿਕਟ ਆਈਡੀ ਨਾਲ ਟ੍ਰੈਕ ਕਰੋ", invalidCredentials: "ਗਲਤ ਲੌਗਇਨ ਵੇਰਵੇ" },
+    register: { subtitle: "ਨਾਗਰਿਕ ਰਜਿਸਟ੍ਰੇਸ਼ਨ", description: "ਕਿਸੇ ਵੀ ਵਿਭਾਗ ਦੀ ਸ਼ਿਕਾਇਤ ਦਰਜ ਕਰਨ, ਪ੍ਰਗਤੀ ਟ੍ਰੈਕ ਕਰਨ ਅਤੇ ਨਿਪਟਾਰੇ ਤੋਂ ਬਾਅਦ ਫੀਡਬੈਕ ਦੇਣ ਲਈ ਤੇਜ਼ ਰਜਿਸਟ੍ਰੇਸ਼ਨ।", createAccount: "ਨਾਗਰਿਕ ਖਾਤਾ ਬਣਾਓ", creating: "ਖਾਤਾ ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...", accountCreated: "ਖਾਤਾ ਬਣ ਗਿਆ! ਕਿਰਪਾ ਕਰਕੇ ਲੌਗਇਨ ਕਰੋ।", registrationFailed: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਸਫਲ", passwordsMismatch: "ਪਾਸਵਰਡ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ", alreadyRegistered: "ਪਹਿਲਾਂ ਹੀ ਰਜਿਸਟਰ ਹੋ?", signIn: "ਸਾਈਨ ਇਨ" },
+    track: { subtitle: "ਜਨਤਕ ਟਿਕਟ ਟ੍ਰੈਕਿੰਗ", description: "ਲੌਗਇਨ ਤੋਂ ਬਿਨਾ ਸ਼ਿਕਾਇਤ ਦੀ ਸਥਿਤੀ, ਨਿਯੁਕਤ ਅਧਿਕਾਰੀ, ਵਿਭਾਗੀ ਮੁਖੀ ਅਤੇ ਪੂਰੀ ਰੂਟਿੰਗ ਟਾਈਮਲਾਈਨ ਵੇਖੋ।", trackTitle: "ਆਪਣੀ ਸ਼ਿਕਾਇਤ ਟ੍ਰੈਕ ਕਰੋ", noLogin: "ਲੌਗਇਨ ਦੀ ਲੋੜ ਨਹੀਂ", ticketPlaceholder: "ਟਿਕਟ ਆਈਡੀ ਦਰਜ ਕਰੋ", track: "ਟ੍ਰੈਕ", notFound: "ਟਿਕਟ ਨਹੀਂ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਆਈਡੀ ਚੈੱਕ ਕਰੋ।", backToLogin: "ਲੌਗਇਨ ‘ਤੇ ਵਾਪਸ", routing: "ਰੂਟਿੰਗ", status: "ਸਥਿਤੀ", timeline: "ਟਾਈਮਲਾਈਨ", department: "ਵਿਭਾਗ", currentLevel: "ਮੌਜੂਦਾ ਪੱਧਰ", assignedLocalOfficer: "ਨਿਯੁਕਤ ਸਥਾਨਕ ਅਧਿਕਾਰੀ", supervisingHead: "ਸੁਪਰਵਾਈਜ਼ਿੰਗ ਮੁਖੀ", state: "ਰਾਜ", district: "ਜ਼ਿਲ੍ਹਾ", block: "ਬਲਾਕ / ਖੇਤਰ", address: "ਪਤਾ", coordinates: "ਕੋਆਰਡੀਨੇਟ", category: "ਸ਼੍ਰੇਣੀ", priority: "ਤਰਜੀਹ", submitted: "ਜਮ੍ਹਾਂ", updated: "ਆਖਰੀ ਅਪਡੇਟ", openRegistration: "ਨਾਗਰਿਕ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਖੋਲ੍ਹੋ", needMore: "ਹੋਰ ਚਾਹੀਦਾ?" },
+  },
+  or: {
+    common: { eyebrow: "ଭରସାଯୋଗ୍ୟ ଡିଜିଟାଲ ଜନ-ଅଭିଯୋଗ ପ୍ରଣାଳୀ", language: "ଭାଷା", portalSubtitle: "AI ସହାୟିତ ଜନ-ଅଭିଯୋଗ ନିରାକରଣ ପୋର୍ଟାଲ", livePlatform: "ଲାଇଭ୍ ଜନ-ଅଭିଯୋଗ ପ୍ଲାଟଫର୍ମ", backToPortal: "ପୋର୍ଟାଲକୁ ଫେରନ୍ତୁ", openLogin: "ଲଗଇନ ଖୋଲନ୍ତୁ" },
+    portal: { subtitle: "AI ସହାୟିତ ଜନ-ଅଭିଯୋଗ ନିରାକରଣ ପୋର୍ଟାଲ", heroTitle: "ସାର୍ବଜନିକ ଅଭିଯୋଗ ପ୍ରବେଶ", heroText: "ନାଗରିକଙ୍କ ପାଇଁ ସରଳ ପ୍ରବେଶ: ନୋନ୍ଦଣୀ କରନ୍ତୁ, ସାଇନ୍-ଇନ୍ କରନ୍ତୁ କିମ୍ବା ଅବସ୍ଥିତ ଟିକେଟ୍ ଟ୍ରାକ୍ କରନ୍ତୁ।", cardTitle: "ଉପଲବ୍ଧ ସାର୍ବଜନିକ ସେବା", cardText: "ସାର୍ବଜନିକ ଫ୍ରଣ୍ଟଏଣ୍ଡ କେବଳ କାର୍ଯ୍ୟଶୀଳ ସେବା ପର୍ଯ୍ୟନ୍ତ ସୀମିତ। ଭିତରୀଣ ଅଧିକାରୀ ଏବଂ ଆଡମିନ୍ ୱର୍କଫ୍ଲୋ ସାଇନ୍-ଇନ୍ ପରେ ସୁରକ୍ଷିତ ରହିବ।", login: "ସାଇନ୍ ଇନ୍", register: "ନୋନ୍ଦଣୀ", track: "ଟ୍ରାକ୍", loginText: "ଆପଣଙ୍କ ଖାତା ଦ୍ୱାରା ନାଗରିକ, ଅଧିକାରୀ କିମ୍ବା ଆଡମିନ୍ ୱର୍କସ୍ପେସକୁ ପ୍ରବେଶ କରନ୍ତୁ।", registerText: "ନାଗରିକ ଖାତା ସୃଷ୍ଟି କରି ଅଭିଯୋଗ ଦାଖଲ ଆରମ୍ଭ କରନ୍ତୁ।", trackText: "ଲଗଇନ୍ ବିନା ପୂର୍ବରୁ ଥିବା ଟିକେଟ୍ ଖୋଜନ୍ତୁ।", actionLogin: "ଲଗଇନ୍ ଖୋଲନ୍ତୁ", actionRegister: "ନୋନ୍ଦଣୀ ଖୋଲନ୍ତୁ", actionTrack: "ଅଭିଯୋଗ ଟ୍ରାକ୍ କରନ୍ତୁ", footer: "କେବଳ ନାଗରିକ ପ୍ରବେଶ। ଭିତରୀଣ ୱର୍କଫ୍ଲୋ ସାଇନ୍-ଇନ୍ ପରେ ସୁରକ୍ଷିତ ରହିବ।", accessTag: "ସାର୍ବଜନିକ ସେବା ପ୍ରବେଶ" },
+  },
+  ur: {
+    common: { eyebrow: "قابلِ اعتماد ڈیجیٹل عوامی شکایت نظام", language: "زبان", portalSubtitle: "اے آئی معاون عوامی شکایت ازالہ پورٹل", livePlatform: "لائیو عوامی شکایت پلیٹ فارم", backToPortal: "پورٹل پر واپس جائیں", openLogin: "لاگ ان کھولیں" },
+    portal: { subtitle: "اے آئی معاون عوامی شکایت ازالہ پورٹل", heroTitle: "عوامی شکایت رسائی", heroText: "شہریوں کے لیے سادہ رسائی: رجسٹر کریں، سائن ان کریں، یا موجودہ شکایت ٹکٹ ٹریک کریں۔", cardTitle: "دستیاب عوامی خدمات", cardText: "یہ عوامی فرنٹ اینڈ صرف کام کرنے والی خدمات تک محدود ہے۔ اندرونی افسر اور ایڈمن ورک فلو سائن اِن کے بعد محفوظ رہتے ہیں۔", login: "سائن اِن", register: "رجسٹر", track: "ٹریک", loginText: "اپنے اکاؤنٹ سے شہری، افسر یا ایڈمن ورک اسپیس میں داخل ہوں۔", registerText: "شہری اکاؤنٹ بنائیں اور شکایات درج کرنا شروع کریں۔", trackText: "لاگ اِن کے بغیر موجودہ ٹکٹ تلاش کریں۔", actionLogin: "لاگ ان کھولیں", actionRegister: "رجسٹریشن کھولیں", actionTrack: "شکایت ٹریک کریں", footer: "صرف شہری داخلہ۔ اندرونی ورک فلو سائن اِن کے بعد محفوظ رہتے ہیں۔", accessTag: "عوامی سروس رسائی" },
+    login: { subtitle: "عوامی شکایت ازالہ پورٹل", description: "کمانڈ ڈیسک سے مقامی آپریٹر تک شکایت حل کے بہاؤ کے لیے محفوظ لاگ اِن۔", username: "یوزرنیم", password: "پاس ورڈ", enterUsername: "یوزرنیم درج کریں", enterPassword: "پاس ورڈ درج کریں", signIn: "سائن اِن", signingIn: "سائن اِن ہو رہا ہے...", newCitizen: "نیا شہری؟", registerHere: "یہاں رجسٹر کریں", trackWithoutLogin: "لاگ اِن کے بغیر شکایت ٹریک کریں", trackCta: "ٹکٹ آئی ڈی سے ٹریک کریں", invalidCredentials: "غلط لاگ اِن تفصیلات" },
+    register: { subtitle: "شہری رجسٹریشن", description: "کسی بھی محکمے کی شکایت درج کرنے، پیش رفت دیکھنے اور حل کے بعد فیڈبیک دینے کے لیے تیز رجسٹریشن۔", createAccount: "شہری اکاؤنٹ بنائیں", creating: "اکاؤنٹ بنایا جا رہا ہے...", accountCreated: "اکاؤنٹ بن گیا! براہِ کرم لاگ اِن کریں۔", registrationFailed: "رجسٹریشن ناکام", passwordsMismatch: "پاس ورڈ مماثل نہیں", alreadyRegistered: "پہلے سے رجسٹر ہیں؟", signIn: "سائن اِن" },
+    track: { subtitle: "عوامی ٹکٹ ٹریکنگ", description: "لاگ اِن کے بغیر شکایت کی حالت، مقرر افسر، محکماتی سربراہ اور مکمل روٹنگ ٹائم لائن دیکھیں۔", trackTitle: "اپنی شکایت ٹریک کریں", noLogin: "لاگ اِن ضروری نہیں", ticketPlaceholder: "ٹکٹ آئی ڈی درج کریں", track: "ٹریک", notFound: "ٹکٹ نہیں ملا۔ براہِ کرم آئی ڈی چیک کریں۔", backToLogin: "لاگ اِن پر واپس", routing: "روٹنگ", status: "حالت", timeline: "ٹائم لائن", department: "محکمہ", currentLevel: "موجودہ سطح", assignedLocalOfficer: "مقامی مقرر افسر", supervisingHead: "نگران سربراہ", state: "ریاست", district: "ضلع", block: "بلاک / علاقہ", address: "پتہ", coordinates: "کوآرڈینیٹس", category: "زمرہ", priority: "ترجیح", submitted: "جمع شدہ", updated: "آخری تازہ کاری", openRegistration: "شہری رجسٹریشن کھولیں", needMore: "مزید چاہیے؟" },
+  },
+  as: {
+    common: { eyebrow: "বিশ্বস্ত ডিজিটেল জনঅভিযোগ ব্যৱস্থা", language: "ভাষা", portalSubtitle: "এআই-সহায়িত জনঅভিযোগ নিষ্পত্তি প’ৰ্টেল", livePlatform: "লাইভ জনঅভিযোগ প্লেটফৰ্ম", backToPortal: "প’ৰ্টেললৈ উভতি যাওক", openLogin: "লগইন খোলক" },
+    portal: { subtitle: "এআই-সহায়িত জনঅভিযোগ নিষ্পত্তি প’ৰ্টেল", heroTitle: "সাৰ্বজনীন অভিযোগ প্ৰৱেশ", heroText: "নাগৰিকৰ বাবে সৰল প্ৰৱেশ: নিবন্ধন কৰক, সাইন ইন কৰক বা বিদ্যমান অভিযোগ টিকেট ট্ৰেক কৰক।", cardTitle: "উপলব্ধ সাৰ্বজনীন সেৱা", cardText: "সাৰ্বজনীন ফ্ৰণ্টএণ্ড কেৱল কাৰ্যকৰী সেৱালৈ সীমাবদ্ধ। আভ্যন্তৰীণ বিষয়া আৰু এডমিন ৱৰ্কফ্ল’ সাইন-ইনৰ পিছত সুৰক্ষিত থাকে।", login: "সাইন ইন", register: "নিবন্ধন", track: "ট্ৰেক", loginText: "আপোনাৰ একাউণ্টেৰে নাগৰিক, বিষয়া বা এডমিন ৱৰ্কস্পেচলৈ প্ৰৱেশ কৰক।", registerText: "নাগৰিক একাউণ্ট তৈয়াৰ কৰি অভিযোগ দাখিল আৰম্ভ কৰক।", trackText: "লগইন নকৰি বিদ্যমান টিকেট বিচাৰক।", actionLogin: "লগইন খোলক", actionRegister: "নিবন্ধন খোলক", actionTrack: "অভিযোগ ট্ৰেক কৰক", footer: "কেৱল নাগৰিকৰ বাবে প্ৰৱেশ। আভ্যন্তৰীণ ৱৰ্কফ্ল’ সাইন-ইনৰ পিছত সুৰক্ষিত থাকে।", accessTag: "সাৰ্বজনীন সেৱা প্ৰৱেশ" },
+  },
+};
+
+export function getPublicText(language = "en") {
+  return mergeDeep(base, overrides[language] || {});
+}
