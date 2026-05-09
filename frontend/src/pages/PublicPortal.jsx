@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth";
 import {
   Activity,
@@ -141,7 +142,10 @@ const copy = {
     contactCta: "Open Process Flow",
     mobileTitle: "Mobile-Ready Workflow",
     mobileText: "The same workflow is designed for progressive mobile rollout: citizen intake, field updates, photo proof, and public tracking.",
-    mobileCta: "Open Public Tracking",
+    mobileCta: "Mobile App Coming Soon",
+    mobileSoon: "Mobile app rollout is coming soon. The current working flow is available on the web portal.",
+    reminderSoon: "Reminder and appeal automation are planned in the next release.",
+    accountRecoverySoon: "Password and username recovery UI is coming soon.",
     footerLine1: "Jan Samadhan AI is configured here as an India-ready water grievance command platform.",
     footerLine2: "Current build includes central-to-village routing, officer hierarchy, escalation flow, and citizen tracking.",
     processTitle: "Water Redress Process Flow",
@@ -268,7 +272,10 @@ const copy = {
     contactCta: "प्रक्रिया देखें",
     mobileTitle: "मोबाइल-रेडी वर्कफ़्लो",
     mobileText: "यही वर्कफ़्लो मोबाइल रोलआउट के लिए भी उपयुक्त है: शिकायत, फोटो प्रूफ, फील्ड अपडेट और सार्वजनिक ट्रैकिंग।",
-    mobileCta: "पब्लिक ट्रैकिंग खोलें",
+    mobileCta: "मोबाइल ऐप जल्द आ रहा है",
+    mobileSoon: "मोबाइल ऐप रोलआउट जल्द आ रहा है। अभी पूरा कार्यशील प्रवाह वेब पोर्टल पर उपलब्ध है।",
+    reminderSoon: "रिमाइंडर और अपील ऑटोमेशन अगले रिलीज़ में जोड़े जाएंगे।",
+    accountRecoverySoon: "पासवर्ड और यूज़रनेम रिकवरी UI जल्द आ रहा है।",
     footerLine1: "जन समाधान एआई यहां भारत-उन्मुख जल शिकायत कमांड प्लेटफॉर्म के रूप में कॉन्फ़िगर किया गया है।",
     footerLine2: "वर्तमान बिल्ड में केंद्र से गांव तक रूटिंग, अधिकारी पदानुक्रम, एस्केलेशन फ्लो और नागरिक ट्रैकिंग शामिल है।",
     processTitle: "जल निवारण प्रक्रिया प्रवाह",
@@ -339,6 +346,13 @@ function authAwarePath(user, role) {
   return user ? getDashboardPath(user.role) : role === "CITIZEN" ? "/register" : "/login";
 }
 
+function showPortalToast(message) {
+  toast(message, {
+    icon: "⏳",
+    duration: 3200,
+  });
+}
+
 function portalActionPath(user, actionKey) {
   if (actionKey === "citizen") return authAwarePath(user, "CITIZEN");
   if (actionKey === "officer") return user?.role === "OFFICER" ? "/officer/dashboard" : "/login";
@@ -391,7 +405,9 @@ function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpe
         <Link to="/process-flow"><Network size={14} /> {t.process}</Link>
         <Link to={grievanceTarget}><FileText size={14} /> {t.grievance}</Link>
         <Link to={officerTarget}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
-        <a href="#mobile"><Smartphone size={14} /> {t.mobileApp}</a>
+        <button type="button" onClick={() => showPortalToast(t.mobileSoon)} className="inline-flex items-center gap-1.5">
+          <Smartphone size={14} /> {t.mobileApp}
+        </button>
         <Link to="/sitemap" className="ml-auto hidden lg:inline-flex"><Network size={14} /> {t.sitemap}</Link>
       </nav>
       {mobileOpen && (
@@ -401,7 +417,15 @@ function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpe
           <Link to="/process-flow" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.process}</Link>
           <Link to={grievanceTarget} onClick={() => setMobileOpen(false)}><FileText size={14} /> {t.grievance}</Link>
           <Link to={officerTarget} onClick={() => setMobileOpen(false)}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
-          <a href="#mobile" onClick={() => setMobileOpen(false)}><Smartphone size={14} /> {t.mobileApp}</a>
+          <button
+            type="button"
+            onClick={() => {
+              setMobileOpen(false);
+              showPortalToast(t.mobileSoon);
+            }}
+          >
+            <Smartphone size={14} /> {t.mobileApp}
+          </button>
           <Link to="/sitemap" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.sitemap}</Link>
         </nav>
       )}
@@ -509,26 +533,26 @@ export function SitemapPage() {
               </div>
               <div className="sitemap-column">
                 <div className="sitemap-box">#{t.appeal}</div>
-                <Link to="/track" className="sitemap-box small">{t.viewStatus}</Link>
+                <button type="button" className="sitemap-box small" onClick={() => showPortalToast(t.reminderSoon)}>{t.viewStatus}</button>
               </div>
               <div className="sitemap-column">
                 <div className="sitemap-box">#{t.grievance}</div>
                 <Link to="/track" className="sitemap-box small">{t.viewStatus}</Link>
               </div>
               <div className="sitemap-column">
-                <Link to="/track" className="sitemap-box">{t.sendReminder}</Link>
+                <button type="button" className="sitemap-box" onClick={() => showPortalToast(t.reminderSoon)}>{t.sendReminder}</button>
               </div>
             </div>
             <div className="sitemap-branches login-row">
               <div className="sitemap-column">
                 <Link to="/login" className="sitemap-box small">{t.userLogin}</Link>
-                <Link to="/citizen/dashboard" className="sitemap-box small">{t.lodgeGrievance}</Link>
+                <Link to={authAwarePath(user, "CITIZEN")} className="sitemap-box small">{t.lodgeGrievance}</Link>
                 <Link to="/track" className="sitemap-box small">{t.viewStatus}</Link>
-                <Link to="/citizen/dashboard" className="sitemap-box small">{t.rateGrievance}</Link>
+                <Link to={authAwarePath(user, "CITIZEN")} className="sitemap-box small">{t.rateGrievance}</Link>
               </div>
               <Link to="/register" className="sitemap-box small">{t.userRegistration}</Link>
-              <Link to="/login" className="sitemap-box small">{t.forgotPassword}</Link>
-              <Link to="/login" className="sitemap-box small">{t.forgotUsername}</Link>
+              <button type="button" className="sitemap-box small" onClick={() => showPortalToast(t.accountRecoverySoon)}>{t.forgotPassword}</button>
+              <button type="button" className="sitemap-box small" onClick={() => showPortalToast(t.accountRecoverySoon)}>{t.forgotUsername}</button>
             </div>
           </div>
         </section>
@@ -865,7 +889,7 @@ export default function PublicPortal() {
               <Smartphone size={22} />
               <h3>{t.mobileTitle}</h3>
               <p>{t.mobileText}</p>
-              <Link to="/track">{t.mobileCta}</Link>
+              <button type="button" onClick={() => showPortalToast(t.mobileSoon)}>{t.mobileCta}</button>
             </div>
           </div>
         </section>
