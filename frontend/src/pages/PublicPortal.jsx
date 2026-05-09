@@ -192,11 +192,11 @@ export default function PublicPortal() {
             </div>
             <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">{portal.heroTitle}</h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
-            <figure className="mt-6 overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/5 shadow-[0_24px_60px_rgba(8,15,32,0.24)]">
+            <figure className="mt-6 overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white shadow-[0_24px_60px_rgba(8,15,32,0.24)]">
               <img
                 src={citizenGuidanceArt}
                 alt="Citizen using a phone to submit a grievance with location and department routing guidance"
-                className="h-72 w-full object-contain bg-[#152038] object-center p-3 md:h-[24rem] md:p-4"
+                className="h-72 w-full object-contain bg-white object-center p-3 md:h-[24rem] md:p-4"
               />
               <figcaption className="flex items-center justify-between gap-3 bg-[#0f1728]/90 px-4 py-3 text-xs text-slate-300">
                 <span>Citizen-friendly complaint filing and smart routing</span>
