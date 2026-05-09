@@ -191,6 +191,18 @@ export default function PublicPortal() {
             </div>
             <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">{portal.heroTitle}</h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
+            <figure className="mt-6 overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/5 shadow-[0_24px_60px_rgba(8,15,32,0.24)]">
+              <img
+                src="https://images.pexels.com/photos/20791613/pexels-photo-20791613/free-photo-of-person-using-an-app-on-the-smartphone.jpeg?auto=compress&cs=tinysrgb&dpr=1&h=750&w=1260"
+                alt="Citizen using a smartphone app to file or track a grievance"
+                className="h-52 w-full object-cover object-center md:h-60"
+                loading="lazy"
+              />
+              <figcaption className="flex items-center justify-between gap-3 bg-[#0f1728]/90 px-4 py-3 text-xs text-slate-300">
+                <span>Citizen-friendly mobile grievance access</span>
+                <span className="text-cyan-300">Photo: Pexels</span>
+              </figcaption>
+            </figure>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/register"
