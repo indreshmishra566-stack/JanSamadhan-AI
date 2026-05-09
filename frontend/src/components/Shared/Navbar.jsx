@@ -21,7 +21,7 @@ export default function Navbar({ onMenuClick }) {
         ) : null}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center text-slate-950 text-sm font-bold">JS</div>
-          <span className="font-semibold text-gray-900 hidden sm:block">Jan Samadhan AI</span>
+          <span className="font-semibold text-lime-500 hidden sm:block">Jan Samadhan AI</span>
         </div>
       </div>
       <div className="flex items-center gap-3">

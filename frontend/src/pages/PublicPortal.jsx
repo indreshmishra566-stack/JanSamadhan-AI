@@ -77,7 +77,7 @@ function PublicShell({ language, setLanguage, children }) {
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
-                <h1 className="text-2xl font-bold text-slate-950">{common.title}</h1>
+                <h1 className="text-2xl font-bold text-lime-500">{common.title}</h1>
                 <p className="text-sm text-slate-600">{portal.subtitle}</p>
               </div>
             </Link>

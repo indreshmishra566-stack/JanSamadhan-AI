@@ -31,7 +31,7 @@ export default function PortalEntryShell({
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-300">{eyebrow}</p>
-                  <h1 className="text-lg font-bold">{title}</h1>
+                  <h1 className="text-lg font-bold text-lime-400">{title}</h1>
                   <p className="text-sm text-slate-200">{subtitle}</p>
                 </div>
               </Link>
