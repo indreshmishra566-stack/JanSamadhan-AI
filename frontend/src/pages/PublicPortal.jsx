@@ -74,23 +74,36 @@ const copy = {
       { icon: MapPinned, title: "Division & District Desk", text: "Regional operational leadership with visibility over district workload and SLA risk." },
       { icon: Droplets, title: "Block / Panchayat / Village", text: "Nearest field operators receive the complaint first, while the head retains visibility." },
     ],
-    hierarchyTitle: "Live Water Hierarchy Demo",
-    hierarchyText: "Use these seeded roles to demonstrate full chain visibility from central mission to village operator.",
+    hierarchyTitle: "Operational Water Hierarchy",
+    hierarchyText: "The public portal now shows only the working service layers, from national command to village response, without exposing seeded accounts or internal credentials.",
     hierarchyGroups: [
       {
         title: "Central & State",
-        items: ["chief_public_grievance", "central_water_mission_head", "up_water_director"],
+        items: [
+          { label: "National Grievance Desk", note: "Central command and policy oversight" },
+          { label: "Water Mission Command", note: "Department-wide supervision and routing" },
+          { label: "State Water Directorate", note: "State operations and escalation control" },
+        ],
       },
       {
         title: "Regional & District",
-        items: ["lucknow_division_head", "lucknow_district_water_head", "bkt_block_water_head"],
+        items: [
+          { label: "Division Operations Desk", note: "Regional workload and SLA monitoring" },
+          { label: "District Water Control Room", note: "District-level complaint supervision" },
+          { label: "Block Response Unit", note: "Block routing and field coordination" },
+        ],
       },
       {
         title: "Field Delivery",
-        items: ["itaunja_panchayat_head", "nabinagar_village_operator", "hasanapur_village_operator"],
+        items: [
+          { label: "Panchayat Field Lead", note: "Local branch ownership and dispatch" },
+          { label: "Village Water Operator", note: "Nearest first responder for field action" },
+          { label: "Mobile Maintenance Crew", note: "Proof upload and closure support" },
+        ],
       },
     ],
-    hierarchyHint: "All demo officer passwords use Officer@1234. Citizen demo users use Citizen@1234.",
+    hierarchyHint: "Public visitors see the service structure only. Demo credentials stay out of the homepage and can be shared separately during testing.",
+    hierarchyPrivacyNote: "Seeded usernames and passwords are intentionally hidden from the public portal.",
     flowTitle: "End-to-End Water Complaint Flow",
     flowNodes: [
       { icon: Users, title: "Citizens", text: "Submit water complaints through web portal or mobile workflow." },
@@ -180,14 +193,36 @@ const copy = {
       { icon: MapPinned, title: "डिविजन और जिला डेस्क", text: "क्षेत्रीय संचालन नेतृत्व और जिला-स्तरीय SLA निगरानी।" },
       { icon: Droplets, title: "ब्लॉक / पंचायत / गांव", text: "निकटतम फील्ड ऑपरेटर को शिकायत पहले मिलती है, पर विभागीय हेड को भी दृश्यता रहती है।" },
     ],
-    hierarchyTitle: "लाइव जल विभाग पदानुक्रम",
-    hierarchyText: "इन सीडेड लॉगिन के साथ केंद्रीय मिशन से गांव ऑपरेटर तक पूरी चेन प्रदर्शित करें।",
+    hierarchyTitle: "ऑपरेशनल जल पदानुक्रम",
+    hierarchyText: "पब्लिक पोर्टल अब केवल कार्यशील सेवा स्तर दिखाता है - राष्ट्रीय कमांड से गांव प्रतिक्रिया तक - बिना सीडेड खातों या आंतरिक क्रेडेंशियल्स को दिखाए।",
     hierarchyGroups: [
-      { title: "केंद्रीय और राज्य", items: ["chief_public_grievance", "central_water_mission_head", "up_water_director"] },
-      { title: "क्षेत्रीय और जिला", items: ["lucknow_division_head", "lucknow_district_water_head", "bkt_block_water_head"] },
-      { title: "फील्ड डिलीवरी", items: ["itaunja_panchayat_head", "nabinagar_village_operator", "hasanapur_village_operator"] },
+      {
+        title: "केंद्रीय और राज्य",
+        items: [
+          { label: "राष्ट्रीय शिकायत डेस्क", note: "केंद्रीय कमांड और नीति निगरानी" },
+          { label: "जल मिशन कमांड", note: "विभाग-स्तरीय सुपरविजन और रूटिंग" },
+          { label: "राज्य जल निदेशालय", note: "राज्य संचालन और एस्केलेशन नियंत्रण" },
+        ],
+      },
+      {
+        title: "क्षेत्रीय और जिला",
+        items: [
+          { label: "डिविजन ऑपरेशन डेस्क", note: "क्षेत्रीय वर्कलोड और SLA मॉनिटरिंग" },
+          { label: "जिला जल कंट्रोल रूम", note: "जिला-स्तरीय शिकायत सुपरविजन" },
+          { label: "ब्लॉक रिस्पॉन्स यूनिट", note: "ब्लॉक रूटिंग और फील्ड समन्वय" },
+        ],
+      },
+      {
+        title: "फील्ड डिलीवरी",
+        items: [
+          { label: "पंचायत फील्ड लीड", note: "स्थानीय शाखा नेतृत्व और डिस्पैच" },
+          { label: "गांव जल ऑपरेटर", note: "फील्ड एक्शन के लिए निकटतम प्रथम प्रतिक्रिया" },
+          { label: "मोबाइल मेंटेनेंस टीम", note: "प्रूफ अपलोड और क्लोज़र सपोर्ट" },
+        ],
+      },
     ],
-    hierarchyHint: "सभी डेमो अधिकारी खातों का पासवर्ड Officer@1234 है। नागरिक खातों का पासवर्ड Citizen@1234 है।",
+    hierarchyHint: "पब्लिक विज़िटर केवल सेवा संरचना देखते हैं। डेमो क्रेडेंशियल्स होमपेज पर नहीं दिखाए जाते और टेस्टिंग के समय अलग से साझा किए जा सकते हैं।",
+    hierarchyPrivacyNote: "सीडेड यूज़रनेम और पासवर्ड पब्लिक पोर्टल से जानबूझकर छिपाए गए हैं।",
     flowTitle: "शिकायत से समाधान तक पूरा प्रवाह",
     flowNodes: [
       { icon: Users, title: "नागरिक", text: "वेब या मोबाइल माध्यम से जल शिकायत दर्ज करते हैं।" },
@@ -238,14 +273,6 @@ const copy = {
     officerBranches: "अधिकारी शाखाएँ",
   },
 };
-
-const loginGrid = [
-  "admin / Admin@1234",
-  "central_water_mission_head / Officer@1234",
-  "lucknow_district_water_head / Officer@1234",
-  "nabinagar_village_operator / Officer@1234",
-  "citizen_rahul / Citizen@1234",
-];
 
 function usePortalLanguage() {
   const [language, setLanguage] = useState(() => {
@@ -562,6 +589,14 @@ export default function PublicPortal() {
     [language]
   );
   const activeScenario = heroScenarios.find((item) => item.key === heroScenario) || heroScenarios[0];
+  const heroBoardSteps = useMemo(
+    () =>
+      t.flowNodes.slice(0, 6).map((step, index) => ({
+        ...step,
+        badge: language === "hi" ? `चरण ${String(index + 1).padStart(2, "0")}` : `Step ${String(index + 1).padStart(2, "0")}`,
+      })),
+    [language, t]
+  );
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -614,12 +649,12 @@ export default function PublicPortal() {
           </div>
 
           <div className="portal-hero-board portal-board-3d" aria-label="Jan Samadhan system diagram">
-            {t.flowNodes.slice(0, 6).map((step, index) => (
+            {heroBoardSteps.map((step, index) => (
               <div key={step.title} className="portal-mini-step">
                 <step.icon size={18} />
                 <div>
                   <span>{step.title}</span>
-                  <small>{step.text}</small>
+                  <small>{step.badge}</small>
                 </div>
                 {index < 5 && <i />}
               </div>
@@ -711,9 +746,9 @@ export default function PublicPortal() {
                   <h3>{group.title}</h3>
                   <div className="space-y-2 mt-4">
                     {group.items.map((item) => (
-                      <div key={item} className="portal-login-pill">
-                        <span>{item}</span>
-                        <strong>Officer@1234</strong>
+                      <div key={item.label} className="portal-login-pill">
+                        <span>{item.label}</span>
+                        <strong>{item.note}</strong>
                       </div>
                     ))}
                   </div>
@@ -721,11 +756,7 @@ export default function PublicPortal() {
               ))}
             </div>
             <p className="mt-4 text-xs text-slate-500">{t.hierarchyHint}</p>
-            <div className="portal-demo-logins">
-              {loginGrid.map((entry) => (
-                <span key={entry} className="portal-login-chip">{entry}</span>
-              ))}
-            </div>
+            <div className="portal-hierarchy-note">{t.hierarchyPrivacyNote}</div>
           </div>
         </section>
 
