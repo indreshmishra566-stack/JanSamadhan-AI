@@ -196,7 +196,7 @@ export default function PublicPortal() {
               <img
                 src={citizenGuidanceArt}
                 alt="Citizen using a phone to submit a grievance with location and department routing guidance"
-                className="h-64 w-full object-cover object-center md:h-[22rem]"
+                className="h-72 w-full object-contain bg-[#152038] object-center p-3 md:h-[24rem] md:p-4"
               />
               <figcaption className="flex items-center justify-between gap-3 bg-[#0f1728]/90 px-4 py-3 text-xs text-slate-300">
                 <span>Citizen-friendly complaint filing and smart routing</span>
