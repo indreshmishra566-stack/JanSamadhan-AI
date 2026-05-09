@@ -9,7 +9,6 @@ from django.core.management import call_command
 from django.utils import timezone
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
-import traceback
 
 from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord
 from .serializers import (
@@ -769,13 +768,9 @@ def run_demo_seed(request):
 
     try:
         call_command("seed")
-    except Exception as exc:
+    except Exception:
         return Response(
-            {
-                "detail": "Seed failed.",
-                "error": str(exc),
-                "traceback": traceback.format_exc().splitlines()[-12:],
-            },
+            {"detail": "Seed failed. Check server logs for details."},
             status=500,
         )
     return Response({
