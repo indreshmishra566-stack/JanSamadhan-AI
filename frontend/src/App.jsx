@@ -64,7 +64,8 @@ export default function App() {
           <Route path="/contact-us" element={<ContactUsPage />} />
           <Route path="/faq-help" element={<FAQPage />} />
           <Route path="/process-flow" element={<ProcessFlowPage />} />
-          <Route path="/sitemap" element={<SitemapPage />} />
+          <Route path="/site-map" element={<SitemapPage />} />
+          <Route path="/sitemap" element={<Navigate to="/site-map" replace />} />
           <Route path="/" element={<PublicPortal />} />
           <Route path="/dashboard" element={<RootRedirect />} />
 

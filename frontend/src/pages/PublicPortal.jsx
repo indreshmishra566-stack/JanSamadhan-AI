@@ -337,6 +337,14 @@ export function SitemapPage() {
   const [language, setLanguage] = usePortalLanguage();
   const t = useMemo(() => getPublicText(language), [language]);
   const portal = t.portal;
+  const flowIcons = [UserPlus, FileText, MapPinned, ShieldCheck, Search, ArrowRight];
+  const quickPageLinks = [
+    { icon: Home, title: portal.utilityHome, text: portal.siteMapHomeText, to: "/" },
+    { icon: Info, title: portal.utilityAbout, text: portal.siteMapAboutText, to: "/about-us" },
+    { icon: Phone, title: portal.utilityContact, text: portal.siteMapContactText, to: "/contact-us" },
+    { icon: CircleHelp, title: portal.utilityFaq, text: portal.siteMapFaqText, to: "/faq-help" },
+    { icon: MapPinned, title: portal.processTitle, text: portal.siteMapProcessText, to: "/process-flow" },
+  ];
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
@@ -349,16 +357,44 @@ export function SitemapPage() {
 
         <section className="portal-flow-shell mt-10">
           <div className="max-w-4xl">
+            <h3 className="text-2xl font-bold text-white">{portal.siteMapPagesTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapPagesText}</p>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {quickPageLinks.map((item, index) => (
+              <ActionCard
+                key={item.title}
+                icon={item.icon}
+                title={item.title}
+                text={item.text}
+                action={portal.openPageLabel}
+                to={item.to}
+                accent={
+                  index === 0
+                    ? "bg-gradient-to-br from-indigo-600 to-indigo-800"
+                    : index === 1
+                      ? "bg-gradient-to-br from-fuchsia-600 to-rose-700"
+                      : index === 2
+                        ? "bg-gradient-to-br from-sky-500 to-indigo-600"
+                        : index === 3
+                          ? "bg-gradient-to-br from-violet-600 to-indigo-700"
+                          : "bg-gradient-to-br from-amber-500 to-orange-500"
+                }
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="portal-flow-shell mt-10">
+          <div className="max-w-4xl">
             <h3 className="text-2xl font-bold text-white">{portal.siteMapFlowTitle}</h3>
             <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapFlowText}</p>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <FlowNode icon={UserPlus} step="01" title={portal.siteMapFlowSteps[0].title} text={portal.siteMapFlowSteps[0].text} />
-            <FlowNode icon={FileText} step="02" title={portal.siteMapFlowSteps[1].title} text={portal.siteMapFlowSteps[1].text} />
-            <FlowNode icon={MapPinned} step="03" title={portal.siteMapFlowSteps[2].title} text={portal.siteMapFlowSteps[2].text} />
-            <FlowNode icon={ShieldCheck} step="04" title={portal.siteMapFlowSteps[3].title} text={portal.siteMapFlowSteps[3].text} />
-            <FlowNode icon={Search} step="05" title={portal.siteMapFlowSteps[4].title} text={portal.siteMapFlowSteps[4].text} />
-            <FlowNode icon={ArrowRight} step="06" title={portal.siteMapFlowSteps[5].title} text={portal.siteMapFlowSteps[5].text} />
+            {portal.siteMapFlowSteps.map((step, index) => {
+              const Icon = flowIcons[index] ?? ArrowRight;
+              return <FlowNode key={step.title} icon={Icon} step={String(index + 1).padStart(2, "0")} title={step.title} text={step.text} />;
+            })}
           </div>
         </section>
 
