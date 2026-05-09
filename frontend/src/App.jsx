@@ -7,7 +7,13 @@ import CitizenDashboard from "./pages/Citizen/CitizenDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import OfficerDashboard from "./pages/Hierarchy/HierarchyDashboard";
 import TrackComplaint from "./pages/TrackComplaint";
-import PublicPortal, { ProcessFlowPage, SitemapPage } from "./pages/PublicPortal";
+import PublicPortal, {
+  AboutUsPage,
+  ContactUsPage,
+  FAQPage,
+  ProcessFlowPage,
+  SitemapPage,
+} from "./pages/PublicPortal";
 import { LoadingSpinner } from "./components/Shared";
 
 const HANDLER_ROLES = ["OFFICER"];
@@ -54,6 +60,9 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/track" element={<TrackComplaint />} />
+          <Route path="/about-us" element={<AboutUsPage />} />
+          <Route path="/contact-us" element={<ContactUsPage />} />
+          <Route path="/faq-help" element={<FAQPage />} />
           <Route path="/process-flow" element={<ProcessFlowPage />} />
           <Route path="/sitemap" element={<SitemapPage />} />
           <Route path="/" element={<PublicPortal />} />
