@@ -75,6 +75,11 @@ export default function TrackComplaint() {
                     <DetailItem label="Current Level" value={result.current_level} accent />
                     <DetailItem label="Assigned Local Officer" value={result.assigned_officer || "Being assigned"} />
                     <DetailItem label="Supervising Department Head" value={result.supervising_head || "Will monitor once assigned"} />
+                    <DetailItem label="State" value={result.state} />
+                    <DetailItem label="District" value={result.district} />
+                    <DetailItem label="Block / Area" value={result.block} />
+                    <DetailItem label="Address" value={result.location} />
+                    <DetailItem label="Coordinates" value={result.latitude && result.longitude ? `${result.latitude}, ${result.longitude}` : ""} />
                   </div>
                 </InfoSection>
                 <InfoSection title="Status" icon="📌" className="bg-white/70">
@@ -87,7 +92,28 @@ export default function TrackComplaint() {
                     <DetailItem label="SLA Deadline" value={`${formatDate(result.sla_deadline)}${result.is_sla_breached ? " ⚠️ Breached" : ""}`} />
                     <DetailItem label="Submitted" value={formatDate(result.created_at)} />
                     <DetailItem label="Last Updated" value={formatDate(result.updated_at)} />
+                    <DetailItem label="Original Language" value={result.original_language?.toUpperCase()} />
+                    <DetailItem label="Resolved" value={formatDate(result.resolved_at)} />
+                    <DetailItem label="Duplicate Status" value={result.is_duplicate ? `Duplicate of #${result.duplicate_of || "master complaint"}` : "Primary complaint"} />
                   </div>
+                  {result.translated_description && (
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200 text-sm">
+                      <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Translated Description</p>
+                      <p className="text-gray-700">{result.translated_description}</p>
+                    </div>
+                  )}
+                  {result.officer_remarks && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
+                      <span className="font-medium text-blue-700">Latest officer remarks:</span> {result.officer_remarks}
+                    </div>
+                  )}
+                  {(result.citizen_rating || result.citizen_feedback) && (
+                    <div className="mt-3 p-3 bg-green-50 rounded-lg text-sm">
+                      <p className="font-medium text-green-700 mb-1">Citizen closure feedback</p>
+                      {result.citizen_rating ? <p>Rating: {"★".repeat(result.citizen_rating)}</p> : null}
+                      {result.citizen_feedback ? <p className="mt-1 text-gray-700">{result.citizen_feedback}</p> : null}
+                    </div>
+                  )}
                 </InfoSection>
                 <InfoSection title="Timeline" icon="🕒" className="bg-white/70">
                   <TimelineList

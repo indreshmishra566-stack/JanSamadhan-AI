@@ -34,6 +34,12 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["date_joined", "is_verified"]
 
 
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "phone", "state", "district", "block"]
+
+
 class DepartmentSerializer(serializers.ModelSerializer):
     complaint_count = serializers.SerializerMethodField()
     head_officer_name = serializers.SerializerMethodField()
@@ -179,10 +185,27 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class AdminComplaintUpdateSerializer(serializers.ModelSerializer):
+    duplicate_of = serializers.PrimaryKeyRelatedField(
+        queryset=Complaint.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
     class Meta:
         model = Complaint
         fields = ["category", "priority", "department", "assigned_officer",
-                  "status", "admin_override_note"]
+                  "status", "admin_override_note", "is_duplicate", "duplicate_of"]
+
+    def validate(self, attrs):
+        duplicate_of = attrs.get("duplicate_of")
+        instance = getattr(self, "instance", None)
+        if duplicate_of and instance and duplicate_of.id == instance.id:
+            raise serializers.ValidationError({"duplicate_of": "A complaint cannot be marked as duplicate of itself."})
+        if attrs.get("is_duplicate") is False:
+            attrs["duplicate_of"] = None
+        if duplicate_of and not attrs.get("is_duplicate", getattr(instance, "is_duplicate", False)):
+            attrs["is_duplicate"] = True
+        return attrs
 
 
 class OfficerComplaintUpdateSerializer(serializers.ModelSerializer):

@@ -37,10 +37,6 @@ urlpatterns = [
     path("admin/users/<int:pk>/", views.AdminUserDetailView.as_view()),
     path("admin/create-officer/", views.AdminCreateOfficerView.as_view()),
 
-    # Officer (legacy)
-    path("officer/complaints/", views.OfficerComplaintListView.as_view()),
-    path("officer/complaints/<int:pk>/", views.OfficerComplaintUpdateView.as_view()),
-
     # Notifications
     path("notifications/", views.NotificationListView.as_view()),
     path("notifications/<int:pk>/read/", views.mark_notification_read),

@@ -100,3 +100,4 @@ export function TimelineList({ items, emptyText = "No timeline events yet." }) {
 }
 
 export { default as NotificationsPanel } from "./NotificationsPanel";
+export { default as ProfilePanel } from "./ProfilePanel";

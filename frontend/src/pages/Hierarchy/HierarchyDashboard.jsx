@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hierarchyApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -144,7 +144,7 @@ export default function HierarchyDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", canCreateOfficers && "team", "departments"].filter(Boolean).map((t) => (
+        {["complaints", canCreateOfficers && "team", "departments", "profile"].filter(Boolean).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
             {t === "team" ? "Department Officers" : t === "departments" ? "Departments" : t}
@@ -281,15 +281,28 @@ export default function HierarchyDashboard() {
                             <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
                             <DetailItem label="Citizen" value={c.citizen_name} />
                             <DetailItem label="Location" value={c.location} />
+                            <DetailItem label="State" value={c.state} />
+                            <DetailItem label="District" value={c.district} />
+                            <DetailItem label="Block / Area" value={c.block} />
+                            <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
                           </div>
                         </InfoSection>
                         <InfoSection title="Status" icon="📌">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round((c.ai_confidence || 0) * 100)}%)`} accent />
                             <DetailItem label="Priority" value={c.priority} />
+                            <DetailItem label="Original Language" value={c.original_language?.toUpperCase()} />
                             <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
                             <DetailItem label="Created" value={formatDate(c.created_at)} />
+                            <DetailItem label="Resolved" value={formatDate(c.resolved_at)} />
+                            <DetailItem label="Duplicate Status" value={c.is_duplicate ? `Duplicate of #${c.duplicate_of || "master complaint"}` : "Primary complaint"} />
                           </div>
+                          {c.translated_description && c.translated_description !== c.description && (
+                            <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200 text-sm">
+                              <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Translated Description</p>
+                              <p className="text-gray-700">{c.translated_description}</p>
+                            </div>
+                          )}
                         </InfoSection>
                         <InfoSection title="Timeline" icon="🕒">
                           <TimelineList
@@ -383,6 +396,8 @@ export default function HierarchyDashboard() {
           }}
         />
       )}
+
+      {tab === "profile" && <ProfilePanel />}
 
       {/* ── FORWARD MODAL ── */}
       {forwardModal && (
@@ -671,8 +686,12 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                     {s.department_name && <span className="badge bg-gray-100 text-gray-600">{s.department_name}</span>}
                     {s.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {s.reports_to_name}</span>}
                     {s.district && <span className="badge bg-green-50 text-green-700">{s.district}</span>}
+                    {s.is_verified && <span className="badge bg-emerald-50 text-emerald-700">Verified</span>}
+                    {!s.is_active && <span className="badge bg-red-50 text-red-700">Inactive</span>}
                   </div>
-                  {s.employee_id && <p className="text-xs text-gray-400 mt-2">ID: {s.employee_id}</p>}
+                  <p className="text-xs text-gray-400 mt-2">
+                    {s.employee_id ? `ID: ${s.employee_id} · ` : ""}Posting: {[s.state, s.district, s.block].filter(Boolean).join(" / ") || "Not mapped"}
+                  </p>
                 </>
               )}
             </div>

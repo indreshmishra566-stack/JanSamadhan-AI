@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { complaintApi, departmentApi } from "../../api";
-import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList } from "../../components/Shared";
+import { complaintApi } from "../../api";
+import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { Plus, X, MapPin, Navigation } from "lucide-react";
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [tab, setTab] = useState("complaints");
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const emptyForm = {
@@ -99,7 +100,21 @@ export default function CitizenDashboard() {
         {stats.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
-      {showForm && (
+      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
+        {["complaints", "profile"].map((section) => (
+          <button
+            key={section}
+            onClick={() => setTab(section)}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === section ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            {section}
+          </button>
+        ))}
+      </div>
+
+      {tab === "profile" && <ProfilePanel />}
+
+      {tab === "complaints" && showForm && (
         <div className="card p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Submit New Complaint</h2>
@@ -179,7 +194,7 @@ export default function CitizenDashboard() {
         </div>
       )}
 
-      {isLoading ? (
+      {tab === "complaints" && (isLoading ? (
         <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
       ) : complaints.length === 0 ? (
         <EmptyState icon="📭" title="No complaints yet"
@@ -236,15 +251,28 @@ export default function CitizenDashboard() {
                         <DetailItem label="Assigned Local Officer" value={c.officer_name} />
                         <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
                         <DetailItem label="Location" value={c.location} />
+                        <DetailItem label="State" value={c.state} />
+                        <DetailItem label="District" value={c.district} />
+                        <DetailItem label="Block / Area" value={c.block} />
+                        <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
                       </div>
                     </InfoSection>
                     <InfoSection title="Status" icon="📌">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round(c.ai_confidence * 100)}%)`} accent />
                         <DetailItem label="Priority" value={c.priority} />
+                        <DetailItem label="Original Language" value={c.original_language?.toUpperCase()} />
                         <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
                         <DetailItem label="Submitted" value={formatDate(c.created_at)} />
+                        <DetailItem label="Resolved" value={formatDate(c.resolved_at)} />
+                        <DetailItem label="Duplicate Status" value={c.is_duplicate ? `Duplicate of #${c.duplicate_of || "master complaint"}` : "Primary complaint"} />
                       </div>
+                      {c.translated_description && c.translated_description !== c.description && (
+                        <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200 text-sm">
+                          <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Translated Description</p>
+                          <p className="text-gray-700">{c.translated_description}</p>
+                        </div>
+                      )}
                       {(c.attachment || c.proof_of_resolution) && (
                         <div className="flex flex-wrap gap-3 mt-3 text-sm">
                           {c.attachment && (
@@ -285,6 +313,12 @@ export default function CitizenDashboard() {
                       <span className="font-medium text-blue-700">Officer remarks:</span> {c.officer_remarks}
                     </div>
                   )}
+                  {c.is_duplicate && (
+                    <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm">
+                      <span className="font-medium text-amber-700">Duplicate intelligence:</span>{" "}
+                      This complaint is linked to {c.duplicate_of ? `master ticket #${c.duplicate_of}` : "another primary complaint"} for combined action.
+                    </div>
+                  )}
                   {c.status === "RESOLVED" && !c.citizen_rating && (
                     <FeedbackForm complaintId={c.id} onDone={() => qc.invalidateQueries(["my-complaints"])} />
                   )}
@@ -293,7 +327,7 @@ export default function CitizenDashboard() {
             </div>
           ))}
         </div>
-      )}
+      ))}
     </div>
   );
 }

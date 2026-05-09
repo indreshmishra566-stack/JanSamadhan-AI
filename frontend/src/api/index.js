@@ -92,11 +92,6 @@ export const adminApi = {
   deleteOfficer: (id) => api.delete(`/admin/users/${id}/`),
 };
 
-export const officerApi = {
-  complaints: (params) => api.get("/officer/complaints/", { params }),
-  update: (id, fd) => api.patch(`/officer/complaints/${id}/`, fd, { headers: { "Content-Type": "multipart/form-data" } }),
-};
-
 export const hierarchyApi = {
   complaints: (params) => api.get("/hierarchy/complaints/", { params }),
   updateComplaint: (id, fd) => api.patch(`/hierarchy/complaints/${id}/`, fd, { headers: { "Content-Type": "multipart/form-data" } }),

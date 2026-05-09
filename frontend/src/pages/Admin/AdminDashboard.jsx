@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -113,6 +113,8 @@ export default function AdminDashboard() {
       category: c.category, priority: c.priority, status: c.status,
       department: c.department || "", assigned_officer: c.assigned_officer || "",
       admin_override_note: c.admin_override_note || "",
+      is_duplicate: c.is_duplicate || false,
+      duplicate_of: c.duplicate_of || "",
     });
   };
 
@@ -132,7 +134,7 @@ export default function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", "analytics", "users", "officers", "departments"].map((t) => (
+        {["complaints", "analytics", "users", "officers", "departments", "profile"].map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
             {t}
@@ -244,15 +246,27 @@ export default function AdminDashboard() {
                             <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
                             <DetailItem label="Citizen" value={c.citizen_name} />
                             <DetailItem label="Location" value={c.location} />
+                            <DetailItem label="State" value={c.state} />
+                            <DetailItem label="District" value={c.district} />
+                            <DetailItem label="Block / Area" value={c.block} />
+                            <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
                           </div>
                         </InfoSection>
                         <InfoSection title="Status" icon="📌">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round((c.ai_confidence||0)*100)}%)`} accent />
                             <DetailItem label="Priority" value={c.priority} />
+                            <DetailItem label="Original Language" value={c.original_language?.toUpperCase()} />
                             <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
                             <DetailItem label="Citizen Rating" value={c.citizen_rating ? "★".repeat(c.citizen_rating) : "—"} />
+                            <DetailItem label="Duplicate Status" value={c.is_duplicate ? `Duplicate of #${c.duplicate_of || "master complaint"}` : "Primary complaint"} />
                           </div>
+                          {c.translated_description && c.translated_description !== c.description && (
+                            <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200 text-sm">
+                              <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Translated Description</p>
+                              <p className="text-gray-700">{c.translated_description}</p>
+                            </div>
+                          )}
                         </InfoSection>
                         <InfoSection title="Timeline" icon="🕒">
                           <TimelineList
@@ -316,6 +330,26 @@ export default function AdminDashboard() {
                           onChange={(e) => setEditForm({ ...editForm, admin_override_note: e.target.value })}
                           placeholder="Reason for override..." />
                       </div>
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Duplicate Handling</label>
+                        <select className="input text-sm" value={editForm.is_duplicate ? "yes" : "no"}
+                          onChange={(e) => setEditForm({ ...editForm, is_duplicate: e.target.value === "yes", duplicate_of: e.target.value === "yes" ? editForm.duplicate_of : "" })}>
+                          <option value="no">Primary complaint</option>
+                          <option value="yes">Mark as duplicate</option>
+                        </select>
+                      </div>
+                      {editForm.is_duplicate && (
+                        <div>
+                          <label className="text-xs text-gray-500 mb-1 block">Duplicate Of</label>
+                          <select className="input text-sm" value={editForm.duplicate_of || ""}
+                            onChange={(e) => setEditForm({ ...editForm, duplicate_of: e.target.value })}>
+                            <option value="">-- Select master complaint --</option>
+                            {complaints.filter((candidate) => candidate.id !== c.id).map((candidate) => (
+                              <option key={candidate.id} value={candidate.id}>#{candidate.ticket_id} · {candidate.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -423,7 +457,10 @@ export default function AdminDashboard() {
                         <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(u)}</span>
                       </td>
                       <td className="px-4 py-3 text-gray-500">{u.department_name || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{u.district || u.state || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">
+                        <div>{u.state || "—"}</div>
+                        <div className="text-gray-400">{[u.district, u.block].filter(Boolean).join(" / ") || "—"}</div>
+                      </td>
                       <td className="px-4 py-3 text-gray-500 font-mono text-xs">{u.employee_id || "—"}</td>
                       <td className="px-4 py-3">
                         {u.role !== "ADMIN" && (
@@ -454,6 +491,8 @@ export default function AdminDashboard() {
       {tab === "departments" && (
         <DepartmentManagement departments={departments} officers={officers} onChanged={() => qc.invalidateQueries(["departments"])} />
       )}
+
+      {tab === "profile" && <ProfilePanel />}
 
       {/* Delete Confirm Modal */}
       {deleteConfirm && (
@@ -658,7 +697,12 @@ function OfficerManagement({ departments, officers, onChanged }) {
                   {o.department_name && <span className="badge bg-gray-100 text-gray-600">{o.department_name}</span>}
                   {o.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {o.reports_to_name}</span>}
                   {o.employee_id && <span className="badge bg-gray-100 text-gray-600">ID: {o.employee_id}</span>}
+                  {o.is_verified && <span className="badge bg-emerald-50 text-emerald-700">Verified</span>}
+                  {!o.is_active && <span className="badge bg-red-50 text-red-700">Inactive</span>}
                 </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Posting: {[o.state, o.district, o.block].filter(Boolean).join(" / ") || "Not mapped"}
+                </p>
               </>
             )}
           </div>

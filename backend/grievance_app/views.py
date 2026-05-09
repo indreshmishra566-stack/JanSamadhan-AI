@@ -13,7 +13,7 @@ import traceback
 
 from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord
 from .serializers import (
-    RegisterSerializer, UserSerializer, DepartmentSerializer,
+    RegisterSerializer, UserSerializer, ProfileUpdateSerializer, DepartmentSerializer,
     ComplaintSerializer, ComplaintCreateSerializer, NotificationSerializer,
     AdminComplaintUpdateSerializer, OfficerComplaintUpdateSerializer,
     CitizenFeedbackSerializer, ForwardingRecordSerializer,
@@ -203,8 +203,12 @@ class RegisterView(generics.CreateAPIView):
 
 
 class MeView(generics.RetrieveUpdateAPIView):
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ["PATCH", "PUT"]:
+            return ProfileUpdateSerializer
+        return UserSerializer
 
     def get_object(self):
         return self.request.user
@@ -675,44 +679,6 @@ class AdminCreateOfficerView(generics.CreateAPIView):
         return Response(UserSerializer(user).data, status=201)
 
 
-# ─── Officer Views (legacy field officer) ────────────────────────────────────
-
-class OfficerComplaintListView(generics.ListAPIView):
-    serializer_class = ComplaintSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Complaint.objects.filter(
-            _complaint_owner_filter(self.request.user)
-        ).prefetch_related("history", "forwarding_records")
-
-
-class OfficerComplaintUpdateView(generics.UpdateAPIView):
-    serializer_class = OfficerComplaintUpdateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Complaint.objects.filter(_complaint_owner_filter(self.request.user))
-
-    def perform_update(self, serializer):
-        old = self.get_object()
-        old_status = old.status
-        complaint = serializer.save()
-        if complaint.status == "RESOLVED":
-            complaint.resolved_at = timezone.now()
-            complaint.save(update_fields=["resolved_at"])
-        ComplaintHistory.objects.create(
-            complaint=complaint,
-            changed_by=self.request.user,
-            old_status=old_status,
-            new_status=complaint.status,
-            note=complaint.officer_remarks,
-        )
-        _notify(complaint.citizen, complaint, "STATUS_UPDATE",
-                f"Update on #{complaint.ticket_id}",
-                f"Officer updated status to: {complaint.get_status_display()}")
-
-
 # ─── Notifications ────────────────────────────────────────────────────────────
 
 class NotificationListView(generics.ListAPIView):
@@ -771,6 +737,20 @@ def track_complaint(request, ticket_id):
             else None
         ),
         "current_level": complaint.current_level,
+        "original_language": complaint.original_language,
+        "translated_description": complaint.translated_description,
+        "state": complaint.state,
+        "district": complaint.district,
+        "block": complaint.block,
+        "location": complaint.location,
+        "latitude": complaint.latitude,
+        "longitude": complaint.longitude,
+        "is_duplicate": complaint.is_duplicate,
+        "duplicate_of": complaint.duplicate_of.ticket_id if complaint.duplicate_of else None,
+        "resolved_at": complaint.resolved_at,
+        "officer_remarks": complaint.officer_remarks,
+        "citizen_rating": complaint.citizen_rating,
+        "citizen_feedback": complaint.citizen_feedback,
         "created_at": complaint.created_at,
         "updated_at": complaint.updated_at,
         "sla_deadline": complaint.sla_deadline,

@@ -7,11 +7,16 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = async () => {
+    const me = await authApi.me();
+    setUser(me.data);
+    return me.data;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      authApi.me()
-        .then((res) => setUser(res.data))
+      refreshUser()
         .catch(() => { localStorage.clear(); })
         .finally(() => setLoading(false));
     } else {
@@ -23,9 +28,7 @@ export function AuthProvider({ children }) {
     const { data } = await authApi.login(credentials);
     localStorage.setItem("access_token", data.access);
     localStorage.setItem("refresh_token", data.refresh);
-    const me = await authApi.me();
-    setUser(me.data);
-    return me.data;
+    return refreshUser();
   };
 
   const logout = () => {
@@ -35,7 +38,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser, setUser }}>
       {children}
     </AuthContext.Provider>
   );
