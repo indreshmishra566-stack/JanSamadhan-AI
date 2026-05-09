@@ -1,19 +1,19 @@
 export const PRIORITY_COLORS = {
-  LOW: "bg-green-100 text-green-800",
-  MEDIUM: "bg-yellow-100 text-yellow-800",
-  HIGH: "bg-orange-100 text-orange-800",
-  CRITICAL: "bg-red-100 text-red-800",
+  LOW: "bg-emerald-50 text-emerald-700",
+  MEDIUM: "bg-cyan-50 text-cyan-700",
+  HIGH: "bg-sky-100 text-sky-800",
+  CRITICAL: "bg-rose-100 text-rose-700",
 };
 
 export const STATUS_COLORS = {
-  PENDING: "bg-gray-100 text-gray-700",
-  ASSIGNED: "bg-blue-100 text-blue-800",
-  FORWARDED: "bg-cyan-100 text-cyan-800",
-  IN_PROGRESS: "bg-purple-100 text-purple-800",
-  RESOLVED: "bg-green-100 text-green-800",
-  CLOSED: "bg-gray-200 text-gray-600",
-  ESCALATED: "bg-red-100 text-red-700",
-  REJECTED: "bg-red-200 text-red-900",
+  PENDING: "bg-slate-100 text-slate-700",
+  ASSIGNED: "bg-cyan-100 text-cyan-800",
+  FORWARDED: "bg-sky-100 text-sky-800",
+  IN_PROGRESS: "bg-indigo-100 text-indigo-700",
+  RESOLVED: "bg-emerald-100 text-emerald-700",
+  CLOSED: "bg-slate-200 text-slate-700",
+  ESCALATED: "bg-rose-100 text-rose-700",
+  REJECTED: "bg-red-100 text-red-700",
 };
 
 export const CATEGORY_ICONS = {

@@ -24,7 +24,7 @@ export function CategoryIcon({ category }) {
 export function LoadingSpinner({ size = "md" }) {
   const s = size === "sm" ? "w-4 h-4" : size === "lg" ? "w-10 h-10" : "w-6 h-6";
   return (
-    <div className={`${s} border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin`} />
+    <div className={`${s} border-2 border-cyan-100 border-t-cyan-500 rounded-full animate-spin`} />
   );
 }
 
@@ -41,11 +41,11 @@ export function EmptyState({ icon, title, description, action }) {
 
 export function StatCard({ label, value, icon, color = "blue", sub }) {
   const colors = {
-    blue: "bg-blue-50 text-blue-700",
-    green: "bg-green-50 text-green-700",
-    yellow: "bg-yellow-50 text-yellow-700",
-    red: "bg-red-50 text-red-700",
-    purple: "bg-purple-50 text-purple-700",
+    blue: "bg-cyan-50 text-cyan-700",
+    green: "bg-emerald-50 text-emerald-700",
+    yellow: "bg-sky-50 text-sky-700",
+    red: "bg-rose-50 text-rose-700",
+    purple: "bg-indigo-50 text-indigo-700",
   };
   return (
     <div className="card p-5">
@@ -109,9 +109,9 @@ export function DashboardHero({
   tone = "blue",
 }) {
   const toneClasses = {
-    blue: "from-slate-950 via-blue-900 to-indigo-800",
-    emerald: "from-slate-950 via-emerald-900 to-cyan-700",
-    violet: "from-slate-950 via-indigo-900 to-violet-800",
+    blue: "from-[#070b18] via-[#111a2e] to-[#1a2640]",
+    emerald: "from-[#070b18] via-[#10233a] to-[#123449]",
+    violet: "from-[#070b18] via-[#141d33] to-[#1f2d4a]",
   };
 
   return (
@@ -119,7 +119,7 @@ export function DashboardHero({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.16),_transparent_26%)]" />
       <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
         <div className="max-w-3xl">
-          {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">{eyebrow}</p> : null}
+          {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300">{eyebrow}</p> : null}
           <h1 className="mt-3 text-3xl font-extrabold leading-tight md:text-4xl">{title}</h1>
           {subtitle ? <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200">{subtitle}</p> : null}
           {badges.length > 0 ? (
@@ -141,7 +141,7 @@ export function DashboardHero({
                 onClick={action.onClick}
                 className={action.variant === "secondary"
                   ? "inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                  : "inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300"}
+                  : "inline-flex items-center gap-2 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300"}
               >
                 {action.label}
                 <ArrowRight size={15} />
@@ -156,15 +156,15 @@ export function DashboardHero({
 
 export function TabPills({ value, onChange, items }) {
   return (
-    <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-sm">
+    <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white/85 p-2 shadow-sm">
       {items.map((item) => (
         <button
           key={item.value}
           type="button"
           onClick={() => onChange(item.value)}
           className={value === item.value
-            ? "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-            : "rounded-xl px-4 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800"}
+            ? "rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-sm"
+            : "rounded-xl px-4 py-2 text-sm font-medium text-slate-500 hover:bg-cyan-50 hover:text-slate-800"}
         >
           {item.label}
         </button>

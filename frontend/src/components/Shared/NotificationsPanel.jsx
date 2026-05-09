@@ -5,12 +5,12 @@ import { notificationApi } from "../../api";
 import { timeAgo } from "../../utils/helpers";
 
 const TYPE_COLORS = {
-  ASSIGNED: "bg-blue-100 text-blue-700",
-  STATUS_UPDATE: "bg-purple-100 text-purple-700",
-  SLA_BREACH: "bg-red-100 text-red-700",
-  ESCALATION: "bg-orange-100 text-orange-700",
-  FORWARDED: "bg-yellow-100 text-yellow-700",
-  RESOLVED: "bg-green-100 text-green-700",
+  ASSIGNED: "bg-cyan-100 text-cyan-700",
+  STATUS_UPDATE: "bg-indigo-100 text-indigo-700",
+  SLA_BREACH: "bg-rose-100 text-rose-700",
+  ESCALATION: "bg-sky-100 text-sky-700",
+  FORWARDED: "bg-slate-100 text-slate-700",
+  RESOLVED: "bg-emerald-100 text-emerald-700",
 };
 
 const TYPE_ICONS = {
@@ -86,7 +86,7 @@ export default function NotificationsPanel() {
               {unread.length > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                  className="text-xs text-cyan-600 hover:underline flex items-center gap-1"
                 >
                   <CheckCheck size={12} /> Mark all read
                 </button>
@@ -110,7 +110,7 @@ export default function NotificationsPanel() {
                   key={n.id}
                   onClick={() => !n.is_read && markReadMutation.mutate(n.id)}
                   className={`px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors hover:bg-gray-50 ${
-                    !n.is_read ? "bg-blue-50/40" : ""
+                    !n.is_read ? "bg-cyan-50/40" : ""
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -121,7 +121,7 @@ export default function NotificationsPanel() {
                           {n.title}
                         </p>
                         {!n.is_read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
+                          <span className="w-2 h-2 bg-cyan-500 rounded-full shrink-0" />
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>

@@ -65,14 +65,14 @@ function PublicShell({ language, setLanguage, children }) {
   }, [location.hash]);
 
   return (
-    <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-2 py-2 md:px-3 md:py-3">
-      <div className="w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-white/10 bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.22)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
+    <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_18%),linear-gradient(145deg,_#070b18,_#101726_45%,_#1a2336)] px-2 py-2 md:px-3 md:py-3">
+      <div className="w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <UtilityNav portal={portal} />
 
-        <header className="bg-white/92 px-5 py-4 md:px-8">
+        <header className="bg-[#f6fbff]/96 px-5 py-4 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link to="/" className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-950 text-xl font-bold text-white shadow-lg shadow-indigo-950/40 ring-2 ring-amber-400/70">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400 text-xl font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
                 JS
               </div>
               <div>
@@ -102,7 +102,7 @@ function PublicShell({ language, setLanguage, children }) {
 
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 <LogIn size={16} />
                 {portal.login}
@@ -113,7 +113,7 @@ function PublicShell({ language, setLanguage, children }) {
 
         {children}
 
-        <footer className="bg-indigo-950/70 px-5 py-4 text-center text-sm text-slate-200 md:px-8">
+        <footer className="bg-[#0b1120]/90 px-5 py-4 text-center text-sm text-slate-200 md:px-8">
           <div className="inline-flex items-center gap-2">
             <ShieldCheck size={16} />
             <span>{portal.footer}</span>
@@ -184,7 +184,7 @@ export default function PublicPortal() {
       <main className="flex min-h-[calc(100vh-156px)] items-center px-5 py-8 md:px-8 md:py-10">
         <section className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
               <Waves size={15} />
               {portal.accessTag}
             </div>
@@ -193,7 +193,7 @@ export default function PublicPortal() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 <UserPlus size={17} />
                 {portal.actionRegister}
@@ -227,8 +227,8 @@ export default function PublicPortal() {
             <p className="mt-3 text-sm leading-7 text-slate-200">{portal.cardText}</p>
             <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-1">
               <ActionCard icon={LogIn} title={portal.login} text={portal.loginText} action={portal.actionLogin} to="/login" />
-              <ActionCard icon={UserPlus} title={portal.register} text={portal.registerText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-amber-500 to-orange-500" />
-              <ActionCard icon={Search} title={portal.track} text={portal.trackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
+              <ActionCard icon={UserPlus} title={portal.register} text={portal.registerText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-cyan-400 to-sky-500" />
+              <ActionCard icon={Search} title={portal.track} text={portal.trackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-cyan-500 to-blue-500" />
             </div>
           </section>
         </section>
@@ -276,7 +276,7 @@ export function ContactUsPage() {
             <div className="mt-6">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 <UserPlus size={16} />
                 {portal.actionRegister}
@@ -347,7 +347,7 @@ export function SitemapPage() {
     <PublicShell language={language} setLanguage={setLanguage}>
       <PublicPageSection title={portal.siteMapTitle} intro={portal.siteMapText}>
         <div className="grid gap-4 md:grid-cols-3">
-          <ActionCard icon={UserPlus} title={portal.register} text={portal.siteMapRegisterText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-amber-500 to-orange-500" />
+          <ActionCard icon={UserPlus} title={portal.register} text={portal.siteMapRegisterText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-cyan-400 to-sky-500" />
           <ActionCard icon={LogIn} title={portal.login} text={portal.siteMapLoginText} action={portal.actionLogin} to="/login" />
           <ActionCard icon={Search} title={portal.track} text={portal.siteMapTrackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
         </div>
@@ -370,12 +370,12 @@ export function SitemapPage() {
                   index === 0
                     ? "bg-gradient-to-br from-indigo-600 to-indigo-800"
                     : index === 1
-                      ? "bg-gradient-to-br from-fuchsia-600 to-rose-700"
+                      ? "bg-gradient-to-br from-cyan-500 to-blue-600"
                       : index === 2
                         ? "bg-gradient-to-br from-sky-500 to-indigo-600"
                         : index === 3
-                          ? "bg-gradient-to-br from-violet-600 to-indigo-700"
-                          : "bg-gradient-to-br from-amber-500 to-orange-500"
+                          ? "bg-gradient-to-br from-indigo-500 to-slate-700"
+                          : "bg-gradient-to-br from-cyan-400 to-sky-500"
                 }
               />
             ))}
@@ -408,7 +408,7 @@ export function SitemapPage() {
                 <ul className="mt-4 space-y-2">
                   {guide.steps.map((step) => (
                     <li key={step} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
-                      <span className="mt-2 inline-block h-2 w-2 rounded-full bg-amber-300" />
+                      <span className="mt-2 inline-block h-2 w-2 rounded-full bg-cyan-300" />
                       <span>{step}</span>
                     </li>
                   ))}
@@ -435,7 +435,7 @@ export function ProcessFlowPage() {
             {portal.guideSteps.map((step, index) => (
               <article key={step.title} className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 text-sm font-bold text-white">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 text-sm font-bold text-slate-950">
                     {index + 1}
                   </div>
                   <div>
@@ -456,7 +456,7 @@ export function ProcessFlowPage() {
             <ul className="mt-5 space-y-3">
               {portal.guideTips.map((tip) => (
                 <li key={tip} className="flex items-start gap-3 text-sm leading-7 text-slate-200">
-                  <span className="mt-1 inline-block h-2.5 w-2.5 rounded-full bg-amber-300" />
+                  <span className="mt-1 inline-block h-2.5 w-2.5 rounded-full bg-cyan-300" />
                   <span>{tip}</span>
                 </li>
               ))}
