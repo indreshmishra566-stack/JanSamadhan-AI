@@ -57,10 +57,10 @@ function PublicShell({ language, setLanguage, children }) {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[32px] border border-white/12 bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
         <UtilityNav portal={portal} />
 
-        <header className="border-b border-white/10 bg-white/92 px-5 py-4 md:px-8">
+        <header className="bg-white/92 px-5 py-4 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link to="/" className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-950 text-xl font-bold text-white shadow-lg shadow-indigo-950/40 ring-2 ring-amber-400/70">
@@ -104,7 +104,7 @@ function PublicShell({ language, setLanguage, children }) {
 
         {children}
 
-        <footer className="border-t border-white/10 bg-indigo-950/70 px-5 py-4 text-center text-sm text-slate-200 md:px-8">
+        <footer className="bg-indigo-950/70 px-5 py-4 text-center text-sm text-slate-200 md:px-8">
           <div className="inline-flex items-center gap-2">
             <ShieldCheck size={16} />
             <span>{portal.footer}</span>
@@ -117,7 +117,7 @@ function PublicShell({ language, setLanguage, children }) {
 
 function ActionCard({ icon: Icon, title, text, action, to, accent = "bg-gradient-to-br from-indigo-600 to-indigo-800" }) {
   return (
-    <article className="rounded-[28px] border border-white/12 bg-white/10 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.24)] backdrop-blur">
+    <article className="rounded-[28px] bg-white/10 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.24)] backdrop-blur">
       <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-lg ${accent}`}>
         <Icon size={20} />
       </div>
@@ -125,7 +125,7 @@ function ActionCard({ icon: Icon, title, text, action, to, accent = "bg-gradient
       <p className="mt-3 text-sm leading-7 text-slate-200">{text}</p>
       <Link
         to={to}
-        className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+        className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
       >
         <Icon size={16} />
         {action}
@@ -136,7 +136,7 @@ function ActionCard({ icon: Icon, title, text, action, to, accent = "bg-gradient
 
 function FlowNode({ icon: Icon, step, title, text }) {
   return (
-    <article className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+    <article className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
       <div className="flex items-start gap-4">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-fuchsia-700 text-white shadow-lg">
           <Icon size={18} />
@@ -154,7 +154,7 @@ function FlowNode({ icon: Icon, step, title, text }) {
 function PublicPageSection({ title, intro, children }) {
   return (
     <main className="px-5 py-10 md:px-8 md:py-12">
-      <section className="rounded-[30px] border border-white/12 bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+      <section className="rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
         <div className="max-w-4xl">
           <h2 className="text-4xl font-extrabold text-white">{title}</h2>
           {intro ? <p className="mt-4 text-sm leading-7 text-slate-200">{intro}</p> : null}
@@ -175,7 +175,7 @@ export default function PublicPortal() {
       <main className="px-5 py-10 md:px-8 md:py-14">
         <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 backdrop-blur">
               <Waves size={15} />
               {portal.accessTag}
             </div>
@@ -191,14 +191,14 @@ export default function PublicPortal() {
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
               >
                 <LogIn size={17} />
                 {portal.actionLogin}
               </Link>
               <Link
                 to="/track"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
               >
                 <Search size={17} />
                 {portal.actionTrack}
@@ -213,7 +213,7 @@ export default function PublicPortal() {
             </div>
           </div>
 
-          <section className="rounded-[30px] border border-white/12 bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+          <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
             <h3 className="text-2xl font-bold text-white">{portal.cardTitle}</h3>
             <p className="mt-3 text-sm leading-7 text-slate-200">{portal.cardText}</p>
             <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-1">
@@ -228,7 +228,7 @@ export default function PublicPortal() {
           {portal.aboutCards.map((card, index) => (
             <article
               key={card.title}
-              className="rounded-[26px] border border-white/12 bg-white/10 p-5 shadow-[0_18px_48px_rgba(15,23,42,0.22)] backdrop-blur"
+              className="rounded-[26px] bg-white/10 p-5 shadow-[0_18px_48px_rgba(15,23,42,0.22)] backdrop-blur"
             >
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg">
                 {index === 0 ? <UserPlus size={18} /> : index === 1 ? <MapPinned size={18} /> : <ShieldCheck size={18} />}
@@ -253,7 +253,7 @@ export function AboutUsPage() {
       <PublicPageSection title={portal.aboutTitle} intro={portal.aboutText}>
         <div className="grid gap-4 md:grid-cols-3">
           {portal.aboutCards.map((card) => (
-            <article key={card.title} className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+            <article key={card.title} className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
               <h3 className="text-lg font-semibold text-white">{card.title}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-200">{card.text}</p>
             </article>
@@ -273,7 +273,7 @@ export function ContactUsPage() {
     <PublicShell language={language} setLanguage={setLanguage}>
       <PublicPageSection title={portal.contactTitle} intro={portal.contactText}>
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <div className="rounded-[24px] border border-white/12 bg-white/10 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+          <div className="rounded-[24px] bg-white/10 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
             <div className="flex items-center gap-3 text-white">
               <Phone size={18} />
               <h3 className="text-lg font-semibold">{portal.contactCallTitle}</h3>
@@ -290,7 +290,7 @@ export function ContactUsPage() {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-white/12 bg-white/10 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+          <div className="rounded-[24px] bg-white/10 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
             <div className="flex items-center gap-3 text-white">
               <Mail size={18} />
               <h3 className="text-lg font-semibold">{portal.contactSupportTitle}</h3>
@@ -322,7 +322,7 @@ export function FAQPage() {
       <PublicPageSection title={portal.faqTitle} intro={portal.faqText}>
         <div className="space-y-4">
           {portal.faqItems.map((item) => (
-            <details key={item.question} className="rounded-[22px] border border-white/12 bg-white/10 p-5 text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+            <details key={item.question} className="rounded-[22px] bg-white/10 p-5 text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
               <summary className="cursor-pointer list-none text-base font-semibold">{item.question}</summary>
               <p className="mt-3 text-sm leading-7 text-slate-200">{item.answer}</p>
             </details>
@@ -340,9 +340,12 @@ export function SitemapPage() {
   const flowIcons = [UserPlus, FileText, MapPinned, ShieldCheck, Search, ArrowRight];
   const quickPageLinks = [
     { icon: Home, title: portal.utilityHome, text: portal.siteMapHomeText, to: "/" },
-    { icon: Info, title: portal.utilityAbout, text: portal.siteMapAboutText, to: "/about-us" },
-    { icon: Phone, title: portal.utilityContact, text: portal.siteMapContactText, to: "/contact-us" },
+    { icon: UserPlus, title: portal.register, text: portal.siteMapRegisterText, to: "/register" },
+    { icon: LogIn, title: portal.login, text: portal.siteMapLoginText, to: "/login" },
+    { icon: Search, title: portal.track, text: portal.siteMapTrackText, to: "/track" },
     { icon: CircleHelp, title: portal.utilityFaq, text: portal.siteMapFaqText, to: "/faq-help" },
+    { icon: Phone, title: portal.utilityContact, text: portal.siteMapContactText, to: "/contact-us" },
+    { icon: Info, title: portal.utilityAbout, text: portal.siteMapAboutText, to: "/about-us" },
     { icon: MapPinned, title: portal.processTitle, text: portal.siteMapProcessText, to: "/process-flow" },
   ];
 
@@ -360,7 +363,7 @@ export function SitemapPage() {
             <h3 className="text-2xl font-bold text-white">{portal.siteMapPagesTitle}</h3>
             <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapPagesText}</p>
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {quickPageLinks.map((item, index) => (
               <ActionCard
                 key={item.title}
@@ -400,12 +403,12 @@ export function SitemapPage() {
 
         <section className="portal-flow-shell mt-10">
           <div className="max-w-4xl">
-            <h3 className="text-2xl font-bold text-white">{portal.siteMapGuideTitle}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapGuideText}</p>
+            <h3 className="text-2xl font-bold text-white">{portal.siteMapCitizenGuideTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.siteMapCitizenGuideText}</p>
           </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            {portal.siteMapGuides.map((guide) => (
-              <article key={guide.title} className="rounded-[24px] border border-white/12 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {portal.siteMapCitizenGuides.map((guide) => (
+              <article key={guide.title} className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
                 <h4 className="text-lg font-semibold text-white">{guide.title}</h4>
                 <p className="mt-3 text-sm leading-7 text-slate-200">{guide.text}</p>
                 <ul className="mt-4 space-y-2">
