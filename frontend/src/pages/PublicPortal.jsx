@@ -57,7 +57,7 @@ function PublicShell({ language, setLanguage, children }) {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
+      <div className="mx-auto w-full max-w-[1680px] overflow-hidden rounded-[32px] bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
         <UtilityNav portal={portal} />
 
         <header className="bg-white/92 px-5 py-4 md:px-8">
@@ -153,9 +153,9 @@ function FlowNode({ icon: Icon, step, title, text }) {
 
 function PublicPageSection({ title, intro, children }) {
   return (
-    <main className="px-5 py-10 md:px-8 md:py-12">
+    <main className="px-5 py-10 md:px-8 md:py-12 xl:px-12">
       <section className="rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
-        <div className="max-w-4xl">
+        <div className="max-w-6xl">
           <h2 className="text-4xl font-extrabold text-white">{title}</h2>
           {intro ? <p className="mt-4 text-sm leading-7 text-slate-200">{intro}</p> : null}
         </div>
