@@ -74,8 +74,39 @@ const base = {
     actionLogin: "Open Login",
     actionRegister: "Open Registration",
     actionTrack: "Track Complaint",
+    actionHowItWorks: "How it works",
     footer: "Citizen-facing entry only. Internal workflows remain protected after sign-in.",
     accessTag: "Public service access",
+    guideTitle: "How a citizen should use this platform",
+    guideText: "This section explains the easiest complaint journey from account creation to final tracking, so citizens know exactly what to do before they start.",
+    guideSteps: [
+      {
+        title: "Create your account",
+        text: "Open registration and enter your basic details so the system can save your complaints and updates.",
+      },
+      {
+        title: "Describe the issue clearly",
+        text: "Add the complaint title, what happened, and where it happened. District, block, and address help the system route it properly.",
+      },
+      {
+        title: "Add location or proof",
+        text: "If possible, include GPS, address details, or an attachment like a photo or document for faster field action.",
+      },
+      {
+        title: "Submit and note the ticket ID",
+        text: "Once submitted, the complaint gets a ticket number. Keep it safe so you can track the case later.",
+      },
+      {
+        title: "Track progress anytime",
+        text: "Use the public tracking page to see status, assigned officer, supervising head, and timeline updates.",
+      },
+    ],
+    guideTipsTitle: "Helpful tips before filing",
+    guideTips: [
+      "Use the language selector if you prefer a regional language on the public screens.",
+      "Mention the exact area, block, or landmark so the nearest responsible officer can be matched faster.",
+      "Write one problem per complaint for clearer routing and quicker action.",
+    ],
   },
   login: {
     subtitle: "Public grievance redressal portal",
@@ -243,8 +274,39 @@ const overrides = {
       actionLogin: "लॉगिन खोलें",
       actionRegister: "पंजीकरण खोलें",
       actionTrack: "शिकायत ट्रैक करें",
+      actionHowItWorks: "कैसे काम करता है",
       footer: "केवल नागरिक प्रवेश। आंतरिक वर्कफ़्लो साइन-इन के बाद सुरक्षित हैं।",
       accessTag: "सार्वजनिक सेवा प्रवेश",
+      guideTitle: "नागरिक इस प्लेटफॉर्म का उपयोग कैसे करें",
+      guideText: "यह भाग खाता बनाने से लेकर अंतिम ट्रैकिंग तक सबसे आसान शिकायत यात्रा दिखाता है, ताकि नागरिक शुरू करने से पहले पूरी प्रक्रिया समझ सकें।",
+      guideSteps: [
+        {
+          title: "अपना खाता बनाएँ",
+          text: "पंजीकरण खोलें और अपनी बुनियादी जानकारी भरें ताकि सिस्टम आपकी शिकायतें और अपडेट सुरक्षित रख सके।",
+        },
+        {
+          title: "समस्या साफ़ लिखें",
+          text: "शिकायत का शीर्षक, क्या हुआ, और कहाँ हुआ यह लिखें। जिला, ब्लॉक और पता रूटिंग को बेहतर बनाते हैं।",
+        },
+        {
+          title: "लोकेशन या प्रमाण जोड़ें",
+          text: "यदि संभव हो तो GPS, पता विवरण, या फोटो / दस्तावेज़ अटैच करें ताकि फील्ड कार्रवाई तेज़ हो सके।",
+        },
+        {
+          title: "शिकायत दर्ज करें और टिकट आईडी नोट करें",
+          text: "शिकायत दर्ज होने के बाद एक टिकट नंबर मिलता है। आगे ट्रैकिंग के लिए उसे सुरक्षित रखें।",
+        },
+        {
+          title: "कभी भी प्रगति ट्रैक करें",
+          text: "पब्लिक ट्रैकिंग पेज पर स्थिति, असाइन अधिकारी, सुपरवाइजिंग हेड और टाइमलाइन देखें।",
+        },
+      ],
+      guideTipsTitle: "शिकायत दर्ज करने से पहले उपयोगी सुझाव",
+      guideTips: [
+        "अगर आप चाहें तो सार्वजनिक स्क्रीन पर क्षेत्रीय भाषा के लिए भाषा चयनकर्ता का उपयोग करें।",
+        "सटीक क्षेत्र, ब्लॉक या लैंडमार्क लिखें ताकि निकटतम जिम्मेदार अधिकारी जल्दी चुना जा सके।",
+        "स्पष्ट रूटिंग और तेज़ कार्रवाई के लिए एक शिकायत में एक ही समस्या लिखें।",
+      ],
     },
     login: {
       subtitle: "जन शिकायत निवारण पोर्टल",
