@@ -21,7 +21,7 @@ export default function RegisterPage() {
     description: isHindi ? "नागरिकों के लिए त्वरित खाता निर्माण ताकि वे जल शिकायत दर्ज कर सकें, ट्रैक कर सकें और समाधान के बाद फीडबैक दे सकें।" : "Fast citizen onboarding for filing water grievances, tracking progress, and giving closure feedback.",
     badges: isHindi ? ["हिंदी इनपुट", "टिकट ट्रैकिंग", "मोबाइल रेडी"] : ["Hindi input", "Ticket tracking", "Mobile ready"],
     asideTitle: isHindi ? "यह स्क्रीन क्यों महत्वपूर्ण है" : "Why this screen matters",
-    asideText: isHindi ? "हैकाथॉन डेमो में यही एंट्री नागरिक भरोसे को दिखाती है — आसान पंजीकरण, स्पष्ट पहचान और शिकायत तक तेज पहुंच।" : "This is the citizen trust moment in the demo: fast onboarding, clear identity, and a direct path into the grievance workflow.",
+    asideText: isHindi ? "यही एंट्री नागरिक भरोसे को बनाती है — आसान पंजीकरण, स्पष्ट पहचान और शिकायत प्रवाह तक तेज पहुंच।" : "This is the citizen trust moment: fast onboarding, clear identity, and a direct path into the grievance workflow.",
     createAccount: isHindi ? "नागरिक खाता बनाएँ" : "Create citizen account",
     creating: isHindi ? "खाता बनाया जा रहा है..." : "Creating account...",
     accountCreated: isHindi ? "खाता बन गया। कृपया लॉगिन करें।" : "Account created! Please login.",
@@ -114,7 +114,7 @@ export default function RegisterPage() {
         {
           icon: Globe2,
           title: isHindi ? "भाषा लचीलेपन" : "Language flexibility",
-          text: isHindi ? "इंटरफेस हिंदी और अंग्रेज़ी दोनों के साथ डेमो फ्लो को सपोर्ट करता है।" : "The onboarding experience is already aligned with a bilingual Hindi-English demo story.",
+          text: isHindi ? "इंटरफेस हिंदी और अंग्रेज़ी दोनों के साथ द्विभाषी नागरिक अनुभव को सपोर्ट करता है।" : "The onboarding experience already supports a bilingual Hindi-English citizen journey.",
         },
       ]}
     >

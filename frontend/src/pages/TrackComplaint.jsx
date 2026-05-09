@@ -22,7 +22,7 @@ export default function TrackComplaint() {
       ? "बिना लॉगिन शिकायत की स्थिति, असाइन अधिकारी, विभागीय हेड और पूरी रूटिंग टाइमलाइन देखें।"
       : "Track complaint status, assigned officer, department head, and the full routing timeline without signing in.",
     badges: isHindi ? ["बिना लॉगिन", "SLA दृश्यता", "रूटिंग टाइमलाइन"] : ["No login required", "SLA visibility", "Routing timeline"],
-    asideTitle: isHindi ? "जजों को क्या दिखेगा" : "What judges will see",
+    asideTitle: isHindi ? "यह स्क्रीन क्या दिखाती है" : "What this screen reveals",
     asideText: isHindi
       ? "यह स्क्रीन नागरिक पारदर्शिता का सबूत है — टिकट आईडी डालते ही विभाग, स्थानीय अधिकारी, हेड दृश्यता और समयरेखा सामने आती है।"
       : "This screen proves citizen transparency: one ticket ID reveals department, local officer, supervising head, and the exact complaint journey.",

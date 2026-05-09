@@ -21,8 +21,8 @@ export default function LoginPage() {
     eyebrow: isHindi ? "विश्वसनीय डिजिटल जन शिकायत प्रणाली" : "Trusted digital public grievance system",
     description: isHindi ? "केंद्र से गांव तक जल शिकायत समाधान के लिए सुरक्षित लॉगिन" : "Secure sign-in for the water grievance command flow from national desk to village operator.",
     badges: isHindi ? ["एडमिन", "अधिकारी", "नागरिक ट्रैकिंग"] : ["Admin", "Officer", "Citizen tracking"],
-    asideTitle: isHindi ? "डेमो में क्या दिखाना है" : "What to show in the demo",
-    asideText: isHindi ? "लॉगिन के बाद अधिकारी एस्केलेशन, विभागीय दृश्यता, प्रोफाइल प्रबंधन और जल शिकायत रूटिंग पूरी तरह काम करती है।" : "Once inside, you can demonstrate officer escalation, supervisory visibility, profile management, and water complaint routing end to end.",
+    asideTitle: isHindi ? "यह स्क्रीन क्या खोलती है" : "What this screen unlocks",
+    asideText: isHindi ? "लॉगिन के बाद अधिकारी एस्केलेशन, विभागीय दृश्यता, प्रोफाइल प्रबंधन और जल शिकायत रूटिंग की पूरी कमांड परत खुलती है।" : "Once signed in, the command layer opens: officer escalation, supervisory visibility, profile management, and end-to-end water complaint routing.",
     username: isHindi ? "यूज़रनेम" : "Username",
     password: isHindi ? "पासवर्ड" : "Password",
     enterUsername: isHindi ? "यूज़रनेम दर्ज करें" : "Enter username",
@@ -83,7 +83,7 @@ export default function LoginPage() {
         {
           icon: Waves,
           title: isHindi ? "जल विभाग फोकस" : "Water-first rollout",
-          text: isHindi ? "वर्तमान डेमो भारत-स्तरीय जल विभाग पदानुक्रम के साथ सीड किया गया है।" : "The current seeded demo is already structured for an India-style water department rollout.",
+          text: isHindi ? "वर्तमान बिल्ड भारत-स्तरीय जल विभाग पदानुक्रम के अनुरूप कॉन्फ़िगर है।" : "The current build is configured around an India-style water department hierarchy.",
         },
       ]}
       footer={

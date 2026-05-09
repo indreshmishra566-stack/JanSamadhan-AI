@@ -58,24 +58,32 @@ const copy = {
       { label: "Service Focus", value: "Water Supply" },
       { label: "Citizen Flow", value: "Trackable by Ticket ID" },
     ],
-    quickActionsTitle: "Working Demo Actions",
-    quickActionsText: "Every primary action below is wired into the current build, so judges can move from landing page to real workflow without broken buttons.",
+    quickActionsTitle: "Core Workflows",
+    quickActionsText: "Every primary action below opens a real working surface in the application: citizen intake, public tracking, officer handling, and administrative control.",
     quickActions: [
       { icon: ClipboardList, title: "Lodge a Water Complaint", text: "Citizen login, complaint form, GPS capture, attachment upload, AI classification, and assignment.", action: "Open Citizen Desk", to: "/citizen/dashboard" },
       { icon: Search, title: "Track Existing Ticket", text: "Public complaint lookup with assigned officer, supervising head, SLA, and routing timeline.", action: "Track Complaint", to: "/track" },
       { icon: ShieldCheck, title: "Officer Handling Console", text: "Update status, upload proof, forward to another officer, or escalate up the reporting chain.", action: "Open Officer Console", to: "/officer/dashboard" },
       { icon: BarChart3, title: "Admin Control Room", text: "Manage complaints, departments, officers, duplicates, and operational analytics from one place.", action: "Open Admin Dashboard", to: "/admin/dashboard" },
     ],
-    architectureTitle: "India Water Operations Map",
-    architectureText: "The current seeded demo is structured exactly like an India rollout pilot for one department: central oversight, state command, division, district, block, panchayat, and village operator levels.",
+    architectureTitle: "Operational Coverage",
+    architectureText: "The platform is structured for one production-style department rollout: central oversight, state command, division, district, block, panchayat, and village response layers working in one chain.",
     architecture: [
       { icon: Globe2, title: "Central Mission Desk", text: "Chief grievance oversight and national water mission supervision." },
       { icon: Waves, title: "State Water Directorate", text: "State-level routing, reporting control, and state escalation handling." },
       { icon: MapPinned, title: "Division & District Desk", text: "Regional operational leadership with visibility over district workload and SLA risk." },
       { icon: Droplets, title: "Block / Panchayat / Village", text: "Nearest field operators receive the complaint first, while the head retains visibility." },
     ],
+    structureTitle: "How The Product Is Structured",
+    structureText: "The UI mirrors the real application layers: public intake, AI and department routing, branch operations, and command monitoring.",
+    structureCards: [
+      { icon: ClipboardList, title: "Citizen Intake", text: "Registration, complaint submission, bilingual input, location capture, and attachment upload." },
+      { icon: Globe2, title: "AI Routing Engine", text: "Complaint classification, department mapping, nearest branch assignment, and head visibility." },
+      { icon: Users, title: "Officer Branch Operations", text: "Forwarding, escalation, proof upload, branch hierarchy, and field-response ownership." },
+      { icon: BarChart3, title: "Command & Analytics", text: "Admin oversight, duplicate control, public tracking, SLA watch, and routing transparency." },
+    ],
     hierarchyTitle: "Operational Water Hierarchy",
-    hierarchyText: "The public portal now shows only the working service layers, from national command to village response, without exposing seeded accounts or internal credentials.",
+    hierarchyText: "The public portal now shows only the working service layers, from national command to village response, without exposing internal accounts or credentials.",
     hierarchyGroups: [
       {
         title: "Central & State",
@@ -121,21 +129,21 @@ const copy = {
       { icon: Users, title: "Officer & Department Hierarchy", text: "Recursive branch structure for heads, sub-heads, child departments, and field operators.", action: "Officer Dashboard", to: "/officer/dashboard" },
       { icon: Activity, title: "Tracking & Transparency", text: "Public ticket tracking with assigned officer, supervising head, routing trail, and SLA.", action: "Track Ticket", to: "/track" },
     ],
-    faqTitle: "Demo FAQs",
+    faqTitle: "Frequently Asked Questions",
     faq: [
       { q: "What happens when a citizen files a complaint?", a: "AI classifies the issue as water-related, maps it to the department, and routes it to the nearest branch officer while the supervising head still sees it." },
       { q: "Can officers escalate complaints upward?", a: "Yes. Field officers can forward cases to peer officers or escalate them upward through the reporting chain if local resolution is not possible." },
       { q: "Can citizens track complaints without login?", a: "Yes. Ticket lookup is public and shows department, assigned officer, supervising head, SLA, and timeline." },
-      { q: "Does the current demo support Hindi?", a: "The public portal now switches between English and Hindi for the main demo experience. Complaint submission also accepts Hindi text." },
+      { q: "Does the platform support Hindi?", a: "Yes. The public portal switches between English and Hindi, and complaint submission accepts Hindi text as well." },
     ],
-    contactTitle: "Hackathon Demo Story",
-    contactText: "Show judges a full operational story: citizen files a complaint, local operator receives it, department head sees it, and escalation works if field resolution fails.",
+    contactTitle: "Process Visibility",
+    contactText: "The process flow explains how a complaint moves from citizen intake to local officer response, department supervision, escalation, and closure.",
     contactCta: "Open Process Flow",
     mobileTitle: "Mobile-Ready Workflow",
     mobileText: "The same workflow is designed for progressive mobile rollout: citizen intake, field updates, photo proof, and public tracking.",
     mobileCta: "Open Public Tracking",
     footerLine1: "Jan Samadhan AI is configured here as an India-ready water grievance command platform.",
-    footerLine2: "Current demo includes central-to-village routing, officer hierarchy, escalation flow, and citizen tracking.",
+    footerLine2: "Current build includes central-to-village routing, officer hierarchy, escalation flow, and citizen tracking.",
     processTitle: "Water Redress Process Flow",
     processHeadline: "JAN SAMADHAN WATER PROCESS FLOW",
     sitemapTitle: "Sitemap",
@@ -177,24 +185,32 @@ const copy = {
       { label: "सेवा फोकस", value: "जल आपूर्ति" },
       { label: "नागरिक प्रवाह", value: "टिकट आईडी से ट्रैकिंग" },
     ],
-    quickActionsTitle: "वर्किंग डेमो एक्शन",
-    quickActionsText: "नीचे दिए गए सभी मुख्य एक्शन वर्तमान बिल्ड से जुड़े हुए हैं, ताकि जज बिना टूटे बटन के सीधे वास्तविक वर्कफ़्लो में जा सकें।",
+    quickActionsTitle: "मुख्य वर्कफ़्लो",
+    quickActionsText: "नीचे दिए गए सभी मुख्य एक्शन ऐप के वास्तविक कार्यशील स्क्रीन खोलते हैं: नागरिक शिकायत, पब्लिक ट्रैकिंग, अधिकारी संचालन और एडमिन नियंत्रण।",
     quickActions: [
       { icon: ClipboardList, title: "जल शिकायत दर्ज करें", text: "नागरिक लॉगिन, शिकायत फ़ॉर्म, जीपीएस, अटैचमेंट अपलोड, एआई वर्गीकरण और असाइनमेंट।", action: "नागरिक डेस्क खोलें", to: "/citizen/dashboard" },
       { icon: Search, title: "मौजूदा टिकट ट्रैक करें", text: "पब्लिक शिकायत ट्रैकिंग जिसमें असाइन अधिकारी, सुपरवाइजिंग हेड, SLA और टाइमलाइन दिखती है।", action: "शिकायत ट्रैक करें", to: "/track" },
       { icon: ShieldCheck, title: "अधिकारी संचालन कंसोल", text: "स्थिति अपडेट करें, प्रूफ अपलोड करें, आगे भेजें या रिपोर्टिंग चेन में ऊपर एस्केलेट करें।", action: "अधिकारी कंसोल खोलें", to: "/officer/dashboard" },
       { icon: BarChart3, title: "एडमिन कंट्रोल रूम", text: "एक ही जगह से शिकायत, विभाग, अधिकारी, डुप्लिकेट और विश्लेषण प्रबंधन।", action: "एडमिन डैशबोर्ड", to: "/admin/dashboard" },
     ],
-    architectureTitle: "भारत जल संचालन मानचित्र",
-    architectureText: "वर्तमान सीडेड डेमो एक विभाग के भारत-स्तरीय पायलट की तरह संरचित है: केंद्रीय निगरानी, राज्य कमांड, डिविजन, जिला, ब्लॉक, पंचायत और गांव ऑपरेटर।",
+    architectureTitle: "ऑपरेशनल कवरेज",
+    architectureText: "यह प्लेटफॉर्म एक प्रोडक्शन-स्टाइल विभागीय रोलआउट के लिए संरचित है: केंद्रीय निगरानी, राज्य कमांड, डिविजन, जिला, ब्लॉक, पंचायत और गांव प्रतिक्रिया स्तर।",
     architecture: [
       { icon: Globe2, title: "केंद्रीय मिशन डेस्क", text: "मुख्य शिकायत निगरानी और राष्ट्रीय जल मिशन पर्यवेक्षण।" },
       { icon: Waves, title: "राज्य जल निदेशालय", text: "राज्य स्तरीय रूटिंग, रिपोर्टिंग नियंत्रण और एस्केलेशन।" },
       { icon: MapPinned, title: "डिविजन और जिला डेस्क", text: "क्षेत्रीय संचालन नेतृत्व और जिला-स्तरीय SLA निगरानी।" },
       { icon: Droplets, title: "ब्लॉक / पंचायत / गांव", text: "निकटतम फील्ड ऑपरेटर को शिकायत पहले मिलती है, पर विभागीय हेड को भी दृश्यता रहती है।" },
     ],
+    structureTitle: "उत्पाद की संरचना",
+    structureText: "UI ऐप की वास्तविक परतों को दर्शाता है: पब्लिक इंटेक, एआई रूटिंग, शाखा संचालन और कमांड मॉनिटरिंग।",
+    structureCards: [
+      { icon: ClipboardList, title: "नागरिक इंटेक", text: "पंजीकरण, शिकायत दर्ज करना, द्विभाषी इनपुट, लोकेशन कैप्चर और अटैचमेंट अपलोड।" },
+      { icon: Globe2, title: "एआई रूटिंग इंजन", text: "शिकायत वर्गीकरण, विभाग मैपिंग, निकटतम शाखा असाइनमेंट और हेड दृश्यता।" },
+      { icon: Users, title: "अधिकारी शाखा संचालन", text: "फॉरवर्डिंग, एस्केलेशन, प्रूफ अपलोड, शाखा पदानुक्रम और फील्ड रिस्पॉन्स स्वामित्व।" },
+      { icon: BarChart3, title: "कमांड और एनालिटिक्स", text: "एडमिन निगरानी, डुप्लिकेट कंट्रोल, पब्लिक ट्रैकिंग, SLA मॉनिटरिंग और रूटिंग पारदर्शिता।" },
+    ],
     hierarchyTitle: "ऑपरेशनल जल पदानुक्रम",
-    hierarchyText: "पब्लिक पोर्टल अब केवल कार्यशील सेवा स्तर दिखाता है - राष्ट्रीय कमांड से गांव प्रतिक्रिया तक - बिना सीडेड खातों या आंतरिक क्रेडेंशियल्स को दिखाए।",
+    hierarchyText: "पब्लिक पोर्टल अब केवल कार्यशील सेवा स्तर दिखाता है - राष्ट्रीय कमांड से गांव प्रतिक्रिया तक - बिना आंतरिक खातों या क्रेडेंशियल्स को दिखाए।",
     hierarchyGroups: [
       {
         title: "केंद्रीय और राज्य",
@@ -240,21 +256,21 @@ const copy = {
       { icon: Users, title: "अधिकारी और विभाग पदानुक्रम", text: "हेड, सब-हेड, चाइल्ड विभाग और फील्ड ऑपरेटर के लिए रिकर्सिव संरचना।", action: "अधिकारी डैशबोर्ड", to: "/officer/dashboard" },
       { icon: Activity, title: "ट्रैकिंग और पारदर्शिता", text: "असाइन अधिकारी, हेड, SLA और टाइमलाइन के साथ पब्लिक ट्रैकिंग।", action: "टिकट ट्रैक करें", to: "/track" },
     ],
-    faqTitle: "डेमो FAQs",
+    faqTitle: "अक्सर पूछे जाने वाले प्रश्न",
     faq: [
       { q: "नागरिक शिकायत दर्ज करने पर क्या होता है?", a: "एआई उसे जल शिकायत के रूप में वर्गीकृत करता है, विभाग चुनता है और निकटतम शाखा अधिकारी को भेजता है, जबकि हेड को दृश्यता रहती है।" },
       { q: "क्या अधिकारी शिकायत ऊपर एस्केलेट कर सकते हैं?", a: "हाँ, फील्ड अधिकारी शिकायत को किसी अन्य अधिकारी को फॉरवर्ड कर सकते हैं या रिपोर्टिंग चेन में ऊपर भेज सकते हैं।" },
       { q: "क्या बिना लॉगिन टिकट ट्रैक किया जा सकता है?", a: "हाँ, टिकट आईडी से पब्लिक ट्रैकिंग उपलब्ध है।" },
-      { q: "क्या हिंदी समर्थित है?", a: "हाँ, पब्लिक पोर्टल अब हिंदी और अंग्रेज़ी में स्विच होता है, और शिकायत विवरण हिंदी में भी स्वीकार करता है।" },
+      { q: "क्या हिंदी समर्थित है?", a: "हाँ, पब्लिक पोर्टल हिंदी और अंग्रेज़ी में स्विच होता है, और शिकायत विवरण हिंदी में भी स्वीकार करता है।" },
     ],
-    contactTitle: "हैकाथॉन डेमो कहानी",
-    contactText: "जजों को पूरा ऑपरेशनल प्रवाह दिखाएँ: नागरिक शिकायत करता है, स्थानीय ऑपरेटर को केस मिलता है, विभागीय हेड देखता है, और आवश्यकता होने पर एस्केलेशन चलता है।",
+    contactTitle: "प्रक्रिया दृश्यता",
+    contactText: "प्रोसेस फ्लो यह स्पष्ट दिखाता है कि शिकायत नागरिक इंटेक से स्थानीय अधिकारी, विभागीय सुपरविजन, एस्केलेशन और क्लोज़र तक कैसे जाती है।",
     contactCta: "प्रक्रिया देखें",
     mobileTitle: "मोबाइल-रेडी वर्कफ़्लो",
     mobileText: "यही वर्कफ़्लो मोबाइल रोलआउट के लिए भी उपयुक्त है: शिकायत, फोटो प्रूफ, फील्ड अपडेट और सार्वजनिक ट्रैकिंग।",
     mobileCta: "पब्लिक ट्रैकिंग खोलें",
     footerLine1: "जन समाधान एआई यहां भारत-उन्मुख जल शिकायत कमांड प्लेटफॉर्म के रूप में कॉन्फ़िगर किया गया है।",
-    footerLine2: "वर्तमान डेमो में केंद्र से गांव तक रूटिंग, अधिकारी पदानुक्रम, एस्केलेशन फ्लो और नागरिक ट्रैकिंग शामिल है।",
+    footerLine2: "वर्तमान बिल्ड में केंद्र से गांव तक रूटिंग, अधिकारी पदानुक्रम, एस्केलेशन फ्लो और नागरिक ट्रैकिंग शामिल है।",
     processTitle: "जल निवारण प्रक्रिया प्रवाह",
     processHeadline: "जन समाधान जल प्रक्रिया प्रवाह",
     sitemapTitle: "साइटमैप",
@@ -323,8 +339,17 @@ function authAwarePath(user, role) {
   return user ? getDashboardPath(user.role) : role === "CITIZEN" ? "/register" : "/login";
 }
 
+function portalActionPath(user, actionKey) {
+  if (actionKey === "citizen") return authAwarePath(user, "CITIZEN");
+  if (actionKey === "officer") return user?.role === "OFFICER" ? "/officer/dashboard" : "/login";
+  if (actionKey === "admin") return user?.role === "ADMIN" ? "/admin/dashboard" : "/login";
+  return "/track";
+}
+
 function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpen }) {
   const signInTarget = user ? getDashboardPath(user.role) : "/login";
+  const grievanceTarget = authAwarePath(user, "CITIZEN");
+  const officerTarget = user?.role === "OFFICER" ? "/officer/dashboard" : "/login";
 
   return (
     <header className="portal-header">
@@ -364,8 +389,8 @@ function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpe
         <Link to="/track"><Search size={14} /> {t.viewStatus}</Link>
         <a href="#hierarchy"><Users size={14} /> {t.officers}</a>
         <Link to="/process-flow"><Network size={14} /> {t.process}</Link>
-        <Link to="/citizen/dashboard"><FileText size={14} /> {t.grievance}</Link>
-        <Link to="/officer/dashboard"><ShieldCheck size={14} /> {t.officerDashboard}</Link>
+        <Link to={grievanceTarget}><FileText size={14} /> {t.grievance}</Link>
+        <Link to={officerTarget}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
         <a href="#mobile"><Smartphone size={14} /> {t.mobileApp}</a>
         <Link to="/sitemap" className="ml-auto hidden lg:inline-flex"><Network size={14} /> {t.sitemap}</Link>
       </nav>
@@ -374,8 +399,8 @@ function PortalHeader({ t, language, setLanguage, user, mobileOpen, setMobileOpe
           <Link to="/track" onClick={() => setMobileOpen(false)}><Search size={14} /> {t.viewStatus}</Link>
           <a href="#hierarchy" onClick={() => setMobileOpen(false)}><Users size={14} /> {t.officers}</a>
           <Link to="/process-flow" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.process}</Link>
-          <Link to="/citizen/dashboard" onClick={() => setMobileOpen(false)}><FileText size={14} /> {t.grievance}</Link>
-          <Link to="/officer/dashboard" onClick={() => setMobileOpen(false)}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
+          <Link to={grievanceTarget} onClick={() => setMobileOpen(false)}><FileText size={14} /> {t.grievance}</Link>
+          <Link to={officerTarget} onClick={() => setMobileOpen(false)}><ShieldCheck size={14} /> {t.officerDashboard}</Link>
           <a href="#mobile" onClick={() => setMobileOpen(false)}><Smartphone size={14} /> {t.mobileApp}</a>
           <Link to="/sitemap" onClick={() => setMobileOpen(false)}><Network size={14} /> {t.sitemap}</Link>
         </nav>
@@ -525,7 +550,14 @@ export default function PublicPortal() {
     () =>
       t.quickActions.map((item) => ({
         ...item,
-        to: item.to === "/citizen/dashboard" ? authAwarePath(user, "CITIZEN") : item.to,
+        to:
+          item.to === "/citizen/dashboard"
+            ? portalActionPath(user, "citizen")
+            : item.to === "/officer/dashboard"
+              ? portalActionPath(user, "officer")
+              : item.to === "/admin/dashboard"
+                ? portalActionPath(user, "admin")
+                : item.to,
       })),
     [t, user]
   );
@@ -533,7 +565,12 @@ export default function PublicPortal() {
     () =>
       t.modules.map((item) => ({
         ...item,
-        to: item.to === "/citizen/dashboard" ? authAwarePath(user, "CITIZEN") : item.to,
+        to:
+          item.to === "/citizen/dashboard"
+            ? portalActionPath(user, "citizen")
+            : item.to === "/officer/dashboard"
+              ? portalActionPath(user, "officer")
+              : item.to,
       })),
     [t, user]
   );
@@ -621,7 +658,7 @@ export default function PublicPortal() {
               ))}
             </div>
             <div className="portal-scenario-shell">
-              <div className="portal-scenario-tabs" role="tablist" aria-label="Demo scenarios">
+              <div className="portal-scenario-tabs" role="tablist" aria-label="Service scenarios">
                 {heroScenarios.map((scenario) => (
                   <button
                     key={scenario.key}
@@ -635,7 +672,7 @@ export default function PublicPortal() {
               </div>
               <div className="portal-scenario-panel portal-lift">
                 <div>
-                  <p className="portal-scenario-kicker">{language === "hi" ? "लाइव डेमो फोकस" : "Live demo focus"}</p>
+                  <p className="portal-scenario-kicker">{language === "hi" ? "सेवा फोकस" : "Service focus"}</p>
                   <h3>{activeScenario.title}</h3>
                   <p>{activeScenario.text}</p>
                 </div>
@@ -696,6 +733,26 @@ export default function PublicPortal() {
           </div>
         </section>
 
+        <section className="portal-page">
+          <div className="portal-panel">
+            <div className="portal-section-head">
+              <div>
+                <h2 className="portal-section-title">{t.structureTitle}</h2>
+                <p className="text-sm text-slate-600 max-w-3xl">{t.structureText}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {t.structureCards.map((item) => (
+                <div key={item.title} className="portal-module portal-lift">
+                  <div className="portal-module-icon"><item.icon size={22} /></div>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="portal-page" id="track">
           <div className="portal-panel portal-panel-accent">
             <div className="portal-section-head">
@@ -720,7 +777,7 @@ export default function PublicPortal() {
               <div className="portal-module portal-lift">
                 <div className="portal-module-icon"><MapPinned size={22} /></div>
                 <h3>{language === "hi" ? "लोकेशन इंटेलिजेंस" : "Location Intelligence"}</h3>
-                <p>{language === "hi" ? "राज्य, जिला, ब्लॉक और जीपीएस विवरण से यह साफ दिखता है कि शिकायत किस फील्ड शाखा तक पहुंची।" : "State, district, block, and GPS context make the field routing transparent to judges and users."}</p>
+                <p>{language === "hi" ? "राज्य, जिला, ब्लॉक और जीपीएस विवरण से यह साफ दिखता है कि शिकायत किस फील्ड शाखा तक पहुंची।" : "State, district, block, and GPS context make the field routing transparent to citizens and operations teams."}</p>
               </div>
               <div className="portal-module portal-lift">
                 <div className="portal-module-icon"><FileCheck2 size={22} /></div>
@@ -738,7 +795,7 @@ export default function PublicPortal() {
                 <h2 className="portal-section-title">{t.hierarchyTitle}</h2>
                 <p className="text-sm text-slate-600">{t.hierarchyText}</p>
               </div>
-              <Link to="/login" className="portal-inline-link">{t.signIn}</Link>
+              <Link to={user ? getDashboardPath(user.role) : "/login"} className="portal-inline-link">{user ? (language === "hi" ? "डैशबोर्ड" : "Dashboard") : t.signIn}</Link>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {t.hierarchyGroups.map((group) => (
