@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight,
   CircleHelp,
@@ -39,24 +39,48 @@ function UtilityLink({ to, icon: Icon, label }) {
 }
 
 function UtilityNav({ portal }) {
+  const location = useLocation();
+  const onHome = location.pathname === "/";
+
   return (
     <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
-      <UtilityLink to="/" icon={Home} label={portal.utilityHome} />
-      <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} />
-      <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} />
-      <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} />
-      <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} />
+      {onHome ? (
+        <>
+          <a href="#top" className="portal-utility-link"><Home size={14} /><span>{portal.utilityHome}</span></a>
+          <a href="#contact" className="portal-utility-link"><Phone size={14} /><span>{portal.utilityContact}</span></a>
+          <a href="#about" className="portal-utility-link"><Info size={14} /><span>{portal.utilityAbout}</span></a>
+          <a href="#faq" className="portal-utility-link"><CircleHelp size={14} /><span>{portal.utilityFaq}</span></a>
+          <a href="#site-map" className="portal-utility-link"><Map size={14} /><span>{portal.utilitySiteMap}</span></a>
+        </>
+      ) : (
+        <>
+          <UtilityLink to="/" icon={Home} label={portal.utilityHome} />
+          <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} />
+          <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} />
+          <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} />
+          <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} />
+        </>
+      )}
     </nav>
   );
 }
 
 function PublicShell({ language, setLanguage, children }) {
+  const location = useLocation();
   const t = useMemo(() => getPublicText(language), [language]);
   const common = t.common;
   const portal = t.portal;
 
+  useEffect(() => {
+    if (!location.hash) return;
+    const target = document.getElementById(location.hash.slice(1));
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
+    <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.14),_transparent_18%),linear-gradient(145deg,_#0f172a,_#1e3a8a_45%,_#312e81)] px-4 py-4 md:px-8 md:py-6">
       <div className="mx-auto w-full max-w-[1680px] overflow-hidden rounded-[32px] bg-white/8 shadow-[0_40px_120px_rgba(15,23,42,0.38)] backdrop-blur">
         <UtilityNav portal={portal} />
 
@@ -237,6 +261,115 @@ export default function PublicPortal() {
               <p className="mt-3 text-sm leading-7 text-slate-200">{card.text}</p>
             </article>
           ))}
+        </section>
+
+        <section id="about" className="scroll-mt-28 mt-14 rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+          <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">{portal.utilityAbout}</p>
+              <h3 className="mt-3 text-3xl font-extrabold text-white">{portal.aboutTitle}</h3>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-slate-200">{portal.aboutText}</p>
+              <Link to="/about-us" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+                <Info size={16} />
+                {portal.openPageLabel}
+              </Link>
+            </div>
+            <div className="grid gap-4">
+              {portal.aboutCards.map((card) => (
+                <article key={card.title} className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                  <h4 className="text-lg font-semibold text-white">{card.title}</h4>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="process" className="scroll-mt-28 mt-12 rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-4xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">{portal.guideBadge}</p>
+              <h3 className="mt-2 text-3xl font-extrabold text-white">{portal.guideTitle}</h3>
+              <p className="mt-4 text-base leading-8 text-slate-200">{portal.guideText}</p>
+            </div>
+            <Link to="/process-flow" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+              <MapPinned size={16} />
+              {portal.openPageLabel}
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {portal.guideSteps.map((step, index) => (
+              <FlowNode key={step.title} icon={index % 2 === 0 ? UserPlus : FileText} step={String(index + 1).padStart(2, "0")} title={step.title} text={step.text} />
+            ))}
+          </div>
+        </section>
+
+        <section id="faq" className="scroll-mt-28 mt-12 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">{portal.utilityFaq}</p>
+                <h3 className="mt-2 text-3xl font-extrabold text-white">{portal.faqTitle}</h3>
+                <p className="mt-4 text-base leading-8 text-slate-200">{portal.faqText}</p>
+              </div>
+              <Link to="/faq-help" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+                <CircleHelp size={16} />
+                {portal.openPageLabel}
+              </Link>
+            </div>
+            <div className="mt-8 space-y-4">
+              {portal.faqItems.map((item) => (
+                <details key={item.question} className="rounded-[22px] bg-white/10 p-5 text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                  <summary className="cursor-pointer list-none text-base font-semibold">{item.question}</summary>
+                  <p className="mt-3 text-sm leading-7 text-slate-200">{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+          <aside id="contact" className="scroll-mt-28 rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">{portal.utilityContact}</p>
+            <h3 className="mt-2 text-3xl font-extrabold text-white">{portal.contactTitle}</h3>
+            <p className="mt-4 text-base leading-8 text-slate-200">{portal.contactText}</p>
+            <div className="mt-8 grid gap-4">
+              <div className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                <div className="flex items-center gap-3 text-white">
+                  <Phone size={18} />
+                  <h4 className="text-lg font-semibold">{portal.contactCallTitle}</h4>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-slate-200">{portal.contactCallText}</p>
+              </div>
+              <div className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+                <div className="flex items-center gap-3 text-white">
+                  <Mail size={18} />
+                  <h4 className="text-lg font-semibold">{portal.contactSupportTitle}</h4>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-slate-200">{portal.contactSupportText}</p>
+              </div>
+              <Link to="/contact-us" className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+                <Phone size={16} />
+                {portal.openPageLabel}
+              </Link>
+            </div>
+          </aside>
+        </section>
+
+        <section id="site-map" className="scroll-mt-28 mt-12 rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-4xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">{portal.utilitySiteMap}</p>
+              <h3 className="mt-2 text-3xl font-extrabold text-white">{portal.siteMapTitle}</h3>
+              <p className="mt-4 text-base leading-8 text-slate-200">{portal.siteMapText}</p>
+            </div>
+            <Link to="/site-map" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+              <Map size={16} />
+              {portal.openPageLabel}
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <ActionCard icon={UserPlus} title={portal.register} text={portal.siteMapRegisterText} action={portal.actionRegister} to="/register" accent="bg-gradient-to-br from-amber-500 to-orange-500" />
+            <ActionCard icon={LogIn} title={portal.login} text={portal.siteMapLoginText} action={portal.actionLogin} to="/login" />
+            <ActionCard icon={Search} title={portal.track} text={portal.siteMapTrackText} action={portal.actionTrack} to="/track" accent="bg-gradient-to-br from-sky-500 to-indigo-600" />
+          </div>
         </section>
       </main>
     </PublicShell>
