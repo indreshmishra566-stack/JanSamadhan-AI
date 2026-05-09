@@ -181,10 +181,11 @@ export default function PublicPortal() {
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
-      <main className="flex min-h-[calc(100vh-156px)] items-center px-5 py-8 md:px-8 md:py-10">
-        <section className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
+      <main className="flex min-h-[calc(100vh-156px)] items-start px-5 py-6 md:px-8 md:py-8">
+        <section className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="max-w-3xl pt-2">
+            <article className="rounded-[34px] bg-[linear-gradient(160deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))] px-8 py-8 shadow-[0_32px_90px_rgba(8,15,32,0.32)] ring-1 ring-white/8 backdrop-blur md:px-10 md:py-10 lg:translate-z-0">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
               {portal.accessTag}
             </div>
@@ -220,6 +221,7 @@ export default function PublicPortal() {
                 {portal.actionHowItWorks}
               </Link>
             </div>
+            </article>
           </div>
 
           <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
