@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hierarchyApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -114,42 +114,37 @@ export default function HierarchyDashboard() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {user?.department_name ? `${user.department_name} Officer Dashboard` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
-        </h1>
-        <p className="text-gray-500 text-sm">
-          {user?.department_name && `${user.department_name} · Department workflow · `}
-          {user?.first_name} {user?.last_name}
-          {user?.state && ` · ${user.district || user.state}`}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {profileDepartment?.name && (
-            <span className="badge bg-blue-50 text-blue-700">Assigned Department: {profileDepartment.name}</span>
-          )}
-          {user?.designation && (
-            <span className="badge bg-slate-100 text-slate-700">Title: {user.designation}</span>
-          )}
-          {user?.reports_to_name && (
-            <span className="badge bg-amber-50 text-amber-700">Reports to: {user.reports_to_name}</span>
-          )}
-        </div>
-      </div>
+      <DashboardHero
+        tone="emerald"
+        eyebrow="Officer operations"
+        title={user?.department_name ? `${user.department_name} Command Desk` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
+        subtitle="Handle local water grievances, move work across your branch, escalate when field resolution is blocked, and maintain team structure under your reporting chain."
+        badges={[
+          profileDepartment?.name ? `Assigned: ${profileDepartment.name}` : "Department branch",
+          user?.designation ? `Title: ${user.designation}` : "Officer role",
+          user?.reports_to_name ? `Reports to: ${user.reports_to_name}` : "Top of branch",
+        ]}
+        actions={[
+          { label: "Complaints", onClick: () => setTab("complaints") },
+          ...(canCreateOfficers ? [{ label: "Team", onClick: () => setTab("team"), variant: "secondary" }] : []),
+        ]}
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 mt-6">
         {stats.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", canCreateOfficers && "team", "departments", "profile"].filter(Boolean).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
-            {t === "team" ? "Department Officers" : t === "departments" ? "Departments" : t}
-          </button>
-        ))}
+      <div className="mb-6">
+        <TabPills
+          value={tab}
+          onChange={setTab}
+          items={["complaints", canCreateOfficers && "team", "departments", "profile"].filter(Boolean).map((t) => ({
+            value: t,
+            label: t === "team" ? "Department Officers" : t === "departments" ? "Departments" : t.charAt(0).toUpperCase() + t.slice(1),
+          }))}
+        />
       </div>
 
       {/* ── COMPLAINTS TAB ── */}

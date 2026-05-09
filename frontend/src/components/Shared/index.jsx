@@ -1,4 +1,5 @@
 import { PRIORITY_COLORS, STATUS_COLORS, CATEGORY_ICONS } from "../../utils/helpers";
+import { ArrowRight } from "lucide-react";
 
 export function PriorityBadge({ priority }) {
   return (
@@ -99,5 +100,79 @@ export function TimelineList({ items, emptyText = "No timeline events yet." }) {
   );
 }
 
+export function DashboardHero({
+  eyebrow,
+  title,
+  subtitle,
+  badges = [],
+  actions = [],
+  tone = "blue",
+}) {
+  const toneClasses = {
+    blue: "from-slate-950 via-blue-900 to-indigo-800",
+    emerald: "from-slate-950 via-emerald-900 to-cyan-700",
+    violet: "from-slate-950 via-indigo-900 to-violet-800",
+  };
+
+  return (
+    <div className={`relative overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br ${toneClasses[tone] || toneClasses.blue} p-6 text-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] md:p-8`}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.16),_transparent_26%)]" />
+      <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div className="max-w-3xl">
+          {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">{eyebrow}</p> : null}
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight md:text-4xl">{title}</h1>
+          {subtitle ? <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200">{subtitle}</p> : null}
+          {badges.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {badges.map((badge) => (
+                <span key={badge} className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+                  {badge}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {actions.length > 0 ? (
+          <div className="flex flex-wrap gap-2 xl:justify-end">
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                className={action.variant === "secondary"
+                  ? "inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                  : "inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300"}
+              >
+                {action.label}
+                <ArrowRight size={15} />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export function TabPills({ value, onChange, items }) {
+  return (
+    <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-sm">
+      {items.map((item) => (
+        <button
+          key={item.value}
+          type="button"
+          onClick={() => onChange(item.value)}
+          className={value === item.value
+            ? "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+            : "rounded-xl px-4 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800"}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export { default as NotificationsPanel } from "./NotificationsPanel";
 export { default as ProfilePanel } from "./ProfilePanel";
+export { default as PortalEntryShell } from "./PortalEntryShell";

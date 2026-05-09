@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { complaintApi } from "../../api";
-import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel } from "../../components/Shared";
+import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -86,39 +86,47 @@ export default function CitizenDashboard() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Complaints</h1>
-          <p className="text-gray-500 text-sm">Welcome, {user?.first_name || user?.username}</p>
-        </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> New Complaint
-        </button>
-      </div>
+      <DashboardHero
+        tone="blue"
+        eyebrow="Citizen workspace"
+        title={`Welcome, ${user?.first_name || user?.username}`}
+        subtitle="File a new water grievance, track officer routing, review closure updates, and keep your identity details current from one place."
+        badges={[
+          user?.district || user?.state || "Public dashboard",
+          "Hindi / English complaint input",
+          "Ticket tracking enabled",
+        ]}
+        actions={[
+          { label: "New Complaint", onClick: () => { setShowForm(true); setTab("complaints"); } },
+          { label: "Profile", onClick: () => setTab("profile"), variant: "secondary" },
+        ]}
+      />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-6 mt-6 md:grid-cols-4">
         {stats.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", "profile"].map((section) => (
-          <button
-            key={section}
-            onClick={() => setTab(section)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === section ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}
-          >
-            {section}
-          </button>
-        ))}
+      <div className="mb-6">
+        <TabPills
+          value={tab}
+          onChange={setTab}
+          items={[
+            { value: "complaints", label: "Complaints" },
+            { value: "profile", label: "Profile" },
+          ]}
+        />
       </div>
 
       {tab === "profile" && <ProfilePanel />}
 
       {tab === "complaints" && showForm && (
-        <div className="card p-6 mb-6">
+        <div className="card p-6 mb-6 border-blue-100 shadow-[0_20px_60px_rgba(29,78,216,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Submit New Complaint</h2>
             <button onClick={() => setShowForm(false)} className="p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
+          </div>
+          <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            The stronger your location details are, the better the system can route this complaint to the nearest water branch operator.
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

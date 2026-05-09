@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -120,26 +120,39 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 text-sm">Manage grievances, departments, and officer reporting chains</p>
-      </div>
+      <DashboardHero
+        tone="violet"
+        eyebrow="Administrative command"
+        title="Admin Dashboard"
+        subtitle="Run the water grievance operation from one control surface: department mapping, complaint intelligence, hierarchy oversight, duplicates, and performance trends."
+        badges={[
+          `${complaints.length} visible complaints`,
+          `${departments.length} departments`,
+          `${users.length} visible users`,
+        ]}
+        actions={[
+          { label: "Complaints", onClick: () => setTab("complaints") },
+          { label: "Departments", onClick: () => setTab("departments"), variant: "secondary" },
+        ]}
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 mt-6">
         {statsLoading
           ? Array(5).fill(0).map((_, i) => <div key={i} className="card p-5 h-24 animate-pulse bg-gray-100" />)
           : statCards.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {["complaints", "analytics", "users", "officers", "departments", "profile"].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${tab === t ? "bg-white shadow text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
-            {t}
-          </button>
-        ))}
+      <div className="mb-6">
+        <TabPills value={tab} onChange={setTab} items={[
+          { value: "complaints", label: "Complaints" },
+          { value: "analytics", label: "Analytics" },
+          { value: "users", label: "Users" },
+          { value: "officers", label: "Officers" },
+          { value: "departments", label: "Departments" },
+          { value: "profile", label: "Profile" },
+        ]} />
       </div>
 
       {/* ── COMPLAINTS TAB ── */}
