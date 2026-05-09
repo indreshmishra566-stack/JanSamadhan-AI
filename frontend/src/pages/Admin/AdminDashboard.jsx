@@ -126,9 +126,9 @@ export default function AdminDashboard() {
         title="Admin Dashboard"
         subtitle="Run the water grievance operation from one control surface: department mapping, complaint intelligence, hierarchy oversight, duplicates, and performance trends."
         badges={[
-          `${complaints.length} visible complaints`,
+          `${stats?.total ?? complaints.length} total complaints`,
           `${departments.length} departments`,
-          `${users.length} visible users`,
+          `${officers.length} officers`,
         ]}
         actions={[
           { label: "Complaints", onClick: () => setTab("complaints") },

@@ -267,7 +267,7 @@ export default function CitizenDashboard() {
                     </InfoSection>
                     <InfoSection title="Status" icon="📌">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round(c.ai_confidence * 100)}%)`} accent />
+                        <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round((c.ai_confidence || 0) * 100)}%)`} accent />
                         <DetailItem label="Priority" value={c.priority} />
                         <DetailItem label="Original Language" value={c.original_language?.toUpperCase()} />
                         <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
@@ -352,13 +352,13 @@ function FeedbackForm({ complaintId, onDone }) {
       <p className="text-sm font-medium text-green-800 mb-2">Rate your experience:</p>
       <div className="flex gap-2 mb-2">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} onClick={() => setRating(n)}
+          <button type="button" key={n} onClick={() => setRating(n)}
             className={`text-2xl ${n <= rating ? "text-yellow-400" : "text-gray-300"}`}>★</button>
         ))}
       </div>
       <textarea className="input text-sm mb-2" value={feedback} onChange={(e) => setFeedback(e.target.value)}
         placeholder="Any comments?" rows={2} />
-      <button onClick={() => mutation.mutate()} disabled={!rating || mutation.isPending} className="btn-primary text-sm py-1.5">
+      <button type="button" onClick={() => mutation.mutate()} disabled={!rating || mutation.isPending} className="btn-primary text-sm py-1.5">
         Submit Feedback
       </button>
     </div>

@@ -14,9 +14,11 @@ export default function Navbar({ onMenuClick }) {
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3">
-        <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-gray-100 lg:hidden">
-          <Menu size={20} />
-        </button>
+        {onMenuClick ? (
+          <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-gray-100 lg:hidden" aria-label="Open navigation">
+            <Menu size={20} />
+          </button>
+        ) : null}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white text-sm font-bold">JS</div>
           <span className="font-semibold text-gray-900 hidden sm:block">Jan Samadhan AI</span>
