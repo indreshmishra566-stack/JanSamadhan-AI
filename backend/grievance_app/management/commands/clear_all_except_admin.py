@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from grievance_app.models import Complaint, ComplaintHistory, Department, ForwardingRecord, Notification, User
 
@@ -22,11 +23,17 @@ class Command(BaseCommand):
         deleted_users, _ = User.objects.exclude(id__in=admin_ids).delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {deleted_users} non-admin user records."))
 
-        User.objects.filter(id__in=admin_ids).update(
+        admin_password = getattr(settings, "DEFAULT_ADMIN_PASSWORD", "Admin@123")
+
+        admins_to_keep = User.objects.filter(id__in=admin_ids)
+        admins_to_keep.update(
             department=None,
             created_by=None,
             reports_to=None,
         )
+        for admin_user in admins_to_keep:
+            admin_user.set_password(admin_password)
+            admin_user.save(update_fields=["password"])
 
         admins = list(
             User.objects.filter(id__in=admin_ids).values("username", "email", "first_name", "last_name")
