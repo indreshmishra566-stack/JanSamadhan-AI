@@ -253,6 +253,15 @@
     color: #001b44;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
   }
+  .portal-theme-authority .portal-hero-title span:nth-child(1) {
+    color: #001b44;
+  }
+  .portal-theme-authority .portal-hero-title span:nth-child(2) {
+    color: #81004b;
+  }
+  .portal-theme-authority .portal-hero-title span:nth-child(3) {
+    color: #b45309;
+  }
   .portal-theme-authority .portal-hero-title::after {
     @apply w-44;
     background: linear-gradient(90deg, #81004b 0%, #f6a11a 45%, #003b82 100%);
