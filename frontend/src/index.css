@@ -66,6 +66,12 @@
       radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 18%),
       linear-gradient(145deg, #070b18, #101726 45%, #1a2336);
   }
+  .portal-root::before {
+    content: "";
+    @apply pointer-events-none fixed left-0 right-0 top-0 z-[60] h-1;
+    background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.95), transparent);
+    animation: portal-official-scan 7s ease-in-out infinite;
+  }
   .portal-shell {
     @apply border border-cyan-300/10 bg-white/[0.06] pt-[52px] shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur;
   }
@@ -93,6 +99,7 @@
   }
   .portal-brand-card {
     @apply flex w-fit items-center gap-4 rounded-[26px] bg-white/10 px-5 py-4 shadow-[0_20px_60px_rgba(8,15,32,0.28)] ring-1 ring-white/10 backdrop-blur transition hover:bg-white/[0.12];
+    animation: portal-card-enter 520ms ease-out both;
   }
   .portal-public-main {
     @apply flex min-h-[calc(100vh-156px)] items-start px-5 py-5 md:px-8 md:py-6 xl:px-10;
@@ -103,6 +110,18 @@
   .portal-public-copy {
     @apply max-w-3xl pt-1;
   }
+  .portal-public-copy > * {
+    animation: portal-card-enter 520ms ease-out both;
+  }
+  .portal-public-copy > *:nth-child(2) {
+    animation-delay: 80ms;
+  }
+  .portal-public-copy > *:nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .portal-public-copy > *:nth-child(4) {
+    animation-delay: 200ms;
+  }
   .portal-trust-strip {
     @apply mt-5 grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2;
   }
@@ -112,10 +131,17 @@
   .portal-trust-strip svg {
     @apply shrink-0 text-cyan-300;
   }
+  .portal-trust-strip span:hover {
+    transform: translateY(-2px);
+  }
   .portal-hero-visual {
     @apply mt-5 overflow-hidden;
     height: clamp(28rem, 47vw, 41rem);
     mask-image: linear-gradient(to bottom, transparent 0%, black 7%, black 88%, transparent 100%);
+  }
+  .portal-hero-visual img {
+    animation: portal-illustration-float 7s ease-in-out infinite;
+    transform-origin: center;
   }
   .portal-hero-caption {
     @apply mt-2 flex items-center justify-between gap-3 px-1 text-xs text-slate-300;
@@ -131,6 +157,7 @@
   .portal-action-primary {
     @apply text-slate-950 shadow-[0_18px_36px_rgba(34,211,238,0.22)] hover:bg-cyan-300;
     background: linear-gradient(135deg, var(--js-accent), #4de3ff);
+    animation: portal-button-breathe 4.8s ease-in-out infinite;
   }
   .portal-action-secondary {
     @apply border border-cyan-300/25 bg-white/10 text-white backdrop-blur hover:bg-white/15;
@@ -140,9 +167,28 @@
   }
   .portal-guide-panel {
     @apply rounded-[30px] border border-white/[0.08] bg-white/[0.08] p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6;
+    animation: portal-card-enter 620ms ease-out both;
   }
   .portal-guide-step {
     @apply rounded-[22px] border border-white/[0.07] bg-white/10 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-white/[0.12];
+  }
+  .portal-guide-step:hover {
+    transform: translateX(4px);
+  }
+  .portal-guide-step > div > div:first-child {
+    animation: portal-step-pulse 5.5s ease-in-out infinite;
+  }
+  .portal-guide-step:nth-child(2) > div > div:first-child {
+    animation-delay: 600ms;
+  }
+  .portal-guide-step:nth-child(3) > div > div:first-child {
+    animation-delay: 1200ms;
+  }
+  .portal-guide-step:nth-child(4) > div > div:first-child {
+    animation-delay: 1800ms;
+  }
+  .portal-guide-step:nth-child(5) > div > div:first-child {
+    animation-delay: 2400ms;
   }
   .portal-guide-tips {
     @apply mt-6 rounded-[24px] border border-cyan-300/10 bg-[#10192a]/70 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)];
@@ -155,6 +201,9 @@
       radial-gradient(circle at top left, rgba(129, 0, 75, 0.08), transparent 24%),
       radial-gradient(circle at top right, rgba(0, 59, 130, 0.08), transparent 24%),
       linear-gradient(145deg, #f7f7f7, #ffffff 48%, #f1f5f9);
+  }
+  .portal-theme-authority::before {
+    background: linear-gradient(90deg, transparent, #ffda6b, transparent);
   }
   .portal-theme-authority .portal-shell {
     @apply border-slate-300 bg-white shadow-[0_34px_110px_rgba(15,23,42,0.12)];
@@ -218,8 +267,83 @@
   .portal-theme-authority .portal-guide-step:hover {
     @apply border-[#003b82]/30;
   }
+  .portal-theme-authority .portal-guide-step > div > div:first-child {
+    animation-name: portal-step-official-pulse;
+  }
   .portal-theme-authority footer {
     @apply bg-white text-slate-700;
+  }
+
+  @keyframes portal-official-scan {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    20%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes portal-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes portal-illustration-float {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-10px) scale(1.01);
+    }
+  }
+
+  @keyframes portal-button-breathe {
+    0%,
+    100% {
+      box-shadow: 0 18px 36px rgba(34, 211, 238, 0.22);
+    }
+    50% {
+      box-shadow: 0 20px 44px rgba(34, 211, 238, 0.34);
+    }
+  }
+
+  @keyframes portal-step-pulse {
+    0%,
+    80%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 10px 22px rgba(34, 211, 238, 0.18);
+    }
+    88% {
+      transform: scale(1.06);
+      box-shadow: 0 14px 30px rgba(34, 211, 238, 0.32);
+    }
+  }
+
+  @keyframes portal-step-official-pulse {
+    0%,
+    80%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 10px 22px rgba(0, 59, 130, 0.14);
+    }
+    88% {
+      transform: scale(1.06);
+      box-shadow: 0 14px 30px rgba(129, 0, 75, 0.2);
+    }
   }
   .portal-menu-toggle {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700;
@@ -640,5 +764,22 @@
     left: 0;
     right: 0;
     top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-root::before,
+  .portal-brand-card,
+  .portal-public-copy > *,
+  .portal-guide-panel,
+  .portal-hero-visual img,
+  .portal-action-primary,
+  .portal-guide-step > div > div:first-child {
+    animation: none !important;
+  }
+
+  .portal-trust-strip span:hover,
+  .portal-guide-step:hover {
+    transform: none;
   }
 }
