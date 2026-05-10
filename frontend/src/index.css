@@ -65,11 +65,9 @@
   }
   .portal-utility-nav {
     @apply fixed z-50 flex flex-wrap items-center gap-1 px-3 py-2 text-sm text-white shadow-lg;
-    left: 0.5rem;
-    right: 0.5rem;
-    top: 0.5rem;
-    border-top-left-radius: 28px;
-    border-top-right-radius: 28px;
+    left: 0;
+    right: 0;
+    top: 0;
     background: linear-gradient(90deg, #07111f, #0b1730 35%, #11233c 100%);
   }
   .portal-utility-link {
@@ -465,10 +463,8 @@
 
 @media (min-width: 768px) {
   .portal-utility-nav {
-    left: 0.75rem;
-    right: 0.75rem;
-    top: 0.75rem;
-    border-top-left-radius: 36px;
-    border-top-right-radius: 36px;
+    left: 0;
+    right: 0;
+    top: 0;
   }
 }
