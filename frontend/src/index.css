@@ -316,6 +316,12 @@
   .portal-theme-authority .portal-guide-step:hover {
     @apply border-[#003b82]/30;
   }
+  .portal-theme-authority .portal-hero-visual {
+    opacity: 0.92;
+  }
+  .portal-theme-authority .portal-hero-visual img {
+    filter: saturate(0.86) contrast(0.92) brightness(1.08) sepia(0.06);
+  }
   .portal-theme-authority .portal-guide-step > div > div:first-child {
     animation-name: portal-step-official-pulse;
   }
