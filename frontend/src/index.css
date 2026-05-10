@@ -198,19 +198,22 @@
     @apply bg-white text-slate-600;
   }
   .portal-theme-authority {
-    --js-accent: #f59e0b;
-    --js-accent-strong: #1d4ed8;
+    --js-accent: #f97316;
+    --js-accent-strong: #1e40af;
     background:
-      radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 22%),
-      radial-gradient(circle at top right, rgba(29, 78, 216, 0.12), transparent 24%),
-      linear-gradient(145deg, #f8fafc, #eef3f8 50%, #fff7ed);
+      linear-gradient(90deg, #ff9933 0 33.3%, #ffffff 33.3% 66.6%, #138808 66.6% 100%) top / 100% 4px no-repeat,
+      radial-gradient(circle at top left, rgba(255, 153, 51, 0.12), transparent 24%),
+      radial-gradient(circle at top right, rgba(19, 136, 8, 0.09), transparent 24%),
+      linear-gradient(145deg, #f8fafc, #f1f5f9 52%, #fff7ed);
   }
   .portal-theme-authority .portal-shell {
-    @apply border-slate-300 bg-white shadow-[0_34px_110px_rgba(15,23,42,0.13)];
+    @apply border-slate-300 bg-white shadow-[0_34px_110px_rgba(15,23,42,0.12)];
   }
   .portal-theme-authority .portal-utility-nav {
     @apply border-amber-300 text-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.16)];
-    background: linear-gradient(90deg, #0f172a, #1e3a8a 58%, #92400e);
+    background:
+      linear-gradient(90deg, #ff9933 0 33.3%, #ffffff 33.3% 66.6%, #138808 66.6% 100%) bottom / 100% 3px no-repeat,
+      linear-gradient(90deg, #07152d, #102a56 58%, #07152d);
   }
   .portal-theme-authority .portal-utility-link {
     @apply hover:bg-white/10;
@@ -245,13 +248,25 @@
     @apply border-slate-300 bg-white text-slate-900 shadow-sm hover:bg-slate-50;
   }
   .portal-theme-authority .portal-action-primary {
-    @apply text-slate-950 shadow-[0_18px_36px_rgba(245,158,11,0.26)] hover:bg-amber-300;
-    background: linear-gradient(135deg, #f59e0b, #fcd34d);
+    @apply text-slate-950 shadow-[0_18px_36px_rgba(249,115,22,0.24)] hover:bg-orange-300;
+    background: linear-gradient(135deg, #ff9933, #fcd34d);
   }
   .portal-theme-authority .portal-trust-strip svg,
   .portal-theme-authority .portal-guide-tips h4,
   .portal-theme-authority .portal-hero-caption .text-cyan-300 {
-    @apply text-blue-700;
+    @apply text-blue-800;
+  }
+  .portal-theme-authority .portal-guide-panel {
+    @apply border-slate-300;
+    box-shadow:
+      0 16px 46px rgba(15, 23, 42, 0.08),
+      inset 4px 0 0 #ff9933;
+  }
+  .portal-theme-authority .portal-guide-step {
+    @apply border-slate-200;
+  }
+  .portal-theme-authority .portal-guide-step:hover {
+    @apply border-blue-200;
   }
   .portal-theme-authority footer {
     @apply bg-white text-slate-700;

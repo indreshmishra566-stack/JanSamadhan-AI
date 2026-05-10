@@ -81,12 +81,12 @@ function PublicShell({ language, setLanguage, children }) {
   const themeOptions = [
     { value: "dark", label: "Dark" },
     { value: "light", label: "Light" },
-    { value: "authority", label: "Authority" },
+    { value: "authority", label: "Official" },
   ];
   const themeLabels = {
     dark: "Dark",
     light: "Light",
-    authority: "Authority",
+    authority: "Official",
   };
   const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? Moon : ShieldCheck;
 
