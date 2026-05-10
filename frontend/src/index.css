@@ -216,10 +216,10 @@
       #81004b;
   }
   .portal-theme-authority .portal-utility-link {
-    @apply hover:bg-white/15;
+    @apply text-yellow-200 hover:bg-white/15 hover:text-yellow-100;
   }
   .portal-theme-authority .portal-utility-link.active {
-    @apply bg-white text-[#81004b] ring-white/70;
+    @apply bg-yellow-300 text-[#81004b] ring-yellow-100;
   }
   .portal-theme-authority .portal-brand-card,
   .portal-theme-authority .portal-guide-panel,
