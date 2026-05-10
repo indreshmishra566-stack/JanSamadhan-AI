@@ -1,4 +1,7 @@
 import secrets
+import logging
+import random
+import requests
 
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -6,13 +9,16 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.management import call_command
+from django.core.mail import send_mail
 from django.utils import timezone
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
 
-from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord
+from .models import User, Department, Complaint, ComplaintHistory, LoginOTP, Notification, ForwardingRecord
 from .serializers import (
     RegisterSerializer, UserSerializer, ProfileUpdateSerializer, DepartmentSerializer,
     ComplaintSerializer, ComplaintCreateSerializer, NotificationSerializer,
@@ -23,6 +29,7 @@ from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
 
 DEFAULT_OFFICER_ROLE = "OFFICER"
+logger = logging.getLogger(__name__)
 
 
 def _demo_maintenance_token(request):
@@ -41,6 +48,70 @@ def _can_run_demo_maintenance(request):
     return _valid_demo_maintenance_token(request) or (
         user and user.is_authenticated and (user.role == "ADMIN" or user.is_superuser)
     )
+
+
+def _token_response(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
+
+
+def _send_sms_otp(phone, message):
+    if not phone:
+        return "No phone number on account."
+    sid = getattr(settings, "TWILIO_ACCOUNT_SID", "")
+    token = getattr(settings, "TWILIO_AUTH_TOKEN", "")
+    from_number = getattr(settings, "TWILIO_FROM_NUMBER", "")
+    if not (sid and token and from_number):
+        logger.warning("SMS OTP for %s was not sent because Twilio is not configured.", phone)
+        return "SMS provider not configured."
+
+    response = requests.post(
+        f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
+        data={"From": from_number, "To": phone, "Body": message},
+        auth=(sid, token),
+        timeout=10,
+    )
+    response.raise_for_status()
+    return "SMS sent."
+
+
+def _create_and_send_login_otp(user):
+    LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
+    code = f"{random.SystemRandom().randint(0, 999999):06d}"
+    expires_at = timezone.now() + timezone.timedelta(minutes=10)
+    message = f"Your Jan Samadhan AI login OTP is {code}. It expires in 10 minutes."
+    delivery_notes = []
+
+    otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
+
+    if user.email:
+        try:
+            send_mail(
+                "Jan Samadhan AI login OTP",
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            delivery_notes.append("Email sent.")
+        except Exception as exc:
+            logger.exception("Email OTP failed for user %s", user.username)
+            delivery_notes.append(f"Email failed: {exc}")
+    else:
+        delivery_notes.append("No email on account.")
+
+    try:
+        delivery_notes.append(_send_sms_otp(user.phone, message))
+    except Exception as exc:
+        logger.exception("SMS OTP failed for user %s", user.username)
+        delivery_notes.append(f"SMS failed: {exc}")
+
+    otp.delivery_note = " ".join(delivery_notes)
+    otp.save(update_fields=["delivery_note"])
+    return otp
 
 
 def _managed_department_ids(user):
@@ -215,6 +286,62 @@ def _can_manage_department(user, department=None, parent=None):
 
 
 # ─── Auth ───────────────────────────────────────────────────────────────────
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username", "").strip()
+        password = request.data.get("password", "")
+        if not username or not password:
+            return Response({"detail": "Username and password are required."}, status=400)
+
+        user = authenticate(request, username=username, password=password)
+        if not user or not user.is_active:
+            return Response({"detail": "Invalid credentials"}, status=401)
+
+        if user.role == "CITIZEN":
+            _create_and_send_login_otp(user)
+            return Response({
+                "otp_required": True,
+                "detail": "OTP sent to your registered email and mobile number.",
+                "username": user.username,
+                "email": user.email,
+                "phone": user.phone,
+            })
+
+        return Response(_token_response(user))
+
+
+class VerifyCitizenLoginOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username", "").strip()
+        password = request.data.get("password", "")
+        code = request.data.get("otp", "").strip()
+        if not username or not password or not code:
+            return Response({"detail": "Username, password, and OTP are required."}, status=400)
+
+        user = authenticate(request, username=username, password=password)
+        if not user or not user.is_active:
+            return Response({"detail": "Invalid credentials"}, status=401)
+        if user.role != "CITIZEN":
+            return Response(_token_response(user))
+
+        otp = LoginOTP.objects.filter(
+            user=user,
+            code=code,
+            consumed_at__isnull=True,
+            expires_at__gte=timezone.now(),
+        ).order_by("-created_at").first()
+        if not otp:
+            return Response({"detail": "Invalid or expired OTP."}, status=400)
+
+        otp.consumed_at = timezone.now()
+        otp.save(update_fields=["consumed_at"])
+        return Response(_token_response(user))
+
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -795,7 +922,7 @@ def run_demo_seed(request):
         "status": "ok",
         "message": "National-to-village water department demo hierarchy, citizens, and grievances were seeded.",
         "logins": {
-            "admin": "Admin@1234",
+            "admin": getattr(settings, "DEFAULT_ADMIN_PASSWORD", "12345678"),
             "chief_public_grievance": "Officer@1234",
             "central_water_mission_head": "Officer@1234",
             "up_water_director": "Officer@1234",
@@ -825,7 +952,7 @@ def run_demo_clear(request):
         "status": "ok",
         "message": "Seeded demo hierarchy data was deleted. Admin was kept.",
         "remaining_login": {
-            "admin": "Admin@1234",
+            "admin": getattr(settings, "DEFAULT_ADMIN_PASSWORD", "12345678"),
         },
     })
 
@@ -843,7 +970,7 @@ def run_clear_all_except_admin(request):
         "message": "All non-admin data was deleted. Admin account(s) were kept.",
         "remaining_admins": admin_users,
         "known_admin_login": {
-            "admin": "Admin@1234",
+            "admin": getattr(settings, "DEFAULT_ADMIN_PASSWORD", "12345678"),
         },
     })
 

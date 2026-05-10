@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Department, Complaint, ComplaintHistory, Notification
+from .models import User, Department, Complaint, ComplaintHistory, LoginOTP, Notification
 
 
 @admin.register(User)
@@ -36,3 +36,10 @@ class ComplaintHistoryAdmin(admin.ModelAdmin):
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ["recipient", "notification_type", "title", "is_read", "created_at"]
     list_filter = ["notification_type", "is_read"]
+
+
+@admin.register(LoginOTP)
+class LoginOTPAdmin(admin.ModelAdmin):
+    list_display = ["user", "created_at", "expires_at", "consumed_at", "delivery_note"]
+    list_filter = ["consumed_at", "created_at"]
+    search_fields = ["user__username", "user__email", "user__phone"]

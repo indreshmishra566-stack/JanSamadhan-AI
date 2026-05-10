@@ -10,9 +10,11 @@ const HANDLER_ROLES = ["OFFICER"];
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
+  const [otp, setOtp] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
-  const { login } = useAuth();
+  const { login, verifyCitizenOtp } = useAuth();
   const navigate = useNavigate();
   const content = getPublicText(language);
   const common = content.common;
@@ -28,7 +30,15 @@ export default function LoginPage() {
     if (!form.username.trim() || !form.password) return;
     setLoading(true);
     try {
-      const user = await login(form);
+      const result = otpStep
+        ? await verifyCitizenOtp({ ...form, otp })
+        : await login(form);
+      if (result?.otp_required) {
+        setOtpStep(true);
+        toast.success(result.detail || "OTP sent to your registered email and mobile number.");
+        return;
+      }
+      const user = result;
       toast.success(`Welcome back, ${user.first_name || user.username}!`);
       if (user.role === "ADMIN") navigate("/admin/dashboard");
       else if (HANDLER_ROLES.includes(user.role)) navigate("/officer/dashboard");
@@ -98,9 +108,40 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
+            {otpStep && (
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Login OTP</label>
+                <input
+                  className="input"
+                  type="text"
+                  inputMode="numeric"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="Enter 6-digit OTP"
+                  required
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  OTP was sent to your registered email and mobile number.
+                </p>
+              </div>
+            )}
             <button type="submit" disabled={loading} className="btn-primary w-full py-3 text-base shadow-lg shadow-blue-600/20">
-              {loading ? text.signingIn : text.signIn}
+              {loading ? text.signingIn : otpStep ? "Verify OTP" : text.signIn}
             </button>
+            {otpStep && (
+              <button
+                type="button"
+                className="w-full text-sm font-medium text-blue-600 hover:underline"
+                onClick={() => {
+                  setOtp("");
+                  setOtpStep(false);
+                }}
+              >
+                Change username or resend OTP
+              </button>
+            )}
           </form>
           <p className="mt-6 text-center text-sm text-gray-500">
             {text.newCitizen}{" "}

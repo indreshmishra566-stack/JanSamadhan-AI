@@ -23,7 +23,7 @@ class Command(BaseCommand):
         deleted_users, _ = User.objects.exclude(id__in=admin_ids).delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {deleted_users} non-admin user records."))
 
-        admin_password = getattr(settings, "DEFAULT_ADMIN_PASSWORD", "Admin@123")
+        admin_password = getattr(settings, "DEFAULT_ADMIN_PASSWORD", "12345678")
 
         admins_to_keep = User.objects.filter(id__in=admin_ids)
         admins_to_keep.update(

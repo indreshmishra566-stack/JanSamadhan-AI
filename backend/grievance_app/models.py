@@ -40,6 +40,24 @@ class User(AbstractUser):
         return order.get(self.role, 99)
 
 
+class LoginOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="login_otps")
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    delivery_note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "code", "expires_at"]),
+        ]
+
+    @property
+    def is_valid(self):
+        return not self.consumed_at and self.expires_at >= timezone.now()
+
+
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=20, unique=True)
