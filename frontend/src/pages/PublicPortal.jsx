@@ -229,14 +229,6 @@ export default function PublicPortal() {
     { icon: Building2, label: "Department routing ready" },
     { icon: LockKeyhole, label: "Internal access stays gated" },
   ];
-  const workflowSteps = [
-    "Citizen complaint submitted",
-    "Central / State grievance portal",
-    "Main officer manages departments",
-    "Department head assigns officer",
-    "Sub officer coordinates field work",
-    "Citizen receives resolution update",
-  ];
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
@@ -255,6 +247,25 @@ export default function PublicPortal() {
             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-200">
               Lodge complaints, classify them with AI, route them to the right authority, monitor SLA progress, and close the loop with feedback.
             </p>
+            <div className="portal-trust-strip">
+              {trustSignals.map(({ icon: Icon, label }) => (
+                <span key={label}>
+                  <Icon size={14} />
+                  {label}
+                </span>
+              ))}
+            </div>
+            <figure className="portal-hero-visual">
+              <img
+                src={citizenGuidanceArt}
+                alt="Citizen using a phone to submit a grievance with location and department routing guidance"
+                className="h-full w-full object-contain object-center drop-shadow-[0_24px_54px_rgba(8,15,32,0.32)]"
+              />
+              <figcaption className="portal-hero-caption">
+                <span>Citizen-friendly complaint filing and smart routing</span>
+                <span className="text-cyan-300">Local project illustration</span>
+              </figcaption>
+            </figure>
             <div className="portal-action-row">
               <Link
                 to="/register"
@@ -285,62 +296,49 @@ export default function PublicPortal() {
                 {portal.actionHowItWorks}
               </Link>
             </div>
-            <div className="portal-hero-stats">
-              <article>
-                <strong>AI</strong>
-                <span>classification ready</span>
-              </article>
-              <article>
-                <strong>24x7</strong>
-                <span>public status tracking</span>
-              </article>
-            </div>
-            <div className="portal-trust-strip">
-              {trustSignals.map(({ icon: Icon, label }) => (
-                <span key={label}>
-                  <Icon size={14} />
-                  {label}
-                </span>
-              ))}
-            </div>
-            <figure className="portal-hero-visual portal-hero-visual-compact">
-              <img
-                src={citizenGuidanceArt}
-                alt="Citizen using a phone to submit a grievance with location and department routing guidance"
-                className="h-full w-full object-contain object-center drop-shadow-[0_24px_54px_rgba(8,15,32,0.32)]"
-              />
-            </figure>
           </div>
 
           <section className="portal-guide-panel">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
               <ShieldCheck size={14} />
-              Live routing preview
+              {portal.guideBadge}
             </div>
-            <h3 className="mt-4 text-2xl font-bold text-white">Assignment workflow</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-200">See how a grievance moves from citizen filing to officer action, department review, and final update.</p>
+            <h3 className="mt-4 text-2xl font-bold text-white">{portal.guideTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.guideText}</p>
 
             <div className="mt-6 space-y-3">
-              {workflowSteps.map((step, index) => (
+              {portal.guideSteps.map((step, index) => (
                 <article
-                  key={step}
+                  key={step.title}
                   className="portal-guide-step"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
                       {String(index + 1).padStart(2, "0")}
                     </div>
-                    <h4 className="text-base font-bold text-white">{step}</h4>
-                    <ArrowRight size={17} className="ml-auto shrink-0 opacity-60" />
+                    <div>
+                      <h4 className="text-base font-bold text-white">{step.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-200">{step.text}</p>
+                    </div>
                   </div>
                 </article>
               ))}
             </div>
-            <div className="portal-workflow-stats">
-              <span><strong>All</strong>Departments</span>
-              <span><strong>4</strong>Officer levels</span>
-              <span><strong>24x7</strong>SLA view</span>
-            </div>
+
+            <article className="portal-guide-tips">
+              <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                {portal.guideTipsTitle}
+              </h4>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{portal.guideTipsText}</p>
+              <ul className="mt-3 space-y-2">
+                {portal.guideTips.map((tip) => (
+                  <li key={tip} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-300" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           </section>
         </section>
       </main>
