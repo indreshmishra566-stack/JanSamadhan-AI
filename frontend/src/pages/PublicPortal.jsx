@@ -22,7 +22,13 @@ import {
   UserPlus,
   Waves,
 } from "lucide-react";
-import { getPortalLanguage, setPortalLanguage, getPublicText, PORTAL_LANGUAGE_OPTIONS } from "../i18n/public";
+import {
+  getPortalLanguage,
+  setPortalLanguage,
+  getPublicText,
+  GOOGLE_TRANSLATE_LANGUAGE_CODES,
+  PORTAL_LANGUAGE_OPTIONS,
+} from "../i18n/public";
 import citizenGuidanceArt from "../assets/citizen-grievance-hero.svg";
 
 function usePortalLanguage() {
@@ -52,7 +58,7 @@ function usePortalTheme() {
 function UtilityLink({ to, icon: Icon, label, active }) {
   return (
     <Link to={to} className={`portal-utility-link ${active ? "active" : ""}`}>
-      <Icon size={14} />
+      <Icon size={14} className="notranslate" />
       <span>{label}</span>
     </Link>
   );
@@ -65,7 +71,7 @@ function UtilityNav({ common, portal }) {
   return (
     <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
       <Link to="/" className="portal-nav-brand" aria-label={common.title}>
-        <span className="portal-nav-emblem">JS</span>
+        <span className="portal-nav-emblem notranslate">JS</span>
         <span>
           <strong>{common.title}</strong>
           <small>{portal.subtitle}</small>
@@ -81,6 +87,68 @@ function UtilityNav({ common, portal }) {
       </div>
     </nav>
   );
+}
+
+function setGoogleTranslateCookie(language) {
+  const value = language === "en" ? "" : `/en/${language}`;
+  const expires = value ? "" : "; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  const cookie = `googtrans=${value}; path=/${expires}`;
+  document.cookie = cookie;
+
+  const hostnameParts = window.location.hostname.split(".");
+  if (hostnameParts.length > 1) {
+    document.cookie = `${cookie}; domain=.${hostnameParts.slice(-2).join(".")}`;
+  }
+}
+
+function applyGoogleTranslateLanguage(language) {
+  const select = document.querySelector(".goog-te-combo");
+  if (!select) return false;
+  select.value = language === "en" ? "" : language;
+  select.dispatchEvent(new Event("change"));
+  return true;
+}
+
+function GoogleTranslateBridge({ language }) {
+  useEffect(() => {
+    setGoogleTranslateCookie(language);
+
+    const tryApplyLanguage = () => {
+      if (applyGoogleTranslateLanguage(language)) return;
+      window.setTimeout(() => applyGoogleTranslateLanguage(language), 500);
+    };
+
+    if (language === "en") {
+      tryApplyLanguage();
+      return;
+    }
+
+    window.googleTranslateElementInit = () => {
+      if (!window.google?.translate?.TranslateElement) return;
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          includedLanguages: GOOGLE_TRANSLATE_LANGUAGE_CODES.join(","),
+          autoDisplay: false,
+        },
+        "google_translate_element",
+      );
+      window.setTimeout(tryApplyLanguage, 300);
+    };
+
+    if (!document.querySelector('script[src*="translate.google.com/translate_a/element.js"]')) {
+      const script = document.createElement("script");
+      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+    } else if (window.google?.translate?.TranslateElement) {
+      window.googleTranslateElementInit();
+    } else {
+      tryApplyLanguage();
+    }
+  }, [language]);
+
+  return <div id="google_translate_element" className="google-translate-host" aria-hidden="true" />;
 }
 
 export function PublicShell({ language, setLanguage, children }) {
@@ -109,6 +177,7 @@ export function PublicShell({ language, setLanguage, children }) {
 
   return (
     <div id="top" className={`portal-root portal-theme-${theme}`}>
+      <GoogleTranslateBridge language={language} />
       <UtilityNav common={common} portal={portal} />
       <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <header className="px-5 py-4 md:px-8 xl:px-10">
@@ -118,7 +187,7 @@ export function PublicShell({ language, setLanguage, children }) {
                 <select
                   value={theme}
                   onChange={(event) => setTheme(event.target.value)}
-                  className="portal-theme-select"
+                  className="portal-theme-select notranslate"
                   aria-label="Choose theme"
                 >
                   {themeOptions.map((option) => (
@@ -129,13 +198,13 @@ export function PublicShell({ language, setLanguage, children }) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
-                <Languages size={16} />
+              <label className="inline-flex min-w-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+                <Languages size={16} className="notranslate shrink-0" />
                 <span>{common.language}</span>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-transparent pr-1 outline-none"
+                  className="notranslate max-w-36 bg-transparent pr-1 outline-none"
                   aria-label={common.language}
                 >
                   {PORTAL_LANGUAGE_OPTIONS.map((option) => (
@@ -150,7 +219,7 @@ export function PublicShell({ language, setLanguage, children }) {
                 to="/login"
                 className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
-                <LogIn size={16} />
+                <LogIn size={16} className="notranslate shrink-0" />
                 {portal.login}
               </Link>
           </div>
@@ -192,11 +261,11 @@ function FlowNode({ icon: Icon, step, title, text }) {
   return (
     <article className="rounded-[24px] bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-fuchsia-700 text-white shadow-lg">
+        <div className="notranslate flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-fuchsia-700 text-white shadow-lg">
           <Icon size={18} />
         </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200">{step}</p>
+        <div className="min-w-0">
+          <p className="notranslate text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200">{step}</p>
           <h3 className="mt-1 text-lg font-semibold text-white">{title}</h3>
           <p className="mt-2 text-sm leading-7 text-slate-200">{text}</p>
         </div>
@@ -312,10 +381,10 @@ export default function PublicPortal() {
                   className="portal-guide-step"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
+                    <div className="notranslate flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
                       {String(index + 1).padStart(2, "0")}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h4 className="text-base font-bold text-white">{step.title}</h4>
                       <p className="mt-2 text-sm leading-6 text-slate-200">{step.text}</p>
                     </div>

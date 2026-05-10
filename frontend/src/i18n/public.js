@@ -2,29 +2,49 @@ export const PORTAL_LANGUAGE_KEY = "portal_language";
 
 export const PORTAL_LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
-  { value: "hi", label: "हिन्दी" },
+  { value: "as", label: "অসমীয়া" },
   { value: "bn", label: "বাংলা" },
+  { value: "bodo", label: "बड़ो" },
+  { value: "doi", label: "डोगरी" },
+  { value: "gu", label: "ગુજરાતી" },
+  { value: "hi", label: "हिन्दी" },
+  { value: "kn", label: "ಕನ್ನಡ" },
+  { value: "ks", label: "کٲشُر" },
+  { value: "gom", label: "कोंकणी" },
+  { value: "mai", label: "मैथिली" },
+  { value: "ml", label: "മലയാളം" },
+  { value: "mni-Mtei", label: "ꯃꯤꯇꯩꯂꯣꯟ" },
+  { value: "mr", label: "मराठी" },
+  { value: "ne", label: "नेपाली" },
+  { value: "or", label: "ଓଡ଼ିଆ" },
+  { value: "pa", label: "ਪੰਜਾਬੀ" },
+  { value: "sa", label: "संस्कृतम्" },
+  { value: "sat", label: "ᱥᱟᱱᱛᱟᱲᱤ" },
+  { value: "sd", label: "سنڌي" },
   { value: "ta", label: "தமிழ்" },
   { value: "te", label: "తెలుగు" },
-  { value: "mr", label: "मराठी" },
-  { value: "gu", label: "ગુજરાતી" },
-  { value: "kn", label: "ಕನ್ನಡ" },
-  { value: "ml", label: "മലയാളം" },
-  { value: "pa", label: "ਪੰਜਾਬੀ" },
-  { value: "or", label: "ଓଡ଼ିଆ" },
   { value: "ur", label: "اردو" },
-  { value: "as", label: "অসমীয়া" },
 ];
+
+export const PORTAL_LANGUAGE_VALUES = PORTAL_LANGUAGE_OPTIONS.map((option) => option.value);
+
+export const GOOGLE_TRANSLATE_LANGUAGE_CODES = PORTAL_LANGUAGE_VALUES.filter((language) => language !== "en");
+
+export function normalizePortalLanguage(language) {
+  return PORTAL_LANGUAGE_VALUES.includes(language) ? language : "en";
+}
 
 export function getPortalLanguage() {
   if (typeof window === "undefined") return "en";
-  return localStorage.getItem(PORTAL_LANGUAGE_KEY) || "en";
+  return normalizePortalLanguage(localStorage.getItem(PORTAL_LANGUAGE_KEY) || "en");
 }
 
 export function setPortalLanguage(language) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(PORTAL_LANGUAGE_KEY, language);
-  document.documentElement.lang = language || "en";
+  const normalizedLanguage = normalizePortalLanguage(language);
+  localStorage.setItem(PORTAL_LANGUAGE_KEY, normalizedLanguage);
+  document.documentElement.lang = normalizedLanguage;
+  document.documentElement.dir = ["ks", "sd", "ur"].includes(normalizedLanguage) ? "rtl" : "ltr";
 }
 
 function mergeDeep(base, override) {
