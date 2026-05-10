@@ -69,19 +69,19 @@ function PublicShell({ language, setLanguage, children }) {
     <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_18%),linear-gradient(145deg,_#070b18,_#101726_45%,_#1a2336)] px-2 py-2 md:px-3 md:py-3">
       <UtilityNav portal={portal} />
       <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
-        <header className="px-5 py-3 md:px-8">
+        <header className="px-5 py-4 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link
               to="/"
-              className="flex w-fit items-center gap-4 rounded-[22px] bg-white/10 px-5 py-3 shadow-[0_20px_60px_rgba(8,15,32,0.28)] ring-1 ring-white/10 backdrop-blur"
+              className="flex w-fit items-center gap-4 rounded-[26px] bg-white/10 px-5 py-4 shadow-[0_20px_60px_rgba(8,15,32,0.28)] ring-1 ring-white/10 backdrop-blur"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400 text-lg font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400 text-xl font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
                 JS
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
-                <h1 className="text-xl font-bold text-white">{common.title}</h1>
-                <p className="text-xs text-slate-400">{portal.subtitle}</p>
+                <h1 className="text-2xl font-bold text-white">{common.title}</h1>
+                <p className="text-sm text-slate-400">{portal.subtitle}</p>
               </div>
             </Link>
 
@@ -184,27 +184,27 @@ export default function PublicPortal() {
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
-      <main className="flex items-start px-5 py-3 md:px-8 md:py-4">
-        <section className="grid w-full gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-          <div className="max-w-3xl">
+      <main className="flex min-h-[calc(100vh-156px)] items-start px-5 py-6 md:px-8 md:py-8">
+        <section className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="max-w-3xl pt-2">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
               {portal.accessTag}
             </div>
-            <h2 className="mt-4 text-4xl font-extrabold leading-[1.05] text-white md:text-5xl">{portal.heroTitle}</h2>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-200">{portal.heroText}</p>
-            <figure className="mt-4">
+            <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">{portal.heroTitle}</h2>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
+            <figure className="mt-6">
               <img
                 src={citizenGuidanceArt}
                 alt="Citizen using a phone to submit a grievance with location and department routing guidance"
-                className="h-[18rem] w-full max-w-none rounded-[24px] object-cover object-center shadow-[0_24px_70px_rgba(8,15,32,0.26)] md:h-[21rem] xl:h-[22rem]"
+                className="w-full max-w-none rounded-[24px] object-cover object-center shadow-[0_24px_70px_rgba(8,15,32,0.26)]"
               />
               <figcaption className="mt-2 flex items-center justify-between gap-3 px-1 text-xs text-slate-300">
                 <span>Citizen-friendly complaint filing and smart routing</span>
                 <span className="text-cyan-300">Local project illustration</span>
               </figcaption>
             </figure>
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/register"
                 className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
@@ -236,41 +236,41 @@ export default function PublicPortal() {
             </div>
           </div>
 
-          <section className="rounded-[26px] bg-white/8 p-4 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-5">
+          <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
               <ShieldCheck size={14} />
               {portal.guideBadge}
             </div>
-            <h3 className="mt-3 text-xl font-bold text-white">{portal.guideTitle}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-200">{portal.guideText}</p>
+            <h3 className="mt-4 text-2xl font-bold text-white">{portal.guideTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{portal.guideText}</p>
 
-            <div className="mt-4 space-y-2">
+            <div className="mt-6 space-y-3">
               {portal.guideSteps.map((step, index) => (
                 <article
                   key={step.title}
-                  className="rounded-[20px] bg-white/10 p-3 shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
+                  className="rounded-[24px] bg-white/10 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-xs font-bold text-slate-950 shadow-lg">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
                       {String(index + 1).padStart(2, "0")}
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white">{step.title}</h4>
-                      <p className="mt-1 text-xs leading-5 text-slate-200 md:text-sm">{step.text}</p>
+                      <h4 className="text-base font-semibold text-white">{step.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-200">{step.text}</p>
                     </div>
                   </div>
                 </article>
               ))}
             </div>
 
-            <article className="mt-4 rounded-[20px] bg-[#10192a]/70 p-3 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+            <article className="mt-6 rounded-[24px] bg-[#10192a]/70 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
               <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-300">
                 {portal.guideTipsTitle}
               </h4>
-              <p className="mt-1 text-xs leading-5 text-slate-300 md:text-sm">{portal.guideTipsText}</p>
-              <ul className="mt-2 space-y-1">
+              <p className="mt-2 text-sm leading-6 text-slate-300">{portal.guideTipsText}</p>
+              <ul className="mt-3 space-y-2">
                 {portal.guideTips.map((tip) => (
-                  <li key={tip} className="flex items-start gap-3 text-xs leading-5 text-slate-200 md:text-sm">
+                  <li key={tip} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
                     <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-300" />
                     <span>{tip}</span>
                   </li>
