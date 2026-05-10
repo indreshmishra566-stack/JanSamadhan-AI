@@ -14,9 +14,11 @@ import {
   Mail,
   Map,
   MapPinned,
+  Moon,
   Phone,
   Search,
   ShieldCheck,
+  Sun,
   UserPlus,
   Waves,
 } from "lucide-react";
@@ -31,6 +33,19 @@ function usePortalLanguage() {
   }, [language]);
 
   return [language, setLanguageState];
+}
+
+function usePortalTheme() {
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "dark";
+    return window.localStorage.getItem("jan-samadhan-theme") || "dark";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem("jan-samadhan-theme", theme);
+  }, [theme]);
+
+  return [theme, setTheme];
 }
 
 function UtilityLink({ to, icon: Icon, label, active }) {
@@ -58,10 +73,12 @@ function UtilityNav({ portal }) {
 }
 
 function PublicShell({ language, setLanguage, children }) {
+  const [theme, setTheme] = usePortalTheme();
   const location = useLocation();
   const t = useMemo(() => getPublicText(language), [language]);
   const common = t.common;
   const portal = t.portal;
+  const isLightTheme = theme === "light";
 
   useEffect(() => {
     if (!location.hash) return;
@@ -72,9 +89,9 @@ function PublicShell({ language, setLanguage, children }) {
   }, [location.hash]);
 
   return (
-    <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_18%),linear-gradient(145deg,_#070b18,_#101726_45%,_#1a2336)] px-2 py-2 md:px-3 md:py-3">
+    <div id="top" className={`portal-root portal-theme-${theme}`}>
       <UtilityNav portal={portal} />
-      <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
+      <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <header className="px-5 py-4 md:px-8 xl:px-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link
@@ -92,6 +109,16 @@ function PublicShell({ language, setLanguage, children }) {
             </Link>
 
             <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setTheme(isLightTheme ? "dark" : "light")}
+                className="portal-theme-toggle"
+                aria-label={`Switch to ${isLightTheme ? "dark" : "light"} theme`}
+              >
+                {isLightTheme ? <Moon size={16} /> : <Sun size={16} />}
+                <span>{isLightTheme ? "Dark" : "Light"}</span>
+              </button>
+
               <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
                 <Languages size={16} />
                 <span>{common.language}</span>
