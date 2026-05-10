@@ -73,7 +73,7 @@ function UtilityNav({ portal }) {
   );
 }
 
-function PublicShell({ language, setLanguage, children }) {
+export function PublicShell({ language, setLanguage, children }) {
   const [theme, setTheme] = usePortalTheme();
   const location = useLocation();
   const t = useMemo(() => getPublicText(language), [language]);

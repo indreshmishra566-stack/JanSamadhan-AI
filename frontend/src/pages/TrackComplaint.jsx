@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { Activity, MapPinned, Search, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { complaintApi } from "../api";
-import PortalEntryShell from "../components/Shared/PortalEntryShell";
 import { StatusBadge, PriorityBadge, InfoSection, DetailItem, TimelineList } from "../components/Shared";
 import { formatDate } from "../utils/helpers";
 import { getPortalLanguage, setPortalLanguage, getPublicText } from "../i18n/public";
+import { PublicShell } from "./PublicPortal";
 
 export default function TrackComplaint() {
   const [ticketId, setTicketId] = useState("");
@@ -38,50 +38,52 @@ export default function TrackComplaint() {
   };
 
   return (
-    <PortalEntryShell
-      language={language}
-      onLanguageChange={handleLanguageChange}
-      title={common.title}
-      subtitle={text.subtitle}
-      eyebrow={common.eyebrow}
-      description={text.description}
-      badges={text.badges}
-      asideTitle={text.asideTitle}
-      asideText={text.asideText}
-      asidePoints={[
-        { icon: Search, ...text.points[0] },
-        { icon: MapPinned, ...text.points[1] },
-        { icon: ShieldCheck, ...text.points[2] },
-      ]}
-      footer={
-        <div className="rounded-2xl border border-white/10 bg-slate-950/85 px-4 py-3 text-sm text-white">
-          <strong>{text.needMore}</strong>{" "}
-          <Link to="/register" className="font-semibold text-amber-300 hover:text-amber-200">
-            {text.openRegistration} →
-          </Link>
-        </div>
-      }
-    >
-      <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-900 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-indigo-900/20">
-          JS
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">{text.trackTitle}</h1>
-        <p className="text-sm text-gray-500">{text.noLogin}</p>
-      </div>
+    <PublicShell language={language} setLanguage={handleLanguageChange}>
+      <main className="portal-entry-page">
+        <section className="portal-entry-info">
+          <p className="portal-entry-kicker">{common.livePlatform}</p>
+          <h2>{text.description}</h2>
+          <div className="portal-entry-badges">
+            {text.badges.map((badge) => (
+              <span key={badge}>{badge}</span>
+            ))}
+          </div>
+          <div className="portal-entry-points">
+            {[
+              { icon: Search, ...text.points[0] },
+              { icon: MapPinned, ...text.points[1] },
+              { icon: ShieldCheck, ...text.points[2] },
+            ].map((point) => (
+              <article key={point.title}>
+                <point.icon size={18} />
+                <h3>{point.title}</h3>
+                <p>{point.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
-      <form onSubmit={handleTrack} className="mb-6 flex gap-2">
-        <input
-          className="input flex-1"
-          value={ticketId}
-          onChange={(e) => setTicketId(e.target.value)}
-          placeholder={text.ticketPlaceholder}
-          maxLength={12}
-        />
-        <button type="submit" disabled={loading} className="btn-primary px-5 shadow-lg shadow-blue-600/20">
-          {loading ? "..." : text.track}
-        </button>
-      </form>
+        <section className="portal-entry-card portal-entry-card-wide">
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-900 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-indigo-900/20">
+              JS
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">{text.trackTitle}</h1>
+            <p className="text-sm text-gray-500">{text.noLogin}</p>
+          </div>
+
+          <form onSubmit={handleTrack} className="mb-6 flex gap-2">
+            <input
+              className="input flex-1"
+              value={ticketId}
+              onChange={(e) => setTicketId(e.target.value)}
+              placeholder={text.ticketPlaceholder}
+              maxLength={12}
+            />
+            <button type="submit" disabled={loading} className="btn-primary px-5 shadow-lg shadow-blue-600/20">
+              {loading ? "..." : text.track}
+            </button>
+          </form>
 
       {result && (
         <div className="space-y-4">
@@ -213,6 +215,12 @@ export default function TrackComplaint() {
       <p className="mt-6 text-center text-sm text-gray-500">
         <Link to="/login" className="text-blue-600 hover:underline">← {text.backToLogin}</Link>
       </p>
-    </PortalEntryShell>
+          <div className="portal-entry-footer-link">
+            <strong>{text.needMore}</strong>{" "}
+            <Link to="/register">{text.openRegistration} →</Link>
+          </div>
+        </section>
+      </main>
+    </PublicShell>
   );
 }

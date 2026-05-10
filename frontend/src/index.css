@@ -299,6 +299,69 @@
     @apply bg-white text-slate-700;
   }
 
+  .portal-entry-page {
+    @apply grid min-h-[calc(100vh-180px)] gap-8 px-5 py-8 md:px-8 xl:grid-cols-[0.95fr_1.05fr] xl:px-12;
+  }
+  .portal-entry-info {
+    @apply rounded-[30px] border border-white/[0.08] bg-white/[0.08] p-6 text-white shadow-[0_24px_80px_rgba(8,15,32,0.24)] backdrop-blur;
+  }
+  .portal-entry-kicker {
+    @apply text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-300;
+  }
+  .portal-entry-info h2 {
+    @apply mt-4 max-w-2xl text-4xl font-extrabold leading-tight md:text-5xl;
+  }
+  .portal-entry-badges {
+    @apply mt-5 flex flex-wrap gap-2;
+  }
+  .portal-entry-badges span {
+    @apply rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur;
+  }
+  .portal-entry-points {
+    @apply mt-6 grid gap-4 md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3;
+  }
+  .portal-entry-points article {
+    @apply rounded-3xl border border-white/10 bg-white/10 p-4 shadow-[0_16px_40px_rgba(8,15,32,0.18)] backdrop-blur;
+  }
+  .portal-entry-points svg {
+    @apply mb-3 text-cyan-300;
+  }
+  .portal-entry-points h3 {
+    @apply text-sm font-bold;
+  }
+  .portal-entry-points p {
+    @apply mt-2 text-sm leading-6 text-slate-200;
+  }
+  .portal-entry-card {
+    @apply mx-auto w-full max-w-xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(8,15,32,0.12)] md:p-8;
+  }
+  .portal-entry-card-wide {
+    @apply max-w-5xl;
+  }
+  .portal-entry-footer-link {
+    @apply mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm text-slate-700;
+  }
+  .portal-entry-footer-link a {
+    @apply font-semibold text-blue-700 hover:underline;
+  }
+  .portal-theme-authority .portal-entry-info {
+    @apply border-slate-200 bg-white text-[#001b44] shadow-[0_24px_80px_rgba(15,23,42,0.08)];
+    box-shadow:
+      0 24px 80px rgba(15, 23, 42, 0.08),
+      inset 4px 0 0 #81004b;
+  }
+  .portal-theme-authority .portal-entry-kicker,
+  .portal-theme-authority .portal-entry-points svg {
+    @apply text-[#003b82];
+  }
+  .portal-theme-authority .portal-entry-badges span,
+  .portal-theme-authority .portal-entry-points article {
+    @apply border-slate-200 bg-white text-[#001b44] shadow-[0_14px_34px_rgba(15,23,42,0.06)];
+  }
+  .portal-theme-authority .portal-entry-points p {
+    @apply text-slate-700;
+  }
+
   @keyframes portal-official-scan {
     0% {
       transform: translateX(-100%);
