@@ -335,6 +335,35 @@
   .portal-theme-authority .portal-guide-step > div > div:first-child {
     animation-name: portal-step-official-pulse;
   }
+  .portal-theme-authority .portal-page-section {
+    @apply border border-slate-200 bg-white text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.1)];
+  }
+  .portal-theme-authority .portal-page-section article,
+  .portal-theme-authority .portal-page-section details,
+  .portal-theme-authority .portal-page-section aside,
+  .portal-theme-authority .portal-page-section .portal-flow-shell {
+    @apply border border-slate-200 bg-slate-50 text-slate-900 shadow-[0_14px_34px_rgba(15,23,42,0.08)];
+  }
+  .portal-theme-authority .portal-page-section h2,
+  .portal-theme-authority .portal-page-section h3,
+  .portal-theme-authority .portal-page-section h4,
+  .portal-theme-authority .portal-page-section summary {
+    color: #001b44;
+  }
+  .portal-theme-authority .portal-page-section p,
+  .portal-theme-authority .portal-page-section li {
+    color: #334155;
+  }
+  .portal-theme-authority .portal-page-section a {
+    @apply border-slate-300 bg-white text-[#001b44] shadow-sm hover:bg-slate-100;
+  }
+  .portal-theme-authority .portal-page-section svg {
+    color: #003b82;
+  }
+  .portal-theme-authority .portal-page-section .bg-cyan-400 {
+    background-color: #22d3ee;
+    color: #020617;
+  }
   .portal-theme-authority footer {
     @apply bg-white text-slate-700;
   }

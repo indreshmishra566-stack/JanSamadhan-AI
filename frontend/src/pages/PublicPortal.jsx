@@ -277,7 +277,7 @@ function FlowNode({ icon: Icon, step, title, text }) {
 function PublicPageSection({ title, intro, children }) {
   return (
     <main className="px-5 py-10 md:px-8 md:py-12 xl:px-12">
-      <section className="rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
+      <section className="portal-page-section rounded-[30px] bg-white/8 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-8">
         <div className="max-w-6xl">
           <h2 className="text-4xl font-extrabold text-white">{title}</h2>
           {intro ? <p className="mt-4 text-sm leading-7 text-slate-200">{intro}</p> : null}
