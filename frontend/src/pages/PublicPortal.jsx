@@ -70,16 +70,19 @@ function PublicShell({ language, setLanguage, children }) {
       <div className="w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <UtilityNav portal={portal} />
 
-        <header className="bg-[#f6fbff]/96 px-5 py-4 md:px-8">
+        <header className="px-5 py-4 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <Link to="/" className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="flex w-fit items-center gap-4 rounded-[26px] bg-white/10 px-5 py-4 shadow-[0_20px_60px_rgba(8,15,32,0.28)] ring-1 ring-white/10 backdrop-blur"
+            >
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400 text-xl font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
                 JS
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
                 <h1 className="text-2xl font-bold text-white">{common.title}</h1>
-                <p className="text-sm text-slate-600">{portal.subtitle}</p>
+                <p className="text-sm text-slate-400">{portal.subtitle}</p>
               </div>
             </Link>
 
@@ -185,7 +188,6 @@ export default function PublicPortal() {
       <main className="flex min-h-[calc(100vh-156px)] items-start px-5 py-6 md:px-8 md:py-8">
         <section className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div className="max-w-3xl pt-2">
-            <article className="rounded-[34px] bg-[linear-gradient(160deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))] px-8 py-8 shadow-[0_32px_90px_rgba(8,15,32,0.32)] ring-1 ring-white/8 backdrop-blur md:px-10 md:py-10 lg:translate-z-0">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
               {portal.accessTag}
@@ -233,7 +235,6 @@ export default function PublicPortal() {
                 {portal.actionHowItWorks}
               </Link>
             </div>
-            </article>
           </div>
 
           <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
