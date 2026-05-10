@@ -81,11 +81,11 @@ function PublicShell({ language, setLanguage, children }) {
   const portal = t.portal;
   const themeOptions = [
     { value: "dark", label: "Dark" },
-    { value: "authority", label: "Official" },
+    { value: "authority", label: "Light" },
   ];
   const themeLabels = {
     dark: "Dark",
-    authority: "Official",
+    authority: "Light",
   };
   const ThemeIcon = theme === "dark" ? Sun : ShieldCheck;
 
