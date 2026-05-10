@@ -223,12 +223,11 @@ export default function PublicPortal() {
   const [language, setLanguage] = usePortalLanguage();
   const t = useMemo(() => getPublicText(language), [language]);
   const portal = t.portal;
-  const trustSignals = [
-    { icon: ShieldCheck, label: "Protected citizen sign-in" },
-    { icon: Clock3, label: "Ticket status visibility" },
-    { icon: Building2, label: "Department routing ready" },
-    { icon: LockKeyhole, label: "Internal access stays gated" },
-  ];
+  const trustIcons = [ShieldCheck, Clock3, Building2, LockKeyhole];
+  const trustSignals = portal.trustSignals.map((label, index) => ({
+    icon: trustIcons[index] ?? ShieldCheck,
+    label,
+  }));
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
@@ -237,15 +236,15 @@ export default function PublicPortal() {
           <div className="portal-public-copy">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
-              Modern Jan Samadhan AI grievance platform
+              {portal.heroBadge}
             </div>
             <h2 className="portal-hero-title">
-              <span>Smart grievance</span>{" "}
-              <span>redress for citizens, officers, and</span>{" "}
-              <span>administrators.</span>
+              {portal.heroTitleLines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
             </h2>
             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-200">
-              Lodge complaints, classify them with AI, route them to the right authority, monitor SLA progress, and close the loop with feedback.
+              {portal.heroDescription}
             </p>
             <div className="portal-trust-strip">
               {trustSignals.map(({ icon: Icon, label }) => (
