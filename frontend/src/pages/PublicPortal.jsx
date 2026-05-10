@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight,
+  Building2,
   CircleHelp,
+  Clock3,
   FileText,
   Home,
   Info,
   Languages,
+  LockKeyhole,
   LogIn,
   Mail,
   Map,
@@ -30,9 +33,9 @@ function usePortalLanguage() {
   return [language, setLanguageState];
 }
 
-function UtilityLink({ to, icon: Icon, label }) {
+function UtilityLink({ to, icon: Icon, label, active }) {
   return (
-    <Link to={to} className="portal-utility-link">
+    <Link to={to} className={`portal-utility-link ${active ? "active" : ""}`}>
       <Icon size={14} />
       <span>{label}</span>
     </Link>
@@ -40,13 +43,16 @@ function UtilityLink({ to, icon: Icon, label }) {
 }
 
 function UtilityNav({ portal }) {
+  const location = useLocation();
+  const isActive = (to) => location.pathname === to;
+
   return (
     <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
-      <UtilityLink to="/" icon={Home} label={portal.utilityHome} />
-      <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} />
-      <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} />
-      <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} />
-      <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} />
+      <UtilityLink to="/" icon={Home} label={portal.utilityHome} active={isActive("/")} />
+      <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} active={isActive("/contact-us")} />
+      <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} active={isActive("/about-us")} />
+      <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} active={isActive("/faq-help")} />
+      <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} active={isActive("/site-map")} />
     </nav>
   );
 }
@@ -69,11 +75,11 @@ function PublicShell({ language, setLanguage, children }) {
     <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_18%),linear-gradient(145deg,_#070b18,_#101726_45%,_#1a2336)] px-2 py-2 md:px-3 md:py-3">
       <UtilityNav portal={portal} />
       <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
-        <header className="px-5 py-4 md:px-8">
+        <header className="px-5 py-4 md:px-8 xl:px-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link
               to="/"
-              className="flex w-fit items-center gap-4 rounded-[26px] bg-white/10 px-5 py-4 shadow-[0_20px_60px_rgba(8,15,32,0.28)] ring-1 ring-white/10 backdrop-blur"
+              className="portal-brand-card"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400 text-xl font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
                 JS
@@ -181,54 +187,68 @@ export default function PublicPortal() {
   const [language, setLanguage] = usePortalLanguage();
   const t = useMemo(() => getPublicText(language), [language]);
   const portal = t.portal;
+  const trustSignals = [
+    { icon: ShieldCheck, label: "Protected citizen sign-in" },
+    { icon: Clock3, label: "Ticket status visibility" },
+    { icon: Building2, label: "Department routing ready" },
+    { icon: LockKeyhole, label: "Internal access stays gated" },
+  ];
 
   return (
     <PublicShell language={language} setLanguage={setLanguage}>
-      <main className="flex min-h-[calc(100vh-156px)] items-start px-5 py-6 md:px-8 md:py-8">
-        <section className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-          <div className="max-w-3xl pt-2">
+      <main className="portal-public-main">
+        <section className="portal-public-hero">
+          <div className="portal-public-copy">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
               {portal.accessTag}
             </div>
-            <h2 className="mt-6 text-5xl font-extrabold leading-[1.05] text-white md:text-6xl">{portal.heroTitle}</h2>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
-            <figure className="mt-6">
+            <h2 className="mt-5 text-5xl font-extrabold leading-[1.04] text-white md:text-6xl">{portal.heroTitle}</h2>
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
+            <div className="portal-trust-strip">
+              {trustSignals.map(({ icon: Icon, label }) => (
+                <span key={label}>
+                  <Icon size={14} />
+                  {label}
+                </span>
+              ))}
+            </div>
+            <figure className="portal-hero-visual">
               <img
                 src={citizenGuidanceArt}
                 alt="Citizen using a phone to submit a grievance with location and department routing guidance"
-                className="w-full max-w-none object-contain object-center drop-shadow-[0_24px_54px_rgba(8,15,32,0.32)]"
+                className="h-full w-full object-contain object-center drop-shadow-[0_24px_54px_rgba(8,15,32,0.32)]"
               />
-              <figcaption className="mt-2 flex items-center justify-between gap-3 px-1 text-xs text-slate-300">
+              <figcaption className="portal-hero-caption">
                 <span>Citizen-friendly complaint filing and smart routing</span>
                 <span className="text-cyan-300">Local project illustration</span>
               </figcaption>
             </figure>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="portal-action-row">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="portal-action-primary"
               >
                 <UserPlus size={17} />
                 {portal.actionRegister}
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="portal-action-secondary"
               >
                 <LogIn size={17} />
                 {portal.actionLogin}
               </Link>
               <Link
                 to="/track"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="portal-action-secondary"
               >
                 <Search size={17} />
                 {portal.actionTrack}
               </Link>
               <Link
                 to="/about-us"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="portal-action-tertiary"
               >
                 <FileText size={17} />
                 {portal.actionHowItWorks}
@@ -236,7 +256,7 @@ export default function PublicPortal() {
             </div>
           </div>
 
-          <section className="rounded-[30px] bg-white/8 p-5 shadow-[0_24px_90px_rgba(15,23,42,0.22)] backdrop-blur md:p-6">
+          <section className="portal-guide-panel">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur">
               <ShieldCheck size={14} />
               {portal.guideBadge}
@@ -248,14 +268,14 @@ export default function PublicPortal() {
               {portal.guideSteps.map((step, index) => (
                 <article
                   key={step.title}
-                  className="rounded-[24px] bg-white/10 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]"
+                  className="portal-guide-step"
                 >
                   <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 text-sm font-bold text-slate-950 shadow-lg">
                       {String(index + 1).padStart(2, "0")}
                     </div>
                     <div>
-                      <h4 className="text-base font-semibold text-white">{step.title}</h4>
+                      <h4 className="text-base font-bold text-white">{step.title}</h4>
                       <p className="mt-2 text-sm leading-6 text-slate-200">{step.text}</p>
                     </div>
                   </div>
@@ -263,7 +283,7 @@ export default function PublicPortal() {
               ))}
             </div>
 
-            <article className="mt-6 rounded-[24px] bg-[#10192a]/70 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)]">
+            <article className="portal-guide-tips">
               <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-300">
                 {portal.guideTipsTitle}
               </h4>
