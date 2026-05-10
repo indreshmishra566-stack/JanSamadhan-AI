@@ -245,7 +245,7 @@ export default function PublicPortal() {
               <Waves size={15} />
               {portal.accessTag}
             </div>
-            <h2 className="mt-5 text-5xl font-extrabold leading-[1.04] text-white md:text-6xl">{portal.heroTitle}</h2>
+            <h2 className="portal-hero-title">{portal.heroTitle}</h2>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
             <div className="portal-trust-strip">
               {trustSignals.map(({ icon: Icon, label }) => (

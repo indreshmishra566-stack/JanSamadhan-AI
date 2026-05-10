@@ -110,6 +110,14 @@
   .portal-public-copy {
     @apply max-w-3xl pt-1;
   }
+  .portal-hero-title {
+    @apply relative mt-5 inline-block text-5xl font-extrabold leading-[1.04] text-white md:text-6xl;
+  }
+  .portal-hero-title::after {
+    content: "";
+    @apply absolute -bottom-3 left-0 h-1 w-32 rounded-full;
+    background: linear-gradient(90deg, var(--js-accent), transparent);
+  }
   .portal-public-copy > * {
     animation: portal-card-enter 520ms ease-out both;
   }
@@ -240,6 +248,14 @@
   .portal-theme-authority .portal-guide-panel h3,
   .portal-theme-authority .portal-guide-step h4 {
     @apply text-[#001b44];
+  }
+  .portal-theme-authority .portal-hero-title {
+    color: #001b44;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  .portal-theme-authority .portal-hero-title::after {
+    @apply w-44;
+    background: linear-gradient(90deg, #81004b 0%, #f6a11a 45%, #003b82 100%);
   }
   .portal-theme-authority .portal-theme-toggle,
   .portal-theme-authority .portal-action-secondary,
