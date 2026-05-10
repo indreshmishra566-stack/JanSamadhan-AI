@@ -237,14 +237,16 @@ export default function PublicPortal() {
           <div className="portal-public-copy">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 backdrop-blur shadow-[0_10px_24px_rgba(34,211,238,0.12)]">
               <Waves size={15} />
-              {portal.accessTag}
+              Modern Jan Samadhan AI grievance platform
             </div>
             <h2 className="portal-hero-title">
-              <span>Public</span>{" "}
-              <span>Grievance</span>{" "}
-              <span>Access</span>
+              <span>Smart grievance</span>{" "}
+              <span>redress for citizens, officers, and</span>{" "}
+              <span>administrators.</span>
             </h2>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">{portal.heroText}</p>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-200">
+              Lodge complaints, classify them with AI, route them to the right authority, monitor SLA progress, and close the loop with feedback.
+            </p>
             <div className="portal-trust-strip">
               {trustSignals.map(({ icon: Icon, label }) => (
                 <span key={label}>

@@ -126,7 +126,10 @@
     @apply max-w-3xl pt-1;
   }
   .portal-hero-title {
-    @apply relative mt-5 inline-block text-5xl font-extrabold leading-[1.04] text-white md:text-6xl;
+    @apply relative mt-5 inline-block max-w-4xl text-5xl font-extrabold leading-[1.04] text-white md:text-6xl;
+  }
+  .portal-hero-title span {
+    @apply inline;
   }
   .portal-hero-title::after {
     content: "";
