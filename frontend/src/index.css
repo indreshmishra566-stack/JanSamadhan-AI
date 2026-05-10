@@ -191,6 +191,65 @@
   .portal-theme-light footer {
     @apply bg-white text-slate-600;
   }
+  .portal-theme-civic {
+    --js-accent: #facc15;
+    --js-accent-strong: #16a34a;
+    background:
+      radial-gradient(circle at top left, rgba(250, 204, 21, 0.22), transparent 20%),
+      radial-gradient(circle at top right, rgba(22, 163, 74, 0.16), transparent 24%),
+      linear-gradient(145deg, #fbfef8, #f4fbef 48%, #fff8d6);
+  }
+  .portal-theme-civic .portal-shell {
+    @apply border-green-200 bg-white shadow-[0_34px_110px_rgba(20,83,45,0.12)];
+  }
+  .portal-theme-civic .portal-utility-nav {
+    @apply border-green-200 text-green-950 shadow-[0_8px_28px_rgba(20,83,45,0.08)];
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 244, 0.96) 45%, rgba(254, 252, 232, 0.96));
+  }
+  .portal-theme-civic .portal-utility-link {
+    @apply hover:bg-green-50;
+  }
+  .portal-theme-civic .portal-utility-link.active {
+    @apply bg-yellow-100 text-green-900 ring-yellow-300;
+  }
+  .portal-theme-civic .portal-brand-card,
+  .portal-theme-civic .portal-guide-panel,
+  .portal-theme-civic .portal-guide-step,
+  .portal-theme-civic .portal-guide-tips,
+  .portal-theme-civic .portal-trust-strip span {
+    @apply border-green-200 bg-white text-green-950 shadow-[0_16px_46px_rgba(20,83,45,0.08)] ring-green-100;
+  }
+  .portal-theme-civic .portal-brand-card p:first-of-type,
+  .portal-theme-civic .portal-hero-caption,
+  .portal-theme-civic .portal-guide-panel p,
+  .portal-theme-civic .portal-guide-tips p,
+  .portal-theme-civic .portal-guide-tips li,
+  .portal-theme-civic .portal-public-copy p {
+    @apply text-slate-700;
+  }
+  .portal-theme-civic .portal-brand-card h1,
+  .portal-theme-civic .portal-public-copy h2,
+  .portal-theme-civic .portal-guide-panel h3,
+  .portal-theme-civic .portal-guide-step h4 {
+    @apply text-green-950;
+  }
+  .portal-theme-civic .portal-theme-toggle,
+  .portal-theme-civic .portal-action-secondary,
+  .portal-theme-civic .portal-action-tertiary {
+    @apply border-green-200 bg-white text-green-900 shadow-sm hover:bg-green-50;
+  }
+  .portal-theme-civic .portal-action-primary {
+    @apply text-green-950 shadow-[0_18px_36px_rgba(250,204,21,0.28)] hover:bg-yellow-300;
+    background: linear-gradient(135deg, #facc15, #fde047);
+  }
+  .portal-theme-civic .portal-trust-strip svg,
+  .portal-theme-civic .portal-guide-tips h4,
+  .portal-theme-civic .portal-hero-caption .text-cyan-300 {
+    @apply text-green-600;
+  }
+  .portal-theme-civic footer {
+    @apply bg-white text-green-800;
+  }
   .portal-menu-toggle {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700;
   }

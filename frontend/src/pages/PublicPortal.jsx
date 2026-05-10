@@ -78,7 +78,14 @@ function PublicShell({ language, setLanguage, children }) {
   const t = useMemo(() => getPublicText(language), [language]);
   const common = t.common;
   const portal = t.portal;
-  const isLightTheme = theme === "light";
+  const themeOptions = ["dark", "light", "civic"];
+  const themeLabels = {
+    dark: "Dark",
+    light: "Light",
+    civic: "Civic",
+  };
+  const nextTheme = themeOptions[(themeOptions.indexOf(theme) + 1) % themeOptions.length] || "dark";
+  const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? ShieldCheck : Moon;
 
   useEffect(() => {
     if (!location.hash) return;
@@ -111,12 +118,12 @@ function PublicShell({ language, setLanguage, children }) {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={() => setTheme(isLightTheme ? "dark" : "light")}
+                onClick={() => setTheme(nextTheme)}
                 className="portal-theme-toggle"
-                aria-label={`Switch to ${isLightTheme ? "dark" : "light"} theme`}
+                aria-label={`Switch to ${themeLabels[nextTheme]} theme`}
               >
-                {isLightTheme ? <Moon size={16} /> : <Sun size={16} />}
-                <span>{isLightTheme ? "Dark" : "Light"}</span>
+                <ThemeIcon size={16} />
+                <span>{themeLabels[theme]}</span>
               </button>
 
               <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
