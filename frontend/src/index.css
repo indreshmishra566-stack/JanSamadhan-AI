@@ -198,28 +198,28 @@
     @apply bg-white text-slate-600;
   }
   .portal-theme-authority {
-    --js-accent: #f97316;
-    --js-accent-strong: #1e40af;
+    --js-accent: #f6a11a;
+    --js-accent-strong: #003b82;
     background:
-      linear-gradient(90deg, #ff9933 0 33.3%, #ffffff 33.3% 66.6%, #138808 66.6% 100%) top / 100% 4px no-repeat,
-      radial-gradient(circle at top left, rgba(255, 153, 51, 0.12), transparent 24%),
-      radial-gradient(circle at top right, rgba(19, 136, 8, 0.09), transparent 24%),
-      linear-gradient(145deg, #f8fafc, #f1f5f9 52%, #fff7ed);
+      linear-gradient(90deg, #81004b, #81004b) top / 100% 5px no-repeat,
+      radial-gradient(circle at top left, rgba(129, 0, 75, 0.08), transparent 24%),
+      radial-gradient(circle at top right, rgba(0, 59, 130, 0.08), transparent 24%),
+      linear-gradient(145deg, #f7f7f7, #ffffff 48%, #f1f5f9);
   }
   .portal-theme-authority .portal-shell {
     @apply border-slate-300 bg-white shadow-[0_34px_110px_rgba(15,23,42,0.12)];
   }
   .portal-theme-authority .portal-utility-nav {
-    @apply border-amber-300 text-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.16)];
+    @apply border-[#81004b] text-white shadow-[0_8px_28px_rgba(15,23,42,0.16)];
     background:
-      linear-gradient(90deg, #ff9933 0 33.3%, #ffffff 33.3% 66.6%, #138808 66.6% 100%) bottom / 100% 3px no-repeat,
-      linear-gradient(90deg, #07152d, #102a56 58%, #07152d);
+      linear-gradient(90deg, #81004b, #81004b) top / 100% 100% no-repeat,
+      #81004b;
   }
   .portal-theme-authority .portal-utility-link {
-    @apply hover:bg-white/10;
+    @apply hover:bg-white/15;
   }
   .portal-theme-authority .portal-utility-link.active {
-    @apply bg-amber-300 text-slate-950 ring-amber-200;
+    @apply bg-white text-[#81004b] ring-white/70;
   }
   .portal-theme-authority .portal-brand-card,
   .portal-theme-authority .portal-guide-panel,
@@ -240,33 +240,33 @@
   .portal-theme-authority .portal-public-copy h2,
   .portal-theme-authority .portal-guide-panel h3,
   .portal-theme-authority .portal-guide-step h4 {
-    @apply text-slate-950;
+    @apply text-[#001b44];
   }
   .portal-theme-authority .portal-theme-toggle,
   .portal-theme-authority .portal-action-secondary,
   .portal-theme-authority .portal-action-tertiary {
-    @apply border-slate-300 bg-white text-slate-900 shadow-sm hover:bg-slate-50;
+    @apply border-slate-300 bg-white text-[#001b44] shadow-sm hover:bg-slate-50;
   }
   .portal-theme-authority .portal-action-primary {
-    @apply text-slate-950 shadow-[0_18px_36px_rgba(249,115,22,0.24)] hover:bg-orange-300;
-    background: linear-gradient(135deg, #ff9933, #fcd34d);
+    @apply text-slate-950 shadow-[0_18px_36px_rgba(246,161,26,0.26)] hover:bg-amber-300;
+    background: linear-gradient(135deg, #f6a11a, #ffc64d);
   }
   .portal-theme-authority .portal-trust-strip svg,
   .portal-theme-authority .portal-guide-tips h4,
   .portal-theme-authority .portal-hero-caption .text-cyan-300 {
-    @apply text-blue-800;
+    @apply text-[#003b82];
   }
   .portal-theme-authority .portal-guide-panel {
     @apply border-slate-300;
     box-shadow:
       0 16px 46px rgba(15, 23, 42, 0.08),
-      inset 4px 0 0 #ff9933;
+      inset 4px 0 0 #81004b;
   }
   .portal-theme-authority .portal-guide-step {
     @apply border-slate-200;
   }
   .portal-theme-authority .portal-guide-step:hover {
-    @apply border-blue-200;
+    @apply border-[#003b82]/30;
   }
   .portal-theme-authority footer {
     @apply bg-white text-slate-700;
