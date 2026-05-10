@@ -72,6 +72,12 @@
   .portal-theme-toggle {
     @apply inline-flex items-center gap-2 rounded-full border border-cyan-200/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-cyan-300;
   }
+  .portal-theme-select {
+    @apply cursor-pointer bg-transparent pr-1 text-sm font-semibold outline-none;
+  }
+  .portal-theme-select option {
+    @apply text-slate-900;
+  }
   .portal-utility-nav {
     @apply fixed z-50 flex flex-wrap items-center gap-1 border-b border-white/10 px-4 py-2 text-sm text-white shadow-lg backdrop-blur-xl;
     left: 0;

@@ -78,13 +78,16 @@ function PublicShell({ language, setLanguage, children }) {
   const t = useMemo(() => getPublicText(language), [language]);
   const common = t.common;
   const portal = t.portal;
-  const themeOptions = ["dark", "light", "civic"];
+  const themeOptions = [
+    { value: "dark", label: "Dark" },
+    { value: "light", label: "Light" },
+    { value: "civic", label: "Civic" },
+  ];
   const themeLabels = {
     dark: "Dark",
     light: "Light",
     civic: "Civic",
   };
-  const nextTheme = themeOptions[(themeOptions.indexOf(theme) + 1) % themeOptions.length] || "dark";
   const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? ShieldCheck : Moon;
 
   useEffect(() => {
@@ -116,15 +119,22 @@ function PublicShell({ language, setLanguage, children }) {
             </Link>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setTheme(nextTheme)}
-                className="portal-theme-toggle"
-                aria-label={`Switch to ${themeLabels[nextTheme]} theme`}
-              >
+              <label className="portal-theme-toggle">
                 <ThemeIcon size={16} />
                 <span>{themeLabels[theme]}</span>
-              </button>
+                <select
+                  value={theme}
+                  onChange={(event) => setTheme(event.target.value)}
+                  className="portal-theme-select"
+                  aria-label="Choose theme"
+                >
+                  {themeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
               <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
                 <Languages size={16} />
