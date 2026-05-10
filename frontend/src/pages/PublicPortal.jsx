@@ -81,14 +81,14 @@ function PublicShell({ language, setLanguage, children }) {
   const themeOptions = [
     { value: "dark", label: "Dark" },
     { value: "light", label: "Light" },
-    { value: "civic", label: "Civic" },
+    { value: "authority", label: "Authority" },
   ];
   const themeLabels = {
     dark: "Dark",
     light: "Light",
-    civic: "Civic",
+    authority: "Authority",
   };
-  const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? ShieldCheck : Moon;
+  const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? Moon : ShieldCheck;
 
   useEffect(() => {
     if (!location.hash) return;
@@ -121,7 +121,6 @@ function PublicShell({ language, setLanguage, children }) {
             <div className="flex flex-wrap items-center gap-3">
               <label className="portal-theme-toggle">
                 <ThemeIcon size={16} />
-                <span>{themeLabels[theme]}</span>
                 <select
                   value={theme}
                   onChange={(event) => setTheme(event.target.value)}

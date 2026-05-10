@@ -197,64 +197,64 @@
   .portal-theme-light footer {
     @apply bg-white text-slate-600;
   }
-  .portal-theme-civic {
-    --js-accent: #facc15;
-    --js-accent-strong: #16a34a;
+  .portal-theme-authority {
+    --js-accent: #f59e0b;
+    --js-accent-strong: #1d4ed8;
     background:
-      radial-gradient(circle at top left, rgba(250, 204, 21, 0.22), transparent 20%),
-      radial-gradient(circle at top right, rgba(22, 163, 74, 0.16), transparent 24%),
-      linear-gradient(145deg, #fbfef8, #f4fbef 48%, #fff8d6);
+      radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 22%),
+      radial-gradient(circle at top right, rgba(29, 78, 216, 0.12), transparent 24%),
+      linear-gradient(145deg, #f8fafc, #eef3f8 50%, #fff7ed);
   }
-  .portal-theme-civic .portal-shell {
-    @apply border-green-200 bg-white shadow-[0_34px_110px_rgba(20,83,45,0.12)];
+  .portal-theme-authority .portal-shell {
+    @apply border-slate-300 bg-white shadow-[0_34px_110px_rgba(15,23,42,0.13)];
   }
-  .portal-theme-civic .portal-utility-nav {
-    @apply border-green-200 text-green-950 shadow-[0_8px_28px_rgba(20,83,45,0.08)];
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 244, 0.96) 45%, rgba(254, 252, 232, 0.96));
+  .portal-theme-authority .portal-utility-nav {
+    @apply border-amber-300 text-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.16)];
+    background: linear-gradient(90deg, #0f172a, #1e3a8a 58%, #92400e);
   }
-  .portal-theme-civic .portal-utility-link {
-    @apply hover:bg-green-50;
+  .portal-theme-authority .portal-utility-link {
+    @apply hover:bg-white/10;
   }
-  .portal-theme-civic .portal-utility-link.active {
-    @apply bg-yellow-100 text-green-900 ring-yellow-300;
+  .portal-theme-authority .portal-utility-link.active {
+    @apply bg-amber-300 text-slate-950 ring-amber-200;
   }
-  .portal-theme-civic .portal-brand-card,
-  .portal-theme-civic .portal-guide-panel,
-  .portal-theme-civic .portal-guide-step,
-  .portal-theme-civic .portal-guide-tips,
-  .portal-theme-civic .portal-trust-strip span {
-    @apply border-green-200 bg-white text-green-950 shadow-[0_16px_46px_rgba(20,83,45,0.08)] ring-green-100;
+  .portal-theme-authority .portal-brand-card,
+  .portal-theme-authority .portal-guide-panel,
+  .portal-theme-authority .portal-guide-step,
+  .portal-theme-authority .portal-guide-tips,
+  .portal-theme-authority .portal-trust-strip span {
+    @apply border-slate-200 bg-white text-slate-950 shadow-[0_16px_46px_rgba(15,23,42,0.08)] ring-slate-200;
   }
-  .portal-theme-civic .portal-brand-card p:first-of-type,
-  .portal-theme-civic .portal-hero-caption,
-  .portal-theme-civic .portal-guide-panel p,
-  .portal-theme-civic .portal-guide-tips p,
-  .portal-theme-civic .portal-guide-tips li,
-  .portal-theme-civic .portal-public-copy p {
+  .portal-theme-authority .portal-brand-card p:first-of-type,
+  .portal-theme-authority .portal-hero-caption,
+  .portal-theme-authority .portal-guide-panel p,
+  .portal-theme-authority .portal-guide-tips p,
+  .portal-theme-authority .portal-guide-tips li,
+  .portal-theme-authority .portal-public-copy p {
     @apply text-slate-700;
   }
-  .portal-theme-civic .portal-brand-card h1,
-  .portal-theme-civic .portal-public-copy h2,
-  .portal-theme-civic .portal-guide-panel h3,
-  .portal-theme-civic .portal-guide-step h4 {
-    @apply text-green-950;
+  .portal-theme-authority .portal-brand-card h1,
+  .portal-theme-authority .portal-public-copy h2,
+  .portal-theme-authority .portal-guide-panel h3,
+  .portal-theme-authority .portal-guide-step h4 {
+    @apply text-slate-950;
   }
-  .portal-theme-civic .portal-theme-toggle,
-  .portal-theme-civic .portal-action-secondary,
-  .portal-theme-civic .portal-action-tertiary {
-    @apply border-green-200 bg-white text-green-900 shadow-sm hover:bg-green-50;
+  .portal-theme-authority .portal-theme-toggle,
+  .portal-theme-authority .portal-action-secondary,
+  .portal-theme-authority .portal-action-tertiary {
+    @apply border-slate-300 bg-white text-slate-900 shadow-sm hover:bg-slate-50;
   }
-  .portal-theme-civic .portal-action-primary {
-    @apply text-green-950 shadow-[0_18px_36px_rgba(250,204,21,0.28)] hover:bg-yellow-300;
-    background: linear-gradient(135deg, #facc15, #fde047);
+  .portal-theme-authority .portal-action-primary {
+    @apply text-slate-950 shadow-[0_18px_36px_rgba(245,158,11,0.26)] hover:bg-amber-300;
+    background: linear-gradient(135deg, #f59e0b, #fcd34d);
   }
-  .portal-theme-civic .portal-trust-strip svg,
-  .portal-theme-civic .portal-guide-tips h4,
-  .portal-theme-civic .portal-hero-caption .text-cyan-300 {
-    @apply text-green-600;
+  .portal-theme-authority .portal-trust-strip svg,
+  .portal-theme-authority .portal-guide-tips h4,
+  .portal-theme-authority .portal-hero-caption .text-cyan-300 {
+    @apply text-blue-700;
   }
-  .portal-theme-civic footer {
-    @apply bg-white text-green-800;
+  .portal-theme-authority footer {
+    @apply bg-white text-slate-700;
   }
   .portal-menu-toggle {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700;
