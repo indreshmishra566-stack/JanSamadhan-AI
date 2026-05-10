@@ -1,7 +1,6 @@
 import secrets
 import logging
 import random
-import requests
 import threading
 
 from rest_framework import generics, status
@@ -60,26 +59,6 @@ def _token_response(user):
     }
 
 
-def _send_sms_otp(phone, message):
-    if not phone:
-        return "No phone number on account."
-    sid = getattr(settings, "TWILIO_ACCOUNT_SID", "")
-    token = getattr(settings, "TWILIO_AUTH_TOKEN", "")
-    from_number = getattr(settings, "TWILIO_FROM_NUMBER", "")
-    if not (sid and token and from_number):
-        logger.warning("SMS OTP for %s was not sent because Twilio is not configured.", phone)
-        return "SMS provider not configured."
-
-    response = requests.post(
-        f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
-        data={"From": from_number, "To": phone, "Body": message},
-        auth=(sid, token),
-        timeout=10,
-    )
-    response.raise_for_status()
-    return "SMS sent."
-
-
 def _deliver_login_otp_async(otp_id, user_id, message):
     try:
         otp = LoginOTP.objects.get(id=otp_id)
@@ -105,12 +84,6 @@ def _deliver_login_otp_async(otp_id, user_id, message):
             delivery_notes.append(f"Email failed: {exc}")
     else:
         delivery_notes.append("No email on account.")
-
-    try:
-        delivery_notes.append(_send_sms_otp(user.phone, message))
-    except Exception as exc:
-        logger.exception("SMS OTP failed for user %s", user.username)
-        delivery_notes.append(f"SMS failed: {exc}")
 
     otp.delivery_note = " ".join(delivery_notes)
     otp.save(update_fields=["delivery_note"])
@@ -326,10 +299,9 @@ class LoginView(APIView):
             _create_and_send_login_otp(user)
             return Response({
                 "otp_required": True,
-                "detail": "OTP sent to your registered email and mobile number.",
+                "detail": "OTP sent to your registered email.",
                 "username": user.username,
                 "email": user.email,
-                "phone": user.phone,
             })
 
         return Response(_token_response(user))

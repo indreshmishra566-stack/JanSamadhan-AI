@@ -42,4 +42,4 @@ class NotificationAdmin(admin.ModelAdmin):
 class LoginOTPAdmin(admin.ModelAdmin):
     list_display = ["user", "created_at", "expires_at", "consumed_at", "delivery_note"]
     list_filter = ["consumed_at", "created_at"]
-    search_fields = ["user__username", "user__email", "user__phone"]
+    search_fields = ["user__username", "user__email"]

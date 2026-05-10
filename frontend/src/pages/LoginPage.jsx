@@ -35,7 +35,7 @@ export default function LoginPage() {
         : await login(form);
       if (result?.otp_required) {
         setOtpStep(true);
-        toast.success(result.detail || "OTP sent to your registered email and mobile number.");
+        toast.success(result.detail || "OTP sent to your registered email.");
         return;
       }
       const user = result;
@@ -123,7 +123,7 @@ export default function LoginPage() {
                   maxLength={6}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  OTP was sent to your registered email and mobile number.
+                  OTP was sent to your registered email.
                 </p>
               </div>
             )}
