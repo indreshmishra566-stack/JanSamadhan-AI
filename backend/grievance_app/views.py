@@ -2,6 +2,7 @@ import secrets
 import logging
 import random
 import requests
+import threading
 
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -12,8 +13,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.conf import settings
+from django.core.cache import cache
 from django.core.management import call_command
-from django.core.mail import send_mail
+from django.core.mail import get_connection, send_mail
 from django.utils import timezone
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
@@ -78,23 +80,24 @@ def _send_sms_otp(phone, message):
     return "SMS sent."
 
 
-def _create_and_send_login_otp(user):
-    LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
-    code = f"{random.SystemRandom().randint(0, 999999):06d}"
-    expires_at = timezone.now() + timezone.timedelta(minutes=10)
-    message = f"Your Jan Samadhan AI login OTP is {code}. It expires in 10 minutes."
+def _deliver_login_otp_async(otp_id, user_id, message):
+    try:
+        otp = LoginOTP.objects.get(id=otp_id)
+        user = User.objects.get(id=user_id)
+    except (LoginOTP.DoesNotExist, User.DoesNotExist):
+        return
+
     delivery_notes = []
-
-    otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
-
     if user.email:
         try:
+            connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
             send_mail(
                 "Jan Samadhan AI login OTP",
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=False,
+                connection=connection,
             )
             delivery_notes.append("Email sent.")
         except Exception as exc:
@@ -111,6 +114,25 @@ def _create_and_send_login_otp(user):
 
     otp.delivery_note = " ".join(delivery_notes)
     otp.save(update_fields=["delivery_note"])
+
+
+def _create_and_send_login_otp(user):
+    resend_key = f"login-otp-sent:{user.id}"
+    if cache.get(resend_key):
+        return None
+
+    LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
+    code = f"{random.SystemRandom().randint(0, 999999):06d}"
+    expires_at = timezone.now() + timezone.timedelta(minutes=10)
+    message = f"Your Jan Samadhan AI login OTP is {code}. It expires in 10 minutes."
+
+    otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
+    threading.Thread(
+        target=_deliver_login_otp_async,
+        args=(otp.id, user.id, message),
+        daemon=True,
+    ).start()
+    cache.set(resend_key, True, timeout=60)
     return otp
 
 
