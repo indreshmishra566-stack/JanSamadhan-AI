@@ -38,7 +38,8 @@ function usePortalLanguage() {
 function usePortalTheme() {
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
-    return window.localStorage.getItem("jan-samadhan-theme") || "dark";
+    const savedTheme = window.localStorage.getItem("jan-samadhan-theme") || "dark";
+    return savedTheme === "light" ? "dark" : savedTheme;
   });
 
   useEffect(() => {
@@ -80,15 +81,13 @@ function PublicShell({ language, setLanguage, children }) {
   const portal = t.portal;
   const themeOptions = [
     { value: "dark", label: "Dark" },
-    { value: "light", label: "Light" },
     { value: "authority", label: "Official" },
   ];
   const themeLabels = {
     dark: "Dark",
-    light: "Light",
     authority: "Official",
   };
-  const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? Moon : ShieldCheck;
+  const ThemeIcon = theme === "dark" ? Sun : ShieldCheck;
 
   useEffect(() => {
     if (!location.hash) return;
