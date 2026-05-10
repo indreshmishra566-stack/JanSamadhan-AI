@@ -1,3 +1,5 @@
+import secrets
+
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
@@ -21,6 +23,24 @@ from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
 
 DEFAULT_OFFICER_ROLE = "OFFICER"
+
+
+def _demo_maintenance_token(request):
+    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token") or ""
+    return str(token).strip()
+
+
+def _valid_demo_maintenance_token(request):
+    expected = str(getattr(settings, "DEMO_SEED_TOKEN", "") or "").strip()
+    token = _demo_maintenance_token(request)
+    return bool(expected and token and secrets.compare_digest(token, expected))
+
+
+def _can_run_demo_maintenance(request):
+    user = getattr(request, "user", None)
+    return _valid_demo_maintenance_token(request) or (
+        user and user.is_authenticated and (user.role == "ADMIN" or user.is_superuser)
+    )
 
 
 def _managed_department_ids(user):
@@ -761,9 +781,7 @@ def track_complaint(request, ticket_id):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def run_demo_seed(request):
-    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
-    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
-    if not expected or token != expected:
+    if not _can_run_demo_maintenance(request):
         return Response({"detail": "Invalid seed token."}, status=403)
 
     try:
@@ -799,9 +817,7 @@ def run_demo_seed(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def run_demo_clear(request):
-    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
-    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
-    if not expected or token != expected:
+    if not _can_run_demo_maintenance(request):
         return Response({"detail": "Invalid seed token."}, status=403)
 
     call_command("clear_demo_data")
@@ -817,9 +833,7 @@ def run_demo_clear(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def run_clear_all_except_admin(request):
-    token = request.headers.get("X-Demo-Seed-Token") or request.data.get("token")
-    expected = getattr(settings, "DEMO_SEED_TOKEN", "")
-    if not expected or token != expected:
+    if not _can_run_demo_maintenance(request):
         return Response({"detail": "Invalid clear token."}, status=403)
 
     call_command("clear_all_except_admin")
