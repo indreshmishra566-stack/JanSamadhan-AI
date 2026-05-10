@@ -67,7 +67,7 @@ function PublicShell({ language, setLanguage, children }) {
 
   return (
     <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_18%),linear-gradient(145deg,_#070b18,_#101726_45%,_#1a2336)] px-2 py-2 md:px-3 md:py-3">
-      <div className="w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
+      <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] border border-cyan-300/10 bg-white/6 shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <UtilityNav portal={portal} />
 
         <header className="px-5 py-4 md:px-8">
