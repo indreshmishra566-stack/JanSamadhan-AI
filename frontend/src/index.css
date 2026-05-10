@@ -61,7 +61,7 @@
     background: linear-gradient(135deg, var(--js-accent), #4de3ff);
   }
   .portal-utility-nav {
-    @apply flex flex-wrap items-center gap-1 px-3 py-2 text-sm text-white;
+    @apply sticky top-0 z-50 flex flex-wrap items-center gap-1 px-3 py-2 text-sm text-white shadow-lg;
     background: linear-gradient(90deg, #07111f, #0b1730 35%, #11233c 100%);
   }
   .portal-utility-link {
