@@ -73,7 +73,7 @@
     animation: portal-official-scan 7s ease-in-out infinite;
   }
   .portal-shell {
-    @apply border border-cyan-300/10 bg-white/[0.06] pt-[52px] shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur;
+    @apply border border-cyan-300/10 bg-white/[0.06] pt-[78px] shadow-[0_40px_120px_rgba(8,15,32,0.3)] backdrop-blur;
   }
   .portal-theme-toggle {
     @apply inline-flex items-center gap-2 rounded-full border border-cyan-200/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-cyan-300;
@@ -85,11 +85,26 @@
     @apply text-slate-900;
   }
   .portal-utility-nav {
-    @apply fixed z-50 flex flex-wrap items-center gap-1 border-b border-white/10 px-4 py-2 text-sm text-white shadow-lg backdrop-blur-xl;
+    @apply fixed z-50 flex items-center justify-between gap-4 border-b border-white/10 px-4 py-2 text-sm text-white shadow-lg backdrop-blur-xl;
     left: 0;
     right: 0;
     top: 0;
     background: linear-gradient(90deg, rgba(7, 17, 31, 0.96), rgba(11, 23, 48, 0.94) 35%, rgba(17, 35, 60, 0.96) 100%);
+  }
+  .portal-nav-brand {
+    @apply inline-flex min-w-0 items-center gap-3 rounded-full px-2 py-1.5 text-white transition hover:bg-white/10;
+  }
+  .portal-nav-emblem {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-900/25;
+  }
+  .portal-nav-brand strong {
+    @apply block truncate text-base font-bold leading-5;
+  }
+  .portal-nav-brand small {
+    @apply block truncate text-[11px] leading-4 text-slate-300;
+  }
+  .portal-utility-links {
+    @apply flex shrink-0 flex-wrap items-center justify-end gap-1;
   }
   .portal-utility-link {
     @apply inline-flex items-center gap-2 rounded-full px-3 py-2 font-medium transition hover:bg-white/10;
@@ -221,6 +236,12 @@
     background:
       linear-gradient(90deg, #81004b, #81004b) top / 100% 100% no-repeat,
       #81004b;
+  }
+  .portal-theme-authority .portal-nav-brand {
+    @apply text-white hover:bg-white/10;
+  }
+  .portal-theme-authority .portal-nav-brand small {
+    @apply text-yellow-100;
   }
   .portal-theme-authority .portal-utility-link {
     @apply text-yellow-200 hover:bg-white/15 hover:text-yellow-100;
@@ -799,10 +820,16 @@
 
 @media (max-width: 767px) {
   .portal-shell {
-    @apply pt-[102px];
+    @apply pt-[150px];
   }
   .portal-utility-nav {
-    @apply grid grid-cols-2 gap-1 border-b border-white/10 p-2;
+    @apply flex-col items-stretch gap-2 border-b border-white/10 p-2;
+  }
+  .portal-nav-brand {
+    @apply justify-center;
+  }
+  .portal-utility-links {
+    @apply grid grid-cols-2 gap-1;
   }
   .portal-utility-link {
     @apply justify-center rounded border-r-0 border border-white/15 bg-white/5 text-xs;

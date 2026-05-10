@@ -58,17 +58,27 @@ function UtilityLink({ to, icon: Icon, label, active }) {
   );
 }
 
-function UtilityNav({ portal }) {
+function UtilityNav({ common, portal }) {
   const location = useLocation();
   const isActive = (to) => location.pathname === to;
 
   return (
     <nav className="portal-utility-nav" aria-label={portal.utilityNavLabel}>
-      <UtilityLink to="/" icon={Home} label={portal.utilityHome} active={isActive("/")} />
-      <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} active={isActive("/contact-us")} />
-      <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} active={isActive("/about-us")} />
-      <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} active={isActive("/faq-help")} />
-      <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} active={isActive("/site-map")} />
+      <Link to="/" className="portal-nav-brand" aria-label={common.title}>
+        <span className="portal-nav-emblem">JS</span>
+        <span>
+          <strong>{common.title}</strong>
+          <small>{portal.subtitle}</small>
+        </span>
+      </Link>
+
+      <div className="portal-utility-links">
+        <UtilityLink to="/" icon={Home} label={portal.utilityHome} active={isActive("/")} />
+        <UtilityLink to="/contact-us" icon={Phone} label={portal.utilityContact} active={isActive("/contact-us")} />
+        <UtilityLink to="/about-us" icon={Info} label={portal.utilityAbout} active={isActive("/about-us")} />
+        <UtilityLink to="/faq-help" icon={CircleHelp} label={portal.utilityFaq} active={isActive("/faq-help")} />
+        <UtilityLink to="/site-map" icon={Map} label={portal.utilitySiteMap} active={isActive("/site-map")} />
+      </div>
     </nav>
   );
 }
@@ -99,25 +109,10 @@ export function PublicShell({ language, setLanguage, children }) {
 
   return (
     <div id="top" className={`portal-root portal-theme-${theme}`}>
-      <UtilityNav portal={portal} />
+      <UtilityNav common={common} portal={portal} />
       <div className="portal-shell w-full min-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] md:min-h-[calc(100vh-1.5rem)] md:rounded-[36px]">
         <header className="px-5 py-4 md:px-8 xl:px-10">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <Link
-              to="/"
-              className="portal-brand-card"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400 text-xl font-bold text-slate-950 shadow-lg shadow-cyan-900/30 ring-2 ring-cyan-200/40">
-                JS
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{common.eyebrow}</p>
-                <h1 className="text-2xl font-bold text-white">{common.title}</h1>
-                <p className="text-sm text-slate-400">{portal.subtitle}</p>
-              </div>
-            </Link>
-
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
               <label className="portal-theme-toggle">
                 <ThemeIcon size={16} />
                 <select
@@ -158,7 +153,6 @@ export function PublicShell({ language, setLanguage, children }) {
                 <LogIn size={16} />
                 {portal.login}
               </Link>
-            </div>
           </div>
         </header>
 
