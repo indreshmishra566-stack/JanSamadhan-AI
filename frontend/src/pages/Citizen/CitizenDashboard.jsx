@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { complaintApi } from "../../api";
 import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
@@ -10,7 +11,9 @@ import { Plus, X, MapPin, Navigation } from "lucide-react";
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [tab, setTab] = useState("complaints");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab") === "profile" ? "profile" : "complaints";
+  const [tab, setTabState] = useState(requestedTab);
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [profileEditRequest, setProfileEditRequest] = useState(0);
@@ -33,6 +36,19 @@ export default function CitizenDashboard() {
   });
 
   const complaints = data?.results || data || [];
+
+  useEffect(() => {
+    const nextTab = searchParams.get("tab") === "profile" ? "profile" : "complaints";
+    setTabState(nextTab);
+    if (nextTab === "profile" && searchParams.get("edit") === "1") {
+      setProfileEditRequest((count) => count + 1);
+    }
+  }, [searchParams]);
+
+  const setTab = (nextTab) => {
+    setTabState(nextTab);
+    setSearchParams(nextTab === "profile" ? { tab: "profile" } : {});
+  };
 
   const createMutation = useMutation({
     mutationFn: (fd) => complaintApi.create(fd),
