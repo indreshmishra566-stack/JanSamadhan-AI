@@ -94,7 +94,7 @@ export default function ProfilePanel({ editRequest = 0 }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Section title="Identity" icon="🪪">
           {editing ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -150,18 +150,6 @@ export default function ProfilePanel({ editRequest = 0 }) {
               <Item label="Block / Area" value={user?.block} />
             </div>
           )}
-        </Section>
-
-        <Section title="Official Assignment" icon="🏛️">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Item label="Role" value={user?.role} accent />
-            <Item label="Designation" value={user?.designation} />
-            <Item label="Department" value={user?.department_name} />
-            <Item label="Employee ID" value={user?.employee_id} />
-          </div>
-          <p className="text-xs text-gray-400 mt-3">
-            Official role, department, and employee assignment are managed through the reporting hierarchy.
-          </p>
         </Section>
       </div>
     </div>
