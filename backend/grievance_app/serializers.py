@@ -9,7 +9,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "phone", "password", "password2", "first_name", "last_name"]
+        fields = [
+            "username", "email", "password", "password2", "first_name", "last_name",
+            "gender", "address_line", "sub_locality", "locality", "country", "state", "district", "block", "pincode",
+        ]
 
     def validate(self, data):
         if data["password"] != data["password2"]:
@@ -29,6 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email", "phone", "role", "first_name", "last_name",
+                  "gender", "address_line", "sub_locality", "locality", "country", "pincode",
                   "designation", "department", "department_name", "employee_id", "is_verified", "date_joined",
                   "state", "district", "block", "created_by", "reports_to", "reports_to_name", "is_active"]
         read_only_fields = ["date_joined", "is_verified"]
@@ -37,7 +41,10 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "phone", "state", "district", "block"]
+        fields = [
+            "first_name", "last_name", "email", "state", "district", "block",
+            "gender", "address_line", "sub_locality", "locality", "country", "pincode",
+        ]
 
 
 class DepartmentSerializer(serializers.ModelSerializer):

@@ -8,9 +8,23 @@ import { PublicShell } from "./PublicPortal";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
-    username: "", email: "", phone: "", first_name: "", last_name: "", password: "", password2: "",
+    email: "",
+    first_name: "",
+    last_name: "",
+    gender: "",
+    address_line: "",
+    sub_locality: "",
+    locality: "",
+    country: "India",
+    state: "",
+    district: "",
+    block: "",
+    pincode: "",
+    password: "",
+    password2: "",
   });
   const [otp, setOtp] = useState("");
+  const [registeredUsername, setRegisteredUsername] = useState("");
   const [verificationStep, setVerificationStep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
@@ -26,6 +40,8 @@ export default function RegisterPage() {
     setPortalLanguage(next);
   };
 
+  const getEmailUsername = () => form.email.trim().toLowerCase();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.password2) {
@@ -34,14 +50,17 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       if (verificationStep) {
-        const { data } = await authApi.verifyRegistrationOtp({ username: form.username, otp });
+        const { data } = await authApi.verifyRegistrationOtp({ username: registeredUsername || getEmailUsername(), otp });
         toast.success(data.detail || "Email verified. Please login.");
         navigate("/login");
         return;
       }
 
-      const { data } = await authApi.register(form);
+      const username = getEmailUsername();
+      const payload = { ...form, username };
+      const { data } = await authApi.register(payload);
       if (data.verification_required) {
+        setRegisteredUsername(data.username || username);
         setVerificationStep(true);
         toast.success(data.detail || "OTP sent to your email.");
       } else {
@@ -57,17 +76,40 @@ export default function RegisterPage() {
     }
   };
 
-  const field = (name, label, type = "text", placeholder = "") => (
+  const requiredMark = <span className="text-red-600"> *</span>;
+
+  const field = (name, label, type = "text", placeholder = "", required = true) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="mb-1 block text-sm font-semibold text-gray-800">
+        {label}{required ? requiredMark : null}
+      </label>
       <input
         className="input"
         type={type}
         value={form[name]}
         onChange={(e) => setForm({ ...form, [name]: e.target.value })}
         placeholder={placeholder}
-        required
+        required={required}
       />
+    </div>
+  );
+
+  const selectField = (name, label, options, required = true) => (
+    <div>
+      <label className="mb-1 block text-sm font-semibold text-gray-800">
+        {label}{required ? requiredMark : null}
+      </label>
+      <select
+        className="input"
+        value={form[name]}
+        onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+        required={required}
+      >
+        <option value="">--Select {label.toLowerCase()}--</option>
+        {options.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
     </div>
   );
 
@@ -97,8 +139,8 @@ export default function RegisterPage() {
           </div>
         </section>
 
-        <section className="portal-entry-card">
-          <div className="text-center mb-6">
+        <section className="portal-entry-card portal-entry-card-wide">
+          <div className="mb-6 text-center">
             <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-900 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-indigo-900/20">JS</div>
             <h1 className="text-2xl font-bold text-gray-900">{text.createAccount}</h1>
             <p className="mt-1 text-sm text-gray-500">{text.subtitle}</p>
@@ -106,15 +148,64 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-3">
             {!verificationStep ? (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  {field("first_name", labels.first_name, "text", placeholders.first_name)}
-                  {field("last_name", labels.last_name, "text", placeholders.last_name)}
+                <div className="mb-2 flex flex-col gap-2 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between">
+                  <h2 className="text-base font-bold text-fuchsia-900">Enter Details</h2>
+                  <p className="text-sm font-semibold text-fuchsia-900">Fields marked with * are mandatory</p>
                 </div>
-                {field("username", labels.username, "text", placeholders.username)}
-                {field("email", labels.email, "email", placeholders.email)}
-                {field("phone", labels.phone, "tel", placeholders.phone)}
-                {field("password", labels.password, "password", placeholders.password)}
-                {field("password2", labels.password2, "password", placeholders.password2)}
+
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {field("first_name", "First Name", "text", placeholders.first_name)}
+                    {field("last_name", "Last Name", "text", placeholders.last_name)}
+                  </div>
+                  <fieldset className="rounded-lg border border-gray-200 px-4 py-3">
+                    <legend className="px-1 text-sm font-semibold text-gray-800">Gender{requiredMark}</legend>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      {[
+                        ["MALE", "Male"],
+                        ["FEMALE", "Female"],
+                        ["TRANSGENDER", "Transgender"],
+                      ].map(([value, label]) => (
+                        <label key={value} className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                          <input
+                            type="radio"
+                            name="gender"
+                            value={value}
+                            checked={form.gender === value}
+                            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                            required
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <div className="space-y-3">
+                    {field("address_line", "Address", "text", "Premise Number or Name")}
+                    {field("locality", "Locality", "text", "Locality")}
+                    {selectField("state", "State", ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Karnataka", "Madhya Pradesh", "Maharashtra", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"])}
+                    {field("pincode", "Pincode", "text", "", false)}
+                  </div>
+
+                  <div className="space-y-3">
+                    {field("sub_locality", "Sub-locality", "text", "Sub-locality", false)}
+                    {selectField("country", "Country", ["India"])}
+                    {field("district", "District", "text", "District")}
+                    {field("block", "Block / Area", "text", "Block or area", false)}
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    {field("email", "E-mail address", "email", placeholders.email)}
+                  </div>
+
+                  <div>
+                    {field("password", labels.password, "password", placeholders.password)}
+                  </div>
+                  <div>
+                    {field("password2", labels.password2, "password", placeholders.password2)}
+                  </div>
+                </div>
               </>
             ) : (
               <div>

@@ -10,9 +10,20 @@ class User(AbstractUser):
         ("ADMIN", "Admin"),
         ("OFFICER", "Officer"),
     ]
+    GENDER_CHOICES = [
+        ("MALE", "Male"),
+        ("FEMALE", "Female"),
+        ("TRANSGENDER", "Transgender"),
+    ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="CITIZEN")
     designation = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=15, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True)
+    address_line = models.CharField(max_length=255, blank=True)
+    sub_locality = models.CharField(max_length=120, blank=True)
+    locality = models.CharField(max_length=120, blank=True)
+    country = models.CharField(max_length=80, blank=True, default="India")
+    pincode = models.CharField(max_length=12, blank=True)
     department = models.ForeignKey(
         "Department", null=True, blank=True, on_delete=models.SET_NULL, related_name="officers"
     )

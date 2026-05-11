@@ -32,7 +32,6 @@ export default function ProfilePanel({ editRequest = 0 }) {
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
     email: user?.email || "",
-    phone: user?.phone || "",
     state: user?.state || "",
     district: user?.district || "",
     block: user?.block || "",
@@ -59,7 +58,6 @@ export default function ProfilePanel({ editRequest = 0 }) {
       first_name: user?.first_name || "",
       last_name: user?.last_name || "",
       email: user?.email || "",
-      phone: user?.phone || "",
       state: user?.state || "",
       district: user?.district || "",
       block: user?.block || "",
@@ -102,7 +100,6 @@ export default function ProfilePanel({ editRequest = 0 }) {
                 ["first_name", "First Name"],
                 ["last_name", "Last Name"],
                 ["email", "Email"],
-                ["phone", "Phone"],
               ].map(([key, label]) => (
                 <div key={key}>
                   <label className="block text-[11px] uppercase tracking-wide text-gray-400 mb-1">{label}</label>
@@ -120,7 +117,6 @@ export default function ProfilePanel({ editRequest = 0 }) {
               <Item label="Full Name" value={`${user?.first_name || ""} ${user?.last_name || ""}`.trim() || user?.username} accent />
               <Item label="Username" value={user?.username} />
               <Item label="Email" value={user?.email} />
-              <Item label="Phone" value={user?.phone} />
             </div>
           )}
         </Section>
