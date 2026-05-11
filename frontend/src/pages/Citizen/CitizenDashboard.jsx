@@ -13,6 +13,7 @@ export default function CitizenDashboard() {
   const [tab, setTab] = useState("complaints");
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [profileEditRequest, setProfileEditRequest] = useState(0);
   const emptyForm = {
     title: "",
     description: "",
@@ -98,7 +99,9 @@ export default function CitizenDashboard() {
         ]}
         actions={[
           { label: "New Complaint", onClick: () => { setShowForm(true); setTab("complaints"); } },
-          { label: "Profile", onClick: () => setTab("profile"), variant: "secondary" },
+          tab === "profile"
+            ? { label: "Edit Profile", onClick: () => setProfileEditRequest((count) => count + 1), variant: "secondary" }
+            : { label: "Profile", onClick: () => setTab("profile"), variant: "secondary" },
         ]}
       />
 
@@ -117,7 +120,7 @@ export default function CitizenDashboard() {
         />
       </div>
 
-      {tab === "profile" && <ProfilePanel />}
+      {tab === "profile" && <ProfilePanel editRequest={profileEditRequest} />}
 
       {tab === "complaints" && showForm && (
         <div className="card p-6 mb-6 border-blue-100 shadow-[0_20px_60px_rgba(29,78,216,0.08)]">

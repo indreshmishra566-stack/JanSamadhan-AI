@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { authApi } from "../../api";
@@ -25,7 +25,7 @@ function Item({ label, value, accent = false }) {
   );
 }
 
-export default function ProfilePanel() {
+export default function ProfilePanel({ editRequest = 0 }) {
   const { user, refreshUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -67,33 +67,30 @@ export default function ProfilePanel() {
     setEditing(true);
   };
 
-  const profileActions = editing ? (
-    <div className="flex gap-2">
-      <button
-        onClick={() => updateMutation.mutate(form)}
-        disabled={updateMutation.isPending}
-        className="btn-primary text-sm"
-      >
-        {updateMutation.isPending ? "Saving..." : "Save"}
-      </button>
-      <button onClick={() => setEditing(false)} className="btn-secondary text-sm">Cancel</button>
-    </div>
-  ) : (
-    <button onClick={startEdit} className="btn-primary text-sm">Edit Profile</button>
-  );
+  useEffect(() => {
+    if (editRequest > 0) startEdit();
+  }, [editRequest]);
 
   return (
-    <div className="relative space-y-4 pt-12 sm:pt-0">
-      <div className="absolute right-0 top-0 z-10 sm:-top-16">
-        {profileActions}
-      </div>
-
+    <div className="space-y-4">
       <div className="card p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">My Profile</h2>
             <p className="text-sm text-gray-500">Maintain your contact and service-area details.</p>
           </div>
+          {editing && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateMutation.mutate(form)}
+                disabled={updateMutation.isPending}
+                className="btn-primary text-sm"
+              >
+                {updateMutation.isPending ? "Saving..." : "Save"}
+              </button>
+              <button onClick={() => setEditing(false)} className="btn-secondary text-sm">Cancel</button>
+            </div>
+          )}
         </div>
       </div>
 
