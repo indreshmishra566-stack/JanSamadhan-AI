@@ -1,7 +1,6 @@
 import secrets
 import logging
 import random
-import threading
 
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -59,53 +58,59 @@ def _token_response(user):
     }
 
 
-def _deliver_email_otp_async(otp_id, user_id, subject, message):
+def _deliver_email_otp(otp, user, subject, message):
     try:
-        otp = LoginOTP.objects.get(id=otp_id)
-        user = User.objects.get(id=user_id)
-    except (LoginOTP.DoesNotExist, User.DoesNotExist):
-        return
+        if not user.email:
+            delivery_note = "No email on account."
+            otp.delivery_note = delivery_note
+            otp.save(update_fields=["delivery_note"])
+            return False, delivery_note
 
-    delivery_notes = []
-    if user.email:
-        try:
-            connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-                connection=connection,
-            )
-            delivery_notes.append("Email sent.")
-        except Exception as exc:
-            logger.exception("Email OTP failed for user %s", user.username)
-            delivery_notes.append(f"Email failed: {exc}")
-    else:
-        delivery_notes.append("No email on account.")
+        if (
+            settings.EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend"
+            and settings.EMAIL_HOST == "smtp.gmail.com"
+            and (not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD)
+        ):
+            delivery_note = "Email is not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD."
+            otp.delivery_note = delivery_note
+            otp.save(update_fields=["delivery_note"])
+            return False, delivery_note
 
-    otp.delivery_note = " ".join(delivery_notes)
-    otp.save(update_fields=["delivery_note"])
+        connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+            connection=connection,
+        )
+        delivery_note = "Email sent."
+        otp.delivery_note = delivery_note
+        otp.save(update_fields=["delivery_note"])
+        return True, delivery_note
+    except Exception as exc:
+        logger.exception("Email OTP failed for user %s", user.username)
+        delivery_note = f"Email failed: {exc}"
+        otp.delivery_note = delivery_note
+        otp.save(update_fields=["delivery_note"])
+        return False, delivery_note
 
 
 def _create_and_send_registration_otp(user):
     resend_key = f"registration-otp-sent:{user.id}"
     if cache.get(resend_key):
-        return None
+        return None, False, "Please wait before requesting another OTP."
 
     LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
     code = f"{random.SystemRandom().randint(0, 999999):06d}"
     expires_at = timezone.now() + timezone.timedelta(minutes=10)
     message = f"Your Jan Samadhan AI email verification OTP is {code}. It expires in 10 minutes."
     otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
-    threading.Thread(
-        target=_deliver_email_otp_async,
-        args=(otp.id, user.id, "Verify your Jan Samadhan AI email", message),
-        daemon=True,
-    ).start()
-    cache.set(resend_key, True, timeout=60)
-    return otp
+    email_sent, delivery_note = _deliver_email_otp(otp, user, "Verify your Jan Samadhan AI email", message)
+    if email_sent:
+        cache.set(resend_key, True, timeout=60)
+    return otp, email_sent, delivery_note
 
 
 def _managed_department_ids(user):
@@ -305,13 +310,41 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        _create_and_send_registration_otp(user)
+        _, email_sent, delivery_note = _create_and_send_registration_otp(user)
         return Response({
             "verification_required": True,
-            "detail": "Account created. OTP sent to your email for verification.",
+            "email_sent": email_sent,
+            "detail": "Account created. OTP sent to your email for verification." if email_sent else "Account created, but OTP email could not be sent.",
+            "delivery_note": delivery_note,
             "username": user.username,
             "email": user.email,
         }, status=status.HTTP_201_CREATED)
+
+
+class ResendRegistrationOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username", "").strip()
+        email = request.data.get("email", "").strip()
+        if not username and not email:
+            return Response({"detail": "Email is required."}, status=400)
+
+        user = User.objects.filter(role="CITIZEN").filter(Q(username=username) | Q(email=email)).first()
+        if not user:
+            return Response({"detail": "Account not found."}, status=404)
+        if user.is_active and user.is_verified:
+            return Response({"detail": "Account is already verified."}, status=400)
+
+        _, email_sent, delivery_note = _create_and_send_registration_otp(user)
+        status_code = status.HTTP_200_OK if email_sent else status.HTTP_503_SERVICE_UNAVAILABLE
+        return Response({
+            "email_sent": email_sent,
+            "detail": "OTP resent to your email." if email_sent else "OTP email could not be sent.",
+            "delivery_note": delivery_note,
+            "username": user.username,
+            "email": user.email,
+        }, status=status_code)
 
 
 class VerifyRegistrationOTPView(APIView):

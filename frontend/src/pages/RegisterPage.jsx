@@ -62,7 +62,11 @@ export default function RegisterPage() {
       if (data.verification_required) {
         setRegisteredUsername(data.username || username);
         setVerificationStep(true);
-        toast.success(data.detail || "OTP sent to your email.");
+        if (data.email_sent === false) {
+          toast.error(data.delivery_note || data.detail || "OTP email could not be sent.");
+        } else {
+          toast.success(data.detail || "OTP sent to your email.");
+        }
       } else {
         toast.success(text.accountCreated);
         navigate("/login");
@@ -70,6 +74,22 @@ export default function RegisterPage() {
     } catch (err) {
       const errors = err.response?.data;
       const msg = errors?.detail || (errors ? Object.values(errors).flat().join(" ") : text.registrationFailed);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const username = registeredUsername || getEmailUsername();
+      const { data } = await authApi.resendRegistrationOtp({ username, email: form.email });
+      setRegisteredUsername(data.username || username);
+      toast.success(data.detail || "OTP resent to your email.");
+    } catch (err) {
+      const errors = err.response?.data;
+      const msg = errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : "Could not resend OTP");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -230,16 +250,26 @@ export default function RegisterPage() {
               {loading ? text.creating : verificationStep ? "Verify Email" : text.createAccount}
             </button>
             {verificationStep && (
-              <button
-                type="button"
-                className="w-full text-sm font-medium text-blue-600 hover:underline"
-                onClick={() => {
-                  setOtp("");
-                  setVerificationStep(false);
-                }}
-              >
-                Change registration details
-              </button>
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  className="text-sm font-medium text-blue-600 hover:underline disabled:text-gray-400"
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                >
+                  Resend OTP
+                </button>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-blue-600 hover:underline"
+                  onClick={() => {
+                    setOtp("");
+                    setVerificationStep(false);
+                  }}
+                >
+                  Change registration details
+                </button>
+              </div>
             )}
           </form>
           <p className="text-center text-sm text-gray-500 mt-4">
