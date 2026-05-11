@@ -74,13 +74,13 @@ export default function LoginPage() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{text.username}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Email / Username</label>
               <input
                 className="input"
                 type="text"
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                placeholder={text.enterUsername}
+                placeholder="Citizen users: enter your registered email address"
                 required
                 autoComplete="username"
                 maxLength={150}
