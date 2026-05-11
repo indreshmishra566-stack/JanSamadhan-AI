@@ -26,14 +26,6 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const { data } = await authApi.login(credentials);
-    if (data.otp_required) return data;
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
-    return refreshUser();
-  };
-
-  const verifyCitizenOtp = async (payload) => {
-    const { data } = await authApi.verifyLoginOtp(payload);
     localStorage.setItem("access_token", data.access);
     localStorage.setItem("refresh_token", data.refresh);
     return refreshUser();
@@ -46,7 +38,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyCitizenOtp, logout, refreshUser, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser, setUser }}>
       {children}
     </AuthContext.Provider>
   );

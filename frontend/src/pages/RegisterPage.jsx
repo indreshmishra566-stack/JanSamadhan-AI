@@ -10,6 +10,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     username: "", email: "", phone: "", first_name: "", last_name: "", password: "", password2: "",
   });
+  const [otp, setOtp] = useState("");
+  const [verificationStep, setVerificationStep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
   const navigate = useNavigate();
@@ -31,12 +33,24 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await authApi.register(form);
-      toast.success(text.accountCreated);
-      navigate("/login");
+      if (verificationStep) {
+        const { data } = await authApi.verifyRegistrationOtp({ username: form.username, otp });
+        toast.success(data.detail || "Email verified. Please login.");
+        navigate("/login");
+        return;
+      }
+
+      const { data } = await authApi.register(form);
+      if (data.verification_required) {
+        setVerificationStep(true);
+        toast.success(data.detail || "OTP sent to your email.");
+      } else {
+        toast.success(text.accountCreated);
+        navigate("/login");
+      }
     } catch (err) {
       const errors = err.response?.data;
-      const msg = errors ? Object.values(errors).flat().join(" ") : text.registrationFailed;
+      const msg = errors?.detail || (errors ? Object.values(errors).flat().join(" ") : text.registrationFailed);
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -90,18 +104,52 @@ export default function RegisterPage() {
             <p className="mt-1 text-sm text-gray-500">{text.subtitle}</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              {field("first_name", labels.first_name, "text", placeholders.first_name)}
-              {field("last_name", labels.last_name, "text", placeholders.last_name)}
-            </div>
-            {field("username", labels.username, "text", placeholders.username)}
-            {field("email", labels.email, "email", placeholders.email)}
-            {field("phone", labels.phone, "tel", placeholders.phone)}
-            {field("password", labels.password, "password", placeholders.password)}
-            {field("password2", labels.password2, "password", placeholders.password2)}
+            {!verificationStep ? (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {field("first_name", labels.first_name, "text", placeholders.first_name)}
+                  {field("last_name", labels.last_name, "text", placeholders.last_name)}
+                </div>
+                {field("username", labels.username, "text", placeholders.username)}
+                {field("email", labels.email, "email", placeholders.email)}
+                {field("phone", labels.phone, "tel", placeholders.phone)}
+                {field("password", labels.password, "password", placeholders.password)}
+                {field("password2", labels.password2, "password", placeholders.password2)}
+              </>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email OTP</label>
+                <input
+                  className="input"
+                  type="text"
+                  inputMode="numeric"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="Enter 6-digit OTP"
+                  required
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  OTP was sent to {form.email}. Verify your email to activate this account.
+                </p>
+              </div>
+            )}
             <button type="submit" disabled={loading} className="btn-primary w-full py-3 shadow-lg shadow-blue-600/20">
-              {loading ? text.creating : text.createAccount}
+              {loading ? text.creating : verificationStep ? "Verify Email" : text.createAccount}
             </button>
+            {verificationStep && (
+              <button
+                type="button"
+                className="w-full text-sm font-medium text-blue-600 hover:underline"
+                onClick={() => {
+                  setOtp("");
+                  setVerificationStep(false);
+                }}
+              >
+                Change registration details
+              </button>
+            )}
           </form>
           <p className="text-center text-sm text-gray-500 mt-4">
             {text.alreadyRegistered}{" "}

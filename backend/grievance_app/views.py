@@ -59,7 +59,7 @@ def _token_response(user):
     }
 
 
-def _deliver_login_otp_async(otp_id, user_id, message):
+def _deliver_email_otp_async(otp_id, user_id, subject, message):
     try:
         otp = LoginOTP.objects.get(id=otp_id)
         user = User.objects.get(id=user_id)
@@ -71,7 +71,7 @@ def _deliver_login_otp_async(otp_id, user_id, message):
         try:
             connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
             send_mail(
-                "Jan Samadhan AI login OTP",
+                subject,
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
@@ -89,20 +89,19 @@ def _deliver_login_otp_async(otp_id, user_id, message):
     otp.save(update_fields=["delivery_note"])
 
 
-def _create_and_send_login_otp(user):
-    resend_key = f"login-otp-sent:{user.id}"
+def _create_and_send_registration_otp(user):
+    resend_key = f"registration-otp-sent:{user.id}"
     if cache.get(resend_key):
         return None
 
     LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
     code = f"{random.SystemRandom().randint(0, 999999):06d}"
     expires_at = timezone.now() + timezone.timedelta(minutes=10)
-    message = f"Your Jan Samadhan AI login OTP is {code}. It expires in 10 minutes."
-
+    message = f"Your Jan Samadhan AI email verification OTP is {code}. It expires in 10 minutes."
     otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
     threading.Thread(
-        target=_deliver_login_otp_async,
-        args=(otp.id, user.id, message),
+        target=_deliver_email_otp_async,
+        args=(otp.id, user.id, "Verify your Jan Samadhan AI email", message),
         daemon=True,
     ).start()
     cache.set(resend_key, True, timeout=60)
@@ -295,33 +294,40 @@ class LoginView(APIView):
         if not user or not user.is_active:
             return Response({"detail": "Invalid credentials"}, status=401)
 
-        if user.role == "CITIZEN":
-            _create_and_send_login_otp(user)
-            return Response({
-                "otp_required": True,
-                "detail": "OTP sent to your registered email.",
-                "username": user.username,
-                "email": user.email,
-            })
-
         return Response(_token_response(user))
 
 
-class VerifyCitizenLoginOTPView(APIView):
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        _create_and_send_registration_otp(user)
+        return Response({
+            "verification_required": True,
+            "detail": "Account created. OTP sent to your email for verification.",
+            "username": user.username,
+            "email": user.email,
+        }, status=status.HTTP_201_CREATED)
+
+
+class VerifyRegistrationOTPView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get("username", "").strip()
-        password = request.data.get("password", "")
         code = request.data.get("otp", "").strip()
-        if not username or not password or not code:
-            return Response({"detail": "Username, password, and OTP are required."}, status=400)
+        if not username or not code:
+            return Response({"detail": "Username and OTP are required."}, status=400)
 
-        user = authenticate(request, username=username, password=password)
-        if not user or not user.is_active:
-            return Response({"detail": "Invalid credentials"}, status=401)
-        if user.role != "CITIZEN":
-            return Response(_token_response(user))
+        user = User.objects.filter(username=username, role="CITIZEN").first()
+        if not user:
+            return Response({"detail": "Account not found."}, status=404)
+        if user.is_active and user.is_verified:
+            return Response({"detail": "Account is already verified."})
 
         otp = LoginOTP.objects.filter(
             user=user,
@@ -334,12 +340,10 @@ class VerifyCitizenLoginOTPView(APIView):
 
         otp.consumed_at = timezone.now()
         otp.save(update_fields=["consumed_at"])
-        return Response(_token_response(user))
-
-
-class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
-    permission_classes = [AllowAny]
+        user.is_active = True
+        user.is_verified = True
+        user.save(update_fields=["is_active", "is_verified"])
+        return Response({"status": "ok", "detail": "Email verified. You can sign in now."})
 
 
 class MeView(generics.RetrieveUpdateAPIView):

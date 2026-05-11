@@ -68,8 +68,8 @@ export default api;
 
 export const authApi = {
   login: (data) => api.post("/auth/login/", data),
-  verifyLoginOtp: (data) => api.post("/auth/login/verify-otp/", data),
   register: (data) => api.post("/auth/register/", data),
+  verifyRegistrationOtp: (data) => api.post("/auth/register/verify-otp/", data),
   me: () => api.get("/auth/me/"),
   updateMe: (data) => api.patch("/auth/me/", data),
 };
