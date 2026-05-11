@@ -307,6 +307,23 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        username = request.data.get("username", "").strip()
+        email = request.data.get("email", "").strip()
+        existing_user = User.objects.filter(role="CITIZEN").filter(Q(username=username) | Q(email=email)).first()
+        if existing_user:
+            if existing_user.is_active and existing_user.is_verified:
+                return Response({"detail": "A verified account already exists. Please sign in."}, status=400)
+
+            _, email_sent, delivery_note = _create_and_send_registration_otp(existing_user)
+            return Response({
+                "verification_required": True,
+                "email_sent": email_sent,
+                "detail": "This account is waiting for email verification. OTP resent." if email_sent else "This account is waiting for email verification, but OTP email could not be sent.",
+                "delivery_note": delivery_note,
+                "username": existing_user.username,
+                "email": existing_user.email,
+            }, status=status.HTTP_200_OK)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
