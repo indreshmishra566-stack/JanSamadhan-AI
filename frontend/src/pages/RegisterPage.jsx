@@ -15,6 +15,8 @@ export default function RegisterPage() {
     gender: "",
     state: "",
     district: "",
+    locality: "",
+    pincode: "",
     password: "",
     password2: "",
   });
@@ -215,6 +217,8 @@ export default function RegisterPage() {
 
                   {selectField("state", "State", ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Karnataka", "Madhya Pradesh", "Maharashtra", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"])}
                   {field("district", "District", "text", "District")}
+                  {field("locality", "Locality", "text", "Locality")}
+                  {field("pincode", "Pincode", "text", "Pincode", false)}
 
                   <div className="lg:col-span-2">
                     {field("email", "E-mail address", "email", placeholders.email)}
