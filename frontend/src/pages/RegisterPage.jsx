@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authApi } from "../api";
+import { useAuth } from "../hooks/useAuth";
 import { Globe2, MapPinned, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { getPortalLanguage, setPortalLanguage, getPublicText } from "../i18n/public";
@@ -29,6 +30,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(getPortalLanguage());
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const content = getPublicText(language);
   const common = content.common;
   const text = content.register;
@@ -51,8 +53,16 @@ export default function RegisterPage() {
     try {
       if (verificationStep) {
         const { data } = await authApi.verifyRegistrationOtp({ username: registeredUsername || getEmailUsername(), otp });
-        toast.success(data.detail || "Email verified. Please login.");
-        navigate("/login");
+        if (data.access && data.refresh) {
+          localStorage.setItem("access_token", data.access);
+          localStorage.setItem("refresh_token", data.refresh);
+          await refreshUser();
+          toast.success(data.detail || "Email verified. Welcome!");
+          navigate("/citizen/dashboard");
+        } else {
+          toast.success(data.detail || "Email verified. Please login.");
+          navigate("/login");
+        }
         return;
       }
 

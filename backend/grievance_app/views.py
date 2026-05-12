@@ -430,7 +430,11 @@ class VerifyRegistrationOTPView(APIView):
         user.is_active = True
         user.is_verified = True
         user.save(update_fields=["is_active", "is_verified"])
-        return Response({"status": "ok", "detail": "Email verified. You can sign in now."})
+        return Response({
+            "status": "ok",
+            "detail": "Email verified. You are signed in now.",
+            **_token_response(user),
+        })
 
 
 class MeView(generics.RetrieveUpdateAPIView):
