@@ -87,13 +87,13 @@ const base = {
     utilityAbout: "About Us",
     utilityFaq: "FAQs / Help",
     utilitySiteMap: "Site Map",
-    heroBadge: "Modern public grievance platform",
+    heroBadge: "Jan Samadhan AI grievance platform",
     heroTitleLines: [
-      "AI-assisted grievance",
-      "redressal for citizens, officers, and",
-      "administrators.",
+      "Intelligent public",
+      "grievance redressal",
+      "built for every department.",
     ],
-    heroDescription: "Register, file complaints, let AI classify and route them, track officer action, and submit closure feedback.",
+    heroDescription: "A unified platform for citizen registration, AI-assisted complaint routing, officer action, admin oversight, live ticket tracking, and closure feedback.",
     trustSignals: [
       "Email OTP registration",
       "Ticket tracking",

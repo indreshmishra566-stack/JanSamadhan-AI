@@ -132,7 +132,7 @@
     text-wrap: balance;
   }
   .portal-hero-title span {
-    @apply inline;
+    @apply block;
   }
   .portal-hero-title::after {
     content: "";
