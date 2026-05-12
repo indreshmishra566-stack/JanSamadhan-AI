@@ -113,6 +113,18 @@ def _create_and_send_registration_otp(user):
     return otp, email_sent, delivery_note
 
 
+def _activate_citizen_without_otp(user):
+    user.is_active = True
+    user.is_verified = True
+    user.save(update_fields=["is_active", "is_verified"])
+
+
+def _otp_response_extra(otp, email_sent):
+    if otp and not email_sent and getattr(settings, "EXPOSE_REGISTRATION_OTP_IN_RESPONSE", False):
+        return {"dev_otp": otp.code}
+    return {}
+
+
 def _managed_department_ids(user):
     if not user or not user.is_authenticated:
         return set()
@@ -295,8 +307,12 @@ class LoginView(APIView):
         if not username or not password:
             return Response({"detail": "Username and password are required."}, status=400)
 
-        user = authenticate(request, username=username, password=password)
-        if not user or not user.is_active:
+        candidate = User.objects.filter(Q(username=username) | Q(email=username)).first()
+        if candidate and not candidate.is_active and candidate.role == "CITIZEN":
+            return Response({"detail": "Please verify your email OTP before signing in."}, status=403)
+
+        user = authenticate(request, username=candidate.username if candidate else username, password=password)
+        if not user:
             return Response({"detail": "Invalid credentials"}, status=401)
 
         return Response(_token_response(user))
@@ -314,7 +330,16 @@ class RegisterView(generics.CreateAPIView):
             if existing_user.is_active and existing_user.is_verified:
                 return Response({"detail": "A verified account already exists. Please sign in."}, status=400)
 
-            _, email_sent, delivery_note = _create_and_send_registration_otp(existing_user)
+            if not getattr(settings, "CITIZEN_EMAIL_VERIFICATION_REQUIRED", True):
+                _activate_citizen_without_otp(existing_user)
+                return Response({
+                    "verification_required": False,
+                    "detail": "Account verified. Please sign in.",
+                    "username": existing_user.username,
+                    "email": existing_user.email,
+                }, status=status.HTTP_200_OK)
+
+            otp, email_sent, delivery_note = _create_and_send_registration_otp(existing_user)
             return Response({
                 "verification_required": True,
                 "email_sent": email_sent,
@@ -322,12 +347,22 @@ class RegisterView(generics.CreateAPIView):
                 "delivery_note": delivery_note,
                 "username": existing_user.username,
                 "email": existing_user.email,
+                **_otp_response_extra(otp, email_sent),
             }, status=status.HTTP_200_OK)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        _, email_sent, delivery_note = _create_and_send_registration_otp(user)
+        if not getattr(settings, "CITIZEN_EMAIL_VERIFICATION_REQUIRED", True):
+            _activate_citizen_without_otp(user)
+            return Response({
+                "verification_required": False,
+                "detail": "Account created. Please sign in.",
+                "username": user.username,
+                "email": user.email,
+            }, status=status.HTTP_201_CREATED)
+
+        otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
         return Response({
             "verification_required": True,
             "email_sent": email_sent,
@@ -335,6 +370,7 @@ class RegisterView(generics.CreateAPIView):
             "delivery_note": delivery_note,
             "username": user.username,
             "email": user.email,
+            **_otp_response_extra(otp, email_sent),
         }, status=status.HTTP_201_CREATED)
 
 
@@ -353,7 +389,7 @@ class ResendRegistrationOTPView(APIView):
         if user.is_active and user.is_verified:
             return Response({"detail": "Account is already verified."}, status=400)
 
-        _, email_sent, delivery_note = _create_and_send_registration_otp(user)
+        otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
         status_code = status.HTTP_200_OK if email_sent else status.HTTP_503_SERVICE_UNAVAILABLE
         return Response({
             "email_sent": email_sent,
@@ -361,6 +397,7 @@ class ResendRegistrationOTPView(APIView):
             "delivery_note": delivery_note,
             "username": user.username,
             "email": user.email,
+            **_otp_response_extra(otp, email_sent),
         }, status=status_code)
 
 

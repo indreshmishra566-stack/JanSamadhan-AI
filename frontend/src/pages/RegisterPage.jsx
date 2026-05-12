@@ -63,7 +63,11 @@ export default function RegisterPage() {
         setRegisteredUsername(data.username || username);
         setVerificationStep(true);
         if (data.email_sent === false) {
-          toast.error(data.delivery_note || data.detail || "OTP email could not be sent.");
+          if (data.dev_otp) {
+            toast.success(`Use OTP ${data.dev_otp} to verify this registration.`);
+          } else {
+            toast.error(data.delivery_note || data.detail || "OTP email could not be sent.");
+          }
         } else {
           toast.success(data.detail || "OTP sent to your email.");
         }
@@ -86,11 +90,15 @@ export default function RegisterPage() {
       const username = registeredUsername || getEmailUsername();
       const { data } = await authApi.resendRegistrationOtp({ username, email: form.email });
       setRegisteredUsername(data.username || username);
-      toast.success(data.detail || "OTP resent to your email.");
+      toast.success(data.dev_otp ? `Use OTP ${data.dev_otp} to verify this registration.` : data.detail || "OTP resent to your email.");
     } catch (err) {
       const errors = err.response?.data;
-      const msg = errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : "Could not resend OTP");
-      toast.error(msg);
+      if (errors?.dev_otp) {
+        toast.success(`Use OTP ${errors.dev_otp} to verify this registration.`);
+      } else {
+        const msg = errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : "Could not resend OTP");
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }

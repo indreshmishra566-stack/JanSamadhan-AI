@@ -156,6 +156,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "noreply@jansamadhan.in")
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+CITIZEN_EMAIL_VERIFICATION_REQUIRED = os.getenv("CITIZEN_EMAIL_VERIFICATION_REQUIRED", "True") == "True"
+EXPOSE_REGISTRATION_OTP_IN_RESPONSE = os.getenv("EXPOSE_REGISTRATION_OTP_IN_RESPONSE", "False") == "True"
 
 # --- Axes (Brute-force protection) ---
 AXES_ENABLED = os.getenv("AXES_ENABLED", "True") == "True"
