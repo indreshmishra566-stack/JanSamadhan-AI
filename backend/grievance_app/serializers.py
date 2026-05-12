@@ -11,7 +11,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "username", "email", "password", "password2", "first_name", "last_name",
-            "gender", "address_line", "sub_locality", "locality", "country", "state", "district", "block", "pincode",
+            "gender", "state", "district", "locality", "pincode",
         ]
 
     def validate(self, data):
@@ -42,8 +42,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "first_name", "last_name", "email", "state", "district", "block",
-            "gender", "address_line", "sub_locality", "locality", "country", "pincode",
+            "first_name", "last_name", "email", "state", "district",
+            "gender", "locality", "pincode",
         ]
 
 

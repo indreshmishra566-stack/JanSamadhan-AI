@@ -34,7 +34,8 @@ export default function ProfilePanel({ editRequest = 0 }) {
     email: user?.email || "",
     state: user?.state || "",
     district: user?.district || "",
-    block: user?.block || "",
+    locality: user?.locality || "",
+    pincode: user?.pincode || "",
   });
 
   const updateMutation = useMutation({
@@ -60,7 +61,8 @@ export default function ProfilePanel({ editRequest = 0 }) {
       email: user?.email || "",
       state: user?.state || "",
       district: user?.district || "",
-      block: user?.block || "",
+      locality: user?.locality || "",
+      pincode: user?.pincode || "",
     });
     setEditing(true);
   };
@@ -127,7 +129,8 @@ export default function ProfilePanel({ editRequest = 0 }) {
               {[
                 ["state", "State"],
                 ["district", "District"],
-                ["block", "Block / Area"],
+                ["locality", "Locality"],
+                ["pincode", "Pincode"],
               ].map(([key, label]) => (
                 <div key={key}>
                   <label className="block text-[11px] uppercase tracking-wide text-gray-400 mb-1">{label}</label>
@@ -143,7 +146,8 @@ export default function ProfilePanel({ editRequest = 0 }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Item label="State" value={user?.state} accent />
               <Item label="District" value={user?.district} />
-              <Item label="Block / Area" value={user?.block} />
+              <Item label="Locality" value={user?.locality} />
+              <Item label="Pincode" value={user?.pincode} />
             </div>
           )}
         </Section>
