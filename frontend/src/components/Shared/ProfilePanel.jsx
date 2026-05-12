@@ -77,7 +77,7 @@ export default function ProfilePanel({ editRequest = 0 }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">My Profile</h2>
-            <p className="text-sm text-gray-500">Maintain your contact and service-area details.</p>
+            <p className="text-sm text-gray-500">Keep your identity and service-area details up to date.</p>
           </div>
           {editing && (
             <div className="flex gap-2">

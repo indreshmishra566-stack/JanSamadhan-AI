@@ -155,6 +155,8 @@ def _managed_department_ids(user):
 def _visible_department_queryset(user):
     if not user or not user.is_authenticated:
         return Department.objects.none()
+    if user.role == "ADMIN":
+        return Department.objects.filter(is_active=True)
     return Department.objects.filter(is_active=True).filter(
         Q(created_by=user) | Q(head_officer=user) | Q(sub_head_officer=user)
     ).distinct()
@@ -164,7 +166,7 @@ def _visible_user_queryset(user):
     if not user or not user.is_authenticated:
         return User.objects.none()
     if user.role == "ADMIN":
-        return User.objects.filter(Q(id=user.id) | Q(created_by=user)).distinct()
+        return User.objects.all().distinct()
     return User.objects.filter(Q(id=user.id) | Q(created_by=user) | Q(reports_to=user)).distinct()
 
 
@@ -172,7 +174,7 @@ def _manageable_officer_queryset(user):
     if not user or not user.is_authenticated:
         return User.objects.none()
     if user.role == "ADMIN":
-        return User.objects.filter(created_by=user).exclude(role="CITIZEN").distinct()
+        return User.objects.exclude(role="CITIZEN").distinct()
     return User.objects.filter(Q(created_by=user) | Q(reports_to=user)).exclude(role="CITIZEN").exclude(id=user.id).distinct()
 
 
@@ -1027,6 +1029,37 @@ def run_demo_seed(request):
             "citizen_aisha": "Citizen@1234",
             "citizen_neha": "Citizen@1234",
         },
+    })
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def run_admin_setup_seed(request):
+    if not _can_run_demo_maintenance(request):
+        return Response({"detail": "Invalid seed token."}, status=403)
+
+    try:
+        call_command("seed_admin_setup")
+    except Exception:
+        logger.exception("Admin setup seed failed")
+        return Response(
+            {"detail": "Admin setup failed. Check server logs for details."},
+            status=500,
+        )
+
+    departments = list(
+        Department.objects.filter(
+            code__in=[
+                "WATER", "ELECTRICITY", "SANITATION", "ROADS", "HEALTH",
+                "EDUCATION", "PUBLIC_SERVICES", "DRAINAGE", "STREET_LIGHT", "WASTE_MGMT",
+            ]
+        ).values("name", "code", "head_officer__username")
+    )
+    return Response({
+        "status": "ok",
+        "message": "10 departments and 10 department officers are ready for admin management.",
+        "officer_password": "Officer@1234",
+        "departments": departments,
     })
 
 

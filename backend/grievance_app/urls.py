@@ -46,6 +46,7 @@ urlpatterns = [
     # Public tracking
     path("track/<str:ticket_id>/", views.track_complaint),
     path("demo/seed/", views.run_demo_seed),
+    path("demo/seed-admin-setup/", views.run_admin_setup_seed),
     path("demo/clear/", views.run_demo_clear),
     path("demo/clear-all-except-admin/", views.run_clear_all_except_admin),
 ]

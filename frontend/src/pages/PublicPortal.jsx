@@ -330,7 +330,7 @@ export default function PublicPortal() {
                 className="h-full w-full object-contain object-center drop-shadow-[0_24px_54px_rgba(8,15,32,0.32)]"
               />
               <figcaption className="portal-hero-caption">
-                <span>Citizen-friendly complaint filing and smart routing</span>
+                <span>Citizen complaint filing with AI-assisted routing</span>
                 <span className="text-cyan-300">Local project illustration</span>
               </figcaption>
             </figure>

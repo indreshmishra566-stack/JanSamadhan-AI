@@ -118,7 +118,7 @@ export default function HierarchyDashboard() {
         tone="emerald"
         eyebrow="Officer operations"
         title={user?.department_name ? `${user.department_name} Command Desk` : `${ROLE_LABELS[user?.role] || "Officer"} Dashboard`}
-        subtitle="Handle local water grievances, move work across your branch, escalate when field resolution is blocked, and maintain team structure under your reporting chain."
+        subtitle="Handle assigned complaints, update status, upload proof, forward or escalate cases, and manage your reporting branch."
         badges={[
           profileDepartment?.name ? `Assigned: ${profileDepartment.name}` : "Department branch",
           user?.designation ? `Title: ${user.designation}` : "Officer role",
@@ -176,7 +176,7 @@ export default function HierarchyDashboard() {
           {isLoading ? (
             <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
           ) : complaints.length === 0 ? (
-            <EmptyState icon="🎉" title="No grievances assigned" description="All clear for your reporting branch." />
+            <EmptyState icon="🎉" title="No complaints assigned" description="Your reporting branch has no active complaints right now." />
           ) : (
             <div className="space-y-3">
               {complaints.map((c) => (

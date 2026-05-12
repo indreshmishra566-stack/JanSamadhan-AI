@@ -183,7 +183,7 @@ export default function RegisterPage() {
             {!verificationStep ? (
               <>
                 <div className="mb-2 flex flex-col gap-2 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between">
-                  <h2 className="text-base font-bold text-fuchsia-900">Enter Details</h2>
+                  <h2 className="text-base font-bold text-fuchsia-900">Citizen Details</h2>
                   <p className="text-sm font-semibold text-fuchsia-900">Fields marked with * are mandatory</p>
                 </div>
 

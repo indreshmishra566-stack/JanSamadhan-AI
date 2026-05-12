@@ -124,7 +124,7 @@ export default function AdminDashboard() {
         tone="violet"
         eyebrow="Administrative command"
         title="Admin Dashboard"
-        subtitle="Run the water grievance operation from one control surface: department mapping, complaint intelligence, hierarchy oversight, duplicates, and performance trends."
+        subtitle="Manage Jan Samadhan AI from one control surface: departments, officers, complaint routing, duplicates, SLA status, and performance trends."
         badges={[
           `${stats?.total ?? complaints.length} total complaints`,
           `${departments.length} departments`,

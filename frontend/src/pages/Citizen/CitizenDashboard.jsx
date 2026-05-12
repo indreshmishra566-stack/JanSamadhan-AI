@@ -107,7 +107,7 @@ export default function CitizenDashboard() {
         tone="blue"
         eyebrow="Citizen workspace"
         title={`Welcome, ${user?.first_name || user?.username}`}
-        subtitle="File a new water grievance, track officer routing, review closure updates, and keep your identity details current from one place."
+        subtitle="File complaints, track department and officer action, review closure updates, and keep your profile details current."
         badges={[
           user?.district || user?.state || "Public dashboard",
           "Hindi / English complaint input",
@@ -145,13 +145,13 @@ export default function CitizenDashboard() {
             <button onClick={() => setShowForm(false)} className="p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
           </div>
           <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-            The stronger your location details are, the better the system can route this complaint to the nearest water branch operator.
+            Clear location details help Jan Samadhan AI route this complaint to the right department and officer.
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
               <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="Brief title of your complaint" required />
+                placeholder="Short issue title" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -159,7 +159,7 @@ export default function CitizenDashboard() {
               </label>
               <textarea className="input min-h-24 resize-y" value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Describe your complaint in detail. AI will auto-classify it." required />
+                placeholder="Describe the issue clearly. AI will classify and route it." required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
@@ -168,7 +168,7 @@ export default function CitizenDashboard() {
                   <MapPin size={16} className="absolute left-3 top-2.5 text-gray-400" />
                   <input className="input pl-9" value={form.location}
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    placeholder="Ward no., area, city" />
+                    placeholder="Street, ward, landmark, or area" />
                 </div>
                 <button type="button" onClick={detectLocation} className="btn-secondary flex items-center gap-2 shrink-0">
                   <Navigation size={15} /> GPS
