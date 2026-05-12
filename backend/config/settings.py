@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from corsheaders.defaults import default_headers
 
 load_dotenv()
 
@@ -134,6 +135,9 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     if regex
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-demo-seed-token",
+]
 
 # --- Static & Media ---
 STATIC_URL = "/static/"
