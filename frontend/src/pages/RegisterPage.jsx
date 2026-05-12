@@ -13,14 +13,8 @@ export default function RegisterPage() {
     first_name: "",
     last_name: "",
     gender: "",
-    address_line: "",
-    sub_locality: "",
-    locality: "",
-    country: "India",
     state: "",
     district: "",
-    block: "",
-    pincode: "",
     password: "",
     password2: "",
   });
@@ -219,19 +213,8 @@ export default function RegisterPage() {
                     </div>
                   </fieldset>
 
-                  <div className="space-y-3">
-                    {field("address_line", "Address", "text", "Premise Number or Name")}
-                    {field("locality", "Locality", "text", "Locality")}
-                    {selectField("state", "State", ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Karnataka", "Madhya Pradesh", "Maharashtra", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"])}
-                    {field("pincode", "Pincode", "text", "", false)}
-                  </div>
-
-                  <div className="space-y-3">
-                    {field("sub_locality", "Sub-locality", "text", "Sub-locality", false)}
-                    {selectField("country", "Country", ["India"])}
-                    {field("district", "District", "text", "District")}
-                    {field("block", "Block / Area", "text", "Block or area", false)}
-                  </div>
+                  {selectField("state", "State", ["Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Karnataka", "Madhya Pradesh", "Maharashtra", "Rajasthan", "Tamil Nadu", "Uttar Pradesh", "West Bengal"])}
+                  {field("district", "District", "text", "District")}
 
                   <div className="lg:col-span-2">
                     {field("email", "E-mail address", "email", placeholders.email)}
