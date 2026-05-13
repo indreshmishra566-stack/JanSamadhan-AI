@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.mail import get_connection, send_mail
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
+from django.db import DatabaseError, IntegrityError, transaction
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
 
@@ -187,10 +187,12 @@ def _otp_response_extra(otp, email_sent):
 
 def _registration_exception_response(exc):
     logger.exception("Citizen registration failed")
+    message = str(exc)[:300]
+    status_code = status.HTTP_400_BAD_REQUEST if isinstance(exc, IntegrityError) else status.HTTP_500_INTERNAL_SERVER_ERROR
     return Response({
         "detail": f"Registration failed: {type(exc).__name__}",
-        "error": str(exc)[:300],
-    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        "error": message,
+    }, status=status_code)
 
 
 def _managed_department_ids(user):
@@ -424,19 +426,20 @@ class RegisterView(generics.CreateAPIView):
             if User.objects.filter(Q(username=username) | Q(email=email)).exists():
                 return Response({"detail": "This email is already used by another account. Please sign in."}, status=400)
 
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            user = serializer.save()
-            if not _email_verification_required():
-                _activate_citizen_without_otp(user)
-                return Response({
-                    "verification_required": False,
-                    "detail": "Account created. Please sign in.",
-                    "username": user.username,
-                    "email": user.email,
-                }, status=status.HTTP_201_CREATED)
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                user = serializer.save()
+                if not _email_verification_required():
+                    _activate_citizen_without_otp(user)
+                    return Response({
+                        "verification_required": False,
+                        "detail": "Account created. Please sign in.",
+                        "username": user.username,
+                        "email": user.email,
+                    }, status=status.HTTP_201_CREATED)
 
-            otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
+                otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
             return Response({
                 "verification_required": True,
                 "email_sent": email_sent,

@@ -45,7 +45,7 @@ export default function RegisterPage() {
     if (typeof errors === "string") {
       return errors.trim().startsWith("<") ? fallback : errors;
     }
-    return errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : fallback);
+    return errors?.delivery_note || errors?.detail || errors?.error || (errors ? Object.values(errors).flat().join(" ") : fallback);
   };
 
   const handleSubmit = async (e) => {
