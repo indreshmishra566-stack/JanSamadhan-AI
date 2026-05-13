@@ -19,6 +19,8 @@ services:
         value: "jansamadhan-ai.onrender.com,jan-samadhan-backend.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://jan-samadhan-ai-cyan.vercel.app,https://jan-samadhan.vercel.app"
+      - key: CORS_ALLOWED_ORIGIN_REGEXES
+        value: "^https://jan-samadhan-[a-z0-9-]+\\.vercel\\.app$,^https://jan-samadhan-ai-[a-z0-9-]+\\.vercel\\.app$"
       - key: GROQ_API_KEY
         sync: false
       - key: EMAIL_HOST_USER
