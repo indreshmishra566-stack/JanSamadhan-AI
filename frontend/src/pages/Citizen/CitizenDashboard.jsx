@@ -63,6 +63,7 @@ export default function CitizenDashboard() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchText, setSearchText] = useState("");
   const [gpsNote, setGpsNote] = useState("");
+  const [showAdvancedGps, setShowAdvancedGps] = useState(false);
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -614,17 +615,27 @@ export default function CitizenDashboard() {
                 </p>
               )}
             </div>
-            <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-800">
-                <Navigation size={15} /> GPS filled details
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4">
+              <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                    <Navigation size={15} /> Address details
+                  </div>
+                  <p className="mt-1 text-xs text-emerald-700">Coordinates are kept for officer map routing and nearby assignment.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedGps((open) => !open)}
+                  className="rounded-md border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                >
+                  {showAdvancedGps ? "Hide coordinates" : "Map coordinates"}
+                </button>
               </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {[
                 ["state", "State", "Uttar Pradesh"],
                 ["district", "District", "Lucknow"],
                 ["block", "Area / Block", "Chinhat"],
-                ["latitude", "Latitude", "23.259933"],
-                ["longitude", "Longitude", "77.412613"],
               ].map(([key, label, placeholder]) => (
                 <div key={key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -637,6 +648,27 @@ export default function CitizenDashboard() {
                 </div>
               ))}
               </div>
+              {showAdvancedGps && (
+                <div className="mt-3 grid grid-cols-1 gap-3 border-t border-emerald-100 pt-3 md:grid-cols-2">
+                  {[
+                    ["latitude", "Latitude", "23.259933"],
+                    ["longitude", "Longitude", "77.412613"],
+                  ].map(([key, label, placeholder]) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                      <input
+                        className="input"
+                        value={form[key]}
+                        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                        placeholder={placeholder}
+                      />
+                    </div>
+                  ))}
+                  <p className="text-xs leading-5 text-emerald-700 md:col-span-2">
+                    Latitude and longitude are map numbers. Citizens can leave them as GPS filled values; officers use them to find the spot accurately.
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Attachment proof (optional)</label>
@@ -709,23 +741,24 @@ export default function CitizenDashboard() {
       ) : (
         <div className="space-y-3">
           <div className="card p-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Case Register</p>
                 <h2 className="text-lg font-bold text-slate-950">My lodged grievances</h2>
+                <p className="mt-1 text-sm text-slate-500">Search, filter, open details, copy registration ID, send reminder, and give feedback after disposal.</p>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative">
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_220px]">
+                <div className="relative min-w-0">
                   <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
                   <input
-                    className="input min-w-64 pl-9"
+                    className="input pl-9"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Search registration ID, subject, office"
+                    placeholder="Search by registration ID, subject, department, officer, or place"
                   />
                 </div>
                 <select
-                  className="input sm:w-48"
+                  className="input"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   aria-label="Filter grievances by status"
@@ -740,13 +773,13 @@ export default function CitizenDashboard() {
                   <option value="CLOSED">Closed</option>
                 </select>
               </div>
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full bg-cyan-50 px-3 py-1 font-medium text-cyan-700">Registration ID</span>
+                <span className="rounded-full bg-green-50 px-3 py-1 font-medium text-green-700">Officer tracking</span>
+                <span className="rounded-full bg-orange-50 px-3 py-1 font-medium text-orange-700">Reminder</span>
+                <span className="rounded-full bg-indigo-50 px-3 py-1 font-medium text-indigo-700">Feedback</span>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="badge bg-cyan-50 text-cyan-700">Registration ID enabled</span>
-            <span className="badge bg-green-50 text-green-700">Officer assignment visible</span>
-            <span className="badge bg-orange-50 text-orange-700">Reminder available</span>
-            <span className="badge bg-indigo-50 text-indigo-700">Feedback after disposal</span>
           </div>
           {filteredComplaints.length === 0 ? (
             <EmptyState
