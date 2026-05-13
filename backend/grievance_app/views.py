@@ -113,6 +113,47 @@ def _create_and_send_registration_otp(user):
     return otp, email_sent, delivery_note
 
 
+def _send_complaint_submission_email(complaint):
+    user = complaint.citizen
+    if not user.email:
+        return False, "No email on account."
+
+    if (
+        settings.EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend"
+        and settings.EMAIL_HOST == "smtp.gmail.com"
+        and (not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD)
+    ):
+        return False, "Email is not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD."
+
+    track_url = f"{getattr(settings, 'FRONTEND_URL', '').rstrip('/')}/track/{complaint.ticket_id}" if getattr(settings, "FRONTEND_URL", "") else ""
+    message_lines = [
+        f"Your complaint has been submitted successfully.",
+        "",
+        f"Tracking ID: {complaint.ticket_id}",
+        f"Title: {complaint.title}",
+        f"Status: {complaint.get_status_display()}",
+    ]
+    if complaint.department:
+        message_lines.append(f"Department: {complaint.department.name}")
+    if track_url:
+        message_lines.extend(["", f"Track your complaint here: {track_url}"])
+
+    try:
+        connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
+        send_mail(
+            f"Complaint submitted: #{complaint.ticket_id}",
+            "\n".join(message_lines),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+            connection=connection,
+        )
+        return True, "Email sent."
+    except Exception as exc:
+        logger.exception("Complaint submission email failed for complaint %s", complaint.ticket_id)
+        return False, f"Email failed: {exc}"
+
+
 def _activate_citizen_without_otp(user):
     user.is_active = True
     user.is_verified = True
@@ -549,7 +590,10 @@ class CitizenComplaintListCreateView(generics.ListCreateAPIView):
                     f"A new grievance was routed to you under {complaint.department.name}.")
         _notify(complaint.citizen, complaint, "ASSIGNED",
                 "Complaint Received",
-                f"Your complaint #{complaint.ticket_id} has been submitted successfully.")
+                f"Your complaint #{complaint.ticket_id} has been submitted successfully. Use this tracking ID to check complaint status.")
+        email_sent, email_note = _send_complaint_submission_email(complaint)
+        if not email_sent:
+            logger.warning("Complaint submission email not sent for %s: %s", complaint.ticket_id, email_note)
 
 
 class CitizenComplaintDetailView(generics.RetrieveAPIView):

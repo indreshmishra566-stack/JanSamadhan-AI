@@ -81,9 +81,14 @@ export default function CitizenDashboard() {
 
   const createMutation = useMutation({
     mutationFn: (fd) => complaintApi.create(fd),
-    onSuccess: () => {
+    onSuccess: ({ data: complaint }) => {
       qc.invalidateQueries(["my-complaints"]);
-      toast.success("Complaint submitted! AI is classifying it now.");
+      toast.success(
+        complaint?.ticket_id
+          ? `Complaint submitted. Tracking ID: ${complaint.ticket_id}`
+          : "Complaint submitted! AI is classifying it now.",
+        { duration: 6000 }
+      );
       stopVoiceInput();
       setShowForm(false);
       setForm(emptyForm);

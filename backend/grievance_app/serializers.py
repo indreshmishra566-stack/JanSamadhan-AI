@@ -153,7 +153,11 @@ class ComplaintSerializer(serializers.ModelSerializer):
 class ComplaintCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
-        fields = ["title", "description", "state", "district", "block", "location", "latitude", "longitude", "attachment"]
+        fields = [
+            "id", "ticket_id", "title", "description", "state", "district",
+            "block", "location", "latitude", "longitude", "attachment",
+        ]
+        read_only_fields = ["id", "ticket_id"]
 
     def create(self, validated_data):
         from .ai_service import classify_complaint
