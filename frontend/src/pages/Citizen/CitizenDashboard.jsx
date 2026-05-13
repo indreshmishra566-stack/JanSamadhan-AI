@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { complaintApi } from "../../api";
@@ -6,7 +6,7 @@ import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, Emp
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { Plus, X, MapPin, Navigation } from "lucide-react";
+import { X, MapPin, Navigation, Mic, MicOff, ImagePlus, Trash2 } from "lucide-react";
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
@@ -17,6 +17,11 @@ export default function CitizenDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [profileEditRequest, setProfileEditRequest] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState("hi-IN");
+  const [attachmentPreview, setAttachmentPreview] = useState("");
+  const recognitionRef = useRef(null);
+  const voiceBaseRef = useRef("");
   const emptyForm = {
     title: "",
     description: "",
@@ -29,6 +34,17 @@ export default function CitizenDashboard() {
     attachment: null,
   };
   const [form, setForm] = useState(emptyForm);
+
+  const stopVoiceInput = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        recognitionRef.current = null;
+      }
+    }
+    setIsListening(false);
+  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-complaints"],
@@ -45,6 +61,19 @@ export default function CitizenDashboard() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!form.attachment || !form.attachment.type?.startsWith("image/")) {
+      setAttachmentPreview("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(form.attachment);
+    setAttachmentPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [form.attachment]);
+
+  useEffect(() => () => stopVoiceInput(), [stopVoiceInput]);
+
   const setTab = (nextTab) => {
     setTabState(nextTab);
     setSearchParams(nextTab === "profile" ? { tab: "profile" } : {});
@@ -55,6 +84,7 @@ export default function CitizenDashboard() {
     onSuccess: () => {
       qc.invalidateQueries(["my-complaints"]);
       toast.success("Complaint submitted! AI is classifying it now.");
+      stopVoiceInput();
       setShowForm(false);
       setForm(emptyForm);
     },
@@ -74,6 +104,66 @@ export default function CitizenDashboard() {
     if (form.longitude) fd.append("longitude", form.longitude);
     if (form.attachment) fd.append("attachment", form.attachment);
     createMutation.mutate(fd);
+  };
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      stopVoiceInput();
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Voice input is not supported in this browser");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = voiceLanguage;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    voiceBaseRef.current = form.description.trim();
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript || "")
+        .join(" ")
+        .trim();
+      const separator = voiceBaseRef.current && transcript ? " " : "";
+      setForm((prev) => ({
+        ...prev,
+        description: `${voiceBaseRef.current}${separator}${transcript}`.trimStart(),
+      }));
+    };
+    recognition.onerror = () => {
+      toast.error("Could not capture voice input");
+      setIsListening(false);
+    };
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      setIsListening(false);
+    };
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+      setIsListening(true);
+      toast.success("Listening for complaint description");
+    } catch {
+      recognitionRef.current = null;
+      toast.error("Could not start voice input");
+    }
+  };
+
+  const handleAttachmentChange = (file) => {
+    if (!file) {
+      setForm((prev) => ({ ...prev, attachment: null }));
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    setForm((prev) => ({ ...prev, attachment: file }));
   };
 
   const detectLocation = () => {
@@ -142,7 +232,7 @@ export default function CitizenDashboard() {
         <div className="card p-6 mb-6 border-blue-100 shadow-[0_20px_60px_rgba(29,78,216,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Submit New Complaint</h2>
-            <button onClick={() => setShowForm(false)} className="p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
+            <button onClick={() => { stopVoiceInput(); setShowForm(false); }} className="p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
           </div>
           <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
             Clear location details help Jan Samadhan AI route this complaint to the right department and officer.
@@ -154,12 +244,42 @@ export default function CitizenDashboard() {
                 placeholder="Short issue title" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description <span className="text-gray-400 font-normal">(Hindi or English both accepted)</span>
-              </label>
+              <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Description <span className="text-gray-400 font-normal">(Hindi or English both accepted)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <select
+                    className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    value={voiceLanguage}
+                    onChange={(e) => setVoiceLanguage(e.target.value)}
+                    disabled={isListening}
+                    aria-label="Voice input language"
+                  >
+                    <option value="hi-IN">Hindi</option>
+                    <option value="en-IN">English</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={toggleVoiceInput}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                      isListening
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
+                    }`}
+                    aria-pressed={isListening}
+                  >
+                    {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+                    {isListening ? "Stop voice" : "Voice input"}
+                  </button>
+                </div>
+              </div>
               <textarea className="input min-h-24 resize-y" value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Describe the issue clearly. AI will classify and route it." required />
+              {isListening && (
+                <p className="mt-1 text-xs font-medium text-cyan-700">Listening now. Speak clearly and stop when the description is complete.</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
@@ -207,15 +327,43 @@ export default function CitizenDashboard() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
-              <input type="file" accept="image/*,application/pdf" className="input text-sm"
-                onChange={(e) => setForm({ ...form, attachment: e.target.files[0] })} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image proof (optional)</label>
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-cyan-200 bg-cyan-50/50 px-4 py-5 text-center transition hover:bg-cyan-50">
+                <ImagePlus size={24} className="text-cyan-700" />
+                <span className="text-sm font-semibold text-gray-800">
+                  {form.attachment ? form.attachment.name : "Upload or capture an image"}
+                </span>
+                <span className="text-xs text-gray-500">Photos from camera or gallery are accepted</span>
+                <input
+                  key={form.attachment ? form.attachment.name : "empty-attachment"}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="sr-only"
+                  onChange={(e) => handleAttachmentChange(e.target.files?.[0])}
+                />
+              </label>
+              {attachmentPreview && (
+                <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  <img src={attachmentPreview} alt="Selected complaint proof" className="h-48 w-full object-cover" />
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs text-gray-600">
+                    <span className="truncate">{form.attachment?.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleAttachmentChange(null)}
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 size={13} /> Remove
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex gap-3">
               <button type="submit" disabled={createMutation.isPending} className="btn-primary">
                 {createMutation.isPending ? "Submitting..." : "Submit Complaint"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={() => { stopVoiceInput(); setShowForm(false); }} className="btn-secondary">Cancel</button>
             </div>
           </form>
         </div>
