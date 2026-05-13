@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { ClipboardList, ShieldCheck, Waves } from "lucide-react";
+import { AlertCircle, ClipboardList, Eye, EyeOff, ShieldCheck, Waves } from "lucide-react";
 import toast from "react-hot-toast";
 import { getPortalLanguage, setPortalLanguage, getPublicText } from "../i18n/public";
 import { PublicShell } from "./PublicPortal";
@@ -11,6 +11,8 @@ const HANDLER_ROLES = ["OFFICER"];
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const [language, setLanguage] = useState(getPortalLanguage());
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +27,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username.trim() || !form.password) return;
+    setLoginError("");
+    if (!form.username.trim() || !form.password) {
+      setLoginError("Please enter both username and password.");
+      return;
+    }
     setLoading(true);
     try {
       const user = await login(form);
@@ -34,7 +40,9 @@ export default function LoginPage() {
       else if (HANDLER_ROLES.includes(user.role)) navigate("/officer/dashboard");
       else navigate("/citizen/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.detail || text.invalidCredentials);
+      const message = err.response?.data?.detail || text.invalidCredentials || "Invalid username or password.";
+      setLoginError(message);
+      toast.error(message, { duration: 5000 });
     } finally {
       setLoading(false);
     }
@@ -79,7 +87,10 @@ export default function LoginPage() {
                 className="input"
                 type="text"
                 value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                onChange={(e) => {
+                  setLoginError("");
+                  setForm({ ...form, username: e.target.value });
+                }}
                 placeholder="Citizen users: enter your registered email address"
                 required
                 autoComplete="username"
@@ -88,16 +99,38 @@ export default function LoginPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{text.password}</label>
-              <input
-                className="input"
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder={text.enterPassword}
-                required
-                autoComplete="current-password"
-              />
+              <div className="relative">
+                <input
+                  className="input pr-11"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) => {
+                    setLoginError("");
+                    setForm({ ...form, password: e.target.value });
+                  }}
+                  placeholder={text.enterPassword}
+                  required
+                  autoComplete="current-password"
+                  aria-invalid={Boolean(loginError)}
+                  aria-describedby={loginError ? "login-error" : undefined}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
+            {loginError && (
+              <div id="login-error" className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert">
+                <AlertCircle size={17} className="mt-0.5 shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
             <button type="submit" disabled={loading} className="btn-primary w-full py-3 text-base shadow-lg shadow-blue-600/20">
               {loading ? text.signingIn : text.signIn}
             </button>
