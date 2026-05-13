@@ -60,7 +60,9 @@ def _token_response(user):
 
 def _deliver_email_otp(otp, user, subject, message):
     def save_delivery_note(note):
-        otp.delivery_note = str(note or "")[:1000]
+        # Keep this below the old varchar(255) schema too, so registration
+        # remains safe even while a Render deploy is between code and migrate.
+        otp.delivery_note = str(note or "")[:240]
         otp.save(update_fields=["delivery_note"])
 
     try:
