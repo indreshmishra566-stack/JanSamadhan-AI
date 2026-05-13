@@ -23,7 +23,7 @@ from .serializers import (
     RegisterSerializer, UserSerializer, ProfileUpdateSerializer, DepartmentSerializer,
     ComplaintSerializer, ComplaintCreateSerializer, NotificationSerializer,
     AdminComplaintUpdateSerializer, OfficerComplaintUpdateSerializer,
-    CitizenFeedbackSerializer, ForwardingRecordSerializer,
+    CitizenFeedbackSerializer, ForwardingRecordSerializer, ChangePasswordSerializer,
 )
 from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
@@ -526,6 +526,16 @@ class MeView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Password changed successfully."})
 
 
 # ─── Departments ─────────────────────────────────────────────────────────────

@@ -47,6 +47,31 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         ]
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True, trim_whitespace=False)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password], trim_whitespace=False)
+    new_password2 = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate_current_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def validate(self, data):
+        if data["new_password"] != data["new_password2"]:
+            raise serializers.ValidationError({"new_password2": "New passwords do not match."})
+        if data["current_password"] == data["new_password"]:
+            raise serializers.ValidationError({"new_password": "New password must be different from current password."})
+        return data
+
+    def save(self, **kwargs):
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save(update_fields=["password"])
+        return user
+
+
 class DepartmentSerializer(serializers.ModelSerializer):
     complaint_count = serializers.SerializerMethodField()
     head_officer_name = serializers.SerializerMethodField()

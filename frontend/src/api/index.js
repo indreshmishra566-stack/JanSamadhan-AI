@@ -73,6 +73,7 @@ export const authApi = {
   verifyRegistrationOtp: (data) => api.post("/auth/register/verify-otp/", data),
   me: () => api.get("/auth/me/"),
   updateMe: (data) => api.patch("/auth/me/", data),
+  changePassword: (data) => api.post("/auth/change-password/", data),
 };
 
 export const complaintApi = {
