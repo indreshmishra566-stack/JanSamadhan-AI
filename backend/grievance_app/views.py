@@ -99,8 +99,11 @@ def _deliver_email_otp(otp, user, subject, message):
 
 def _create_and_send_registration_otp(user):
     resend_key = f"registration-otp-sent:{user.id}"
-    if cache.get(resend_key):
-        return None, False, "Please wait before requesting another OTP."
+    try:
+        if cache.get(resend_key):
+            return None, False, "Please wait before requesting another OTP."
+    except Exception as exc:
+        logger.warning("Registration OTP throttle cache unavailable for user %s: %s", user.username, exc)
 
     LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
     code = f"{random.SystemRandom().randint(0, 999999):06d}"
@@ -109,7 +112,10 @@ def _create_and_send_registration_otp(user):
     otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
     email_sent, delivery_note = _deliver_email_otp(otp, user, "Verify your Jan Samadhan AI email", message)
     if email_sent:
-        cache.set(resend_key, True, timeout=60)
+        try:
+            cache.set(resend_key, True, timeout=60)
+        except Exception as exc:
+            logger.warning("Registration OTP throttle cache set failed for user %s: %s", user.username, exc)
     return otp, email_sent, delivery_note
 
 

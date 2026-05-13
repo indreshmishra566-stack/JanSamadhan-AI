@@ -40,6 +40,14 @@ export default function RegisterPage() {
 
   const getEmailUsername = () => form.email.trim().toLowerCase();
 
+  const getErrorMessage = (err, fallback) => {
+    const errors = err.response?.data;
+    if (typeof errors === "string") {
+      return errors.trim().startsWith("<") ? fallback : errors;
+    }
+    return errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : fallback);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.password2) {
@@ -82,9 +90,7 @@ export default function RegisterPage() {
         navigate("/login");
       }
     } catch (err) {
-      const errors = err.response?.data;
-      const msg = errors?.detail || (errors ? Object.values(errors).flat().join(" ") : text.registrationFailed);
-      toast.error(msg);
+      toast.error(getErrorMessage(err, text.registrationFailed));
     } finally {
       setLoading(false);
     }
@@ -102,8 +108,7 @@ export default function RegisterPage() {
       if (errors?.dev_otp) {
         toast.success(`Use OTP ${errors.dev_otp} to verify this registration.`);
       } else {
-        const msg = errors?.delivery_note || errors?.detail || (errors ? Object.values(errors).flat().join(" ") : "Could not resend OTP");
-        toast.error(msg);
+        toast.error(getErrorMessage(err, "Could not resend OTP"));
       }
     } finally {
       setLoading(false);
