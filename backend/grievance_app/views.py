@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.mail import get_connection, send_mail
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
 
@@ -61,8 +62,11 @@ def _deliver_email_otp(otp, user, subject, message):
     def save_delivery_note(note):
         # Keep this below the old varchar(255) schema too, so registration
         # remains safe even while a Render deploy is between code and migrate.
-        otp.delivery_note = str(note or "")[:240]
-        otp.save(update_fields=["delivery_note"])
+        try:
+            otp.delivery_note = str(note or "")[:240]
+            otp.save(update_fields=["delivery_note"])
+        except Exception as exc:
+            logger.warning("Could not save OTP delivery note for user %s: %s", user.username, exc)
 
     try:
         if not user.email:
@@ -179,6 +183,14 @@ def _otp_response_extra(otp, email_sent):
     if otp and not email_sent and getattr(settings, "EXPOSE_REGISTRATION_OTP_IN_RESPONSE", False):
         return {"dev_otp": otp.code}
     return {}
+
+
+def _registration_exception_response(exc):
+    logger.exception("Citizen registration failed")
+    return Response({
+        "detail": f"Registration failed: {type(exc).__name__}",
+        "error": str(exc)[:300],
+    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def _managed_department_ids(user):
@@ -381,58 +393,61 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        username = request.data.get("username", "").strip()
-        email = request.data.get("email", "").strip()
-        existing_user = User.objects.filter(role="CITIZEN").filter(Q(username=username) | Q(email=email)).first()
-        if existing_user:
-            if existing_user.is_active and existing_user.is_verified:
-                return Response({"detail": "A verified account already exists. Please sign in."}, status=400)
+        try:
+            username = request.data.get("username", "").strip()
+            email = request.data.get("email", "").strip()
+            existing_user = User.objects.filter(role="CITIZEN").filter(Q(username=username) | Q(email=email)).first()
+            if existing_user:
+                if existing_user.is_active and existing_user.is_verified:
+                    return Response({"detail": "A verified account already exists. Please sign in."}, status=400)
 
-            if not _email_verification_required():
-                _activate_citizen_without_otp(existing_user)
+                if not _email_verification_required():
+                    _activate_citizen_without_otp(existing_user)
+                    return Response({
+                        "verification_required": False,
+                        "detail": "Account verified. Please sign in.",
+                        "username": existing_user.username,
+                        "email": existing_user.email,
+                    }, status=status.HTTP_200_OK)
+
+                otp, email_sent, delivery_note = _create_and_send_registration_otp(existing_user)
                 return Response({
-                    "verification_required": False,
-                    "detail": "Account verified. Please sign in.",
+                    "verification_required": True,
+                    "email_sent": email_sent,
+                    "detail": "This account is waiting for email verification. OTP resent." if email_sent else "This account is waiting for email verification, but OTP email could not be sent.",
+                    "delivery_note": delivery_note,
                     "username": existing_user.username,
                     "email": existing_user.email,
+                    **_otp_response_extra(otp, email_sent),
                 }, status=status.HTTP_200_OK)
 
-            otp, email_sent, delivery_note = _create_and_send_registration_otp(existing_user)
+            if User.objects.filter(Q(username=username) | Q(email=email)).exists():
+                return Response({"detail": "This email is already used by another account. Please sign in."}, status=400)
+
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            if not _email_verification_required():
+                _activate_citizen_without_otp(user)
+                return Response({
+                    "verification_required": False,
+                    "detail": "Account created. Please sign in.",
+                    "username": user.username,
+                    "email": user.email,
+                }, status=status.HTTP_201_CREATED)
+
+            otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
             return Response({
                 "verification_required": True,
                 "email_sent": email_sent,
-                "detail": "This account is waiting for email verification. OTP resent." if email_sent else "This account is waiting for email verification, but OTP email could not be sent.",
+                "detail": "Account created. OTP sent to your email for verification." if email_sent else "Account created, but OTP email could not be sent.",
                 "delivery_note": delivery_note,
-                "username": existing_user.username,
-                "email": existing_user.email,
-                **_otp_response_extra(otp, email_sent),
-            }, status=status.HTTP_200_OK)
-
-        if User.objects.filter(Q(username=username) | Q(email=email)).exists():
-            return Response({"detail": "This email is already used by another account. Please sign in."}, status=400)
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        if not _email_verification_required():
-            _activate_citizen_without_otp(user)
-            return Response({
-                "verification_required": False,
-                "detail": "Account created. Please sign in.",
                 "username": user.username,
                 "email": user.email,
+                **_otp_response_extra(otp, email_sent),
             }, status=status.HTTP_201_CREATED)
-
-        otp, email_sent, delivery_note = _create_and_send_registration_otp(user)
-        return Response({
-            "verification_required": True,
-            "email_sent": email_sent,
-            "detail": "Account created. OTP sent to your email for verification." if email_sent else "Account created, but OTP email could not be sent.",
-            "delivery_note": delivery_note,
-            "username": user.username,
-            "email": user.email,
-            **_otp_response_extra(otp, email_sent),
-        }, status=status.HTTP_201_CREATED)
+        except (DatabaseError, IntegrityError, Exception) as exc:
+            return _registration_exception_response(exc)
 
 
 class ResendRegistrationOTPView(APIView):
