@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { complaintApi } from "../../api";
@@ -6,7 +6,29 @@ import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, Emp
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { X, MapPin, Navigation, Mic, MicOff, ImagePlus, Trash2, FileAudio, FileText, FileVideo, Paperclip } from "lucide-react";
+import {
+  AlertCircle,
+  BellRing,
+  CheckCircle2,
+  ClipboardList,
+  FileAudio,
+  FileText,
+  FileVideo,
+  ImagePlus,
+  MapPin,
+  MessageSquareReply,
+  Mic,
+  MicOff,
+  Navigation,
+  Paperclip,
+  RotateCcw,
+  Search,
+  Send,
+  ShieldCheck,
+  Star,
+  Trash2,
+  X,
+} from "lucide-react";
 
 const COMPLAINT_ATTACHMENT_ACCEPT = "image/*,application/pdf,audio/*,video/*";
 
@@ -36,6 +58,8 @@ export default function CitizenDashboard() {
   const [isListening, setIsListening] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("hi-IN");
   const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [searchText, setSearchText] = useState("");
   const recognitionRef = useRef(null);
   const voiceBaseRef = useRef("");
   const emptyForm = {
@@ -68,6 +92,29 @@ export default function CitizenDashboard() {
   });
 
   const complaints = data?.results || data || [];
+  const disposedStatuses = ["RESOLVED", "CLOSED", "REJECTED"];
+  const pendingComplaints = complaints.filter((c) => !disposedStatuses.includes(c.status));
+  const disposedComplaints = complaints.filter((c) => disposedStatuses.includes(c.status));
+  const resolvedWithoutFeedback = complaints.filter((c) => c.status === "RESOLVED" && !c.citizen_rating);
+  const escalatedComplaints = complaints.filter((c) => c.status === "ESCALATED");
+  const latestComplaint = complaints[0];
+
+  const filteredComplaints = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    return complaints.filter((complaint) => {
+      const matchesStatus = statusFilter === "ALL"
+        || (statusFilter === "PENDING_WORK" ? !disposedStatuses.includes(complaint.status) : complaint.status === statusFilter);
+      const searchable = [
+        complaint.ticket_id,
+        complaint.title,
+        complaint.description,
+        complaint.department_name,
+        complaint.officer_name,
+        complaint.location,
+      ].filter(Boolean).join(" ").toLowerCase();
+      return matchesStatus && (!query || searchable.includes(query));
+    });
+  }, [complaints, searchText, statusFilter]);
 
   useEffect(() => {
     const nextTab = searchParams.get("tab") === "profile" ? "profile" : "complaints";
@@ -217,32 +264,94 @@ export default function CitizenDashboard() {
     );
   };
 
+  const sendReminder = (complaint) => {
+    toast.success(`Reminder noted for ${complaint.ticket_id}. Officer notification API can be connected next.`);
+  };
+
+  const openFeedback = (complaint) => {
+    setSelected(complaint);
+    toast("Feedback form is available inside resolved complaint details.");
+  };
+
   const stats = [
-    { label: "Total Complaints", value: complaints.length, icon: "📋", color: "blue" },
-    { label: "Pending", value: complaints.filter((c) => c.status === "PENDING").length, icon: "⏳", color: "yellow" },
-    { label: "Resolved", value: complaints.filter((c) => c.status === "RESOLVED").length, icon: "✅", color: "green" },
-    { label: "Escalated", value: complaints.filter((c) => c.status === "ESCALATED").length, icon: "🔴", color: "red" },
+    { label: "Total Registered", value: complaints.length, icon: "📋", color: "blue", sub: "All grievances filed" },
+    { label: "Pending Action", value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: "Under review or assigned" },
+    { label: "Disposed", value: disposedComplaints.length, icon: "✅", color: "green", sub: "Resolved, closed, or rejected" },
+    { label: "Escalated", value: escalatedComplaints.length, icon: "🔴", color: "red", sub: "Needs higher attention" },
+  ];
+
+  const serviceCards = [
+    {
+      title: "Lodge Public Grievance",
+      text: "Submit issue details with AI routing, GPS, voice input, and supporting media.",
+      icon: ClipboardList,
+      action: () => { setShowForm(true); setTab("complaints"); },
+      cta: "Lodge grievance",
+    },
+    {
+      title: "View Status",
+      text: latestComplaint ? `Latest registration ID: ${latestComplaint.ticket_id}` : "Track all registration IDs from one case register.",
+      icon: Search,
+      action: () => { setShowForm(false); setTab("complaints"); },
+      cta: "Open register",
+    },
+    {
+      title: "Send Reminder",
+      text: pendingComplaints.length ? `${pendingComplaints.length} active case${pendingComplaints.length > 1 ? "s" : ""} can be followed up.` : "No pending grievance needs a reminder.",
+      icon: BellRing,
+      action: () => pendingComplaints[0] ? sendReminder(pendingComplaints[0]) : toast.success("No pending reminders right now."),
+      cta: "Send reminder",
+    },
+    {
+      title: "Feedback / Appeal",
+      text: resolvedWithoutFeedback.length ? `${resolvedWithoutFeedback.length} resolved case${resolvedWithoutFeedback.length > 1 ? "s" : ""} awaiting citizen feedback.` : "Feedback opens after officer resolution.",
+      icon: Star,
+      action: () => resolvedWithoutFeedback[0] ? openFeedback(resolvedWithoutFeedback[0]) : toast("No resolved case is awaiting feedback."),
+      cta: "Give feedback",
+    },
   ];
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <div className="mx-auto max-w-7xl p-4 md:p-6">
       <DashboardHero
         tone="blue"
-        eyebrow="Citizen workspace"
+        eyebrow="Citizen Grievance Dashboard"
         title={`Welcome, ${user?.first_name || user?.username}`}
-        subtitle="File complaints, track department and officer action, review closure updates, and keep your profile details current."
+        subtitle="Lodge public grievances, monitor registration IDs, send follow-up reminders, review officer action, and submit closure feedback from one citizen workspace."
         badges={[
           user?.district || user?.state || "Public dashboard",
-          "Hindi / English complaint input",
-          "Ticket tracking enabled",
+          "24x7 grievance lodging",
+          "Unique registration ID tracking",
+          "AI assisted routing",
         ]}
         actions={[
-          { label: "New Complaint", onClick: () => { setShowForm(true); setTab("complaints"); } },
+          { label: "Lodge Grievance", onClick: () => { setShowForm(true); setTab("complaints"); } },
           tab === "profile"
             ? { label: "Edit Profile", onClick: () => setProfileEditRequest((count) => count + 1), variant: "secondary" }
             : { label: "Profile", onClick: () => setTab("profile"), variant: "secondary" },
         ]}
       />
+
+      <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {serviceCards.map((item) => (
+          <button
+            key={item.title}
+            type="button"
+            onClick={item.action}
+            className="card group flex min-h-36 flex-col items-start p-5 text-left transition hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-md"
+          >
+            <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50 text-cyan-700">
+              <item.icon size={20} />
+            </span>
+            <span className="text-sm font-bold text-slate-900">{item.title}</span>
+            <span className="mt-2 min-h-10 text-sm leading-5 text-slate-500">{item.text}</span>
+            <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-bold uppercase tracking-wide text-cyan-700">
+              {item.cta}
+              <Send size={13} className="transition group-hover:translate-x-0.5" />
+            </span>
+          </button>
+        ))}
+      </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6 mt-6 md:grid-cols-4">
         {stats.map((s) => <StatCard key={s.label} {...s} />)}
@@ -262,13 +371,27 @@ export default function CitizenDashboard() {
       {tab === "profile" && <ProfilePanel editRequest={profileEditRequest} />}
 
       {tab === "complaints" && showForm && (
-        <div className="card p-6 mb-6 border-blue-100 shadow-[0_20px_60px_rgba(29,78,216,0.08)]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Submit New Complaint</h2>
-            <button onClick={() => { stopVoiceInput(); setShowForm(false); }} className="p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
+        <div className="card mb-6 overflow-hidden border-blue-100 shadow-[0_20px_60px_rgba(29,78,216,0.08)]">
+          <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-700">Lodge Public Grievance</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">Register a new citizen complaint</h2>
+              </div>
+              <button onClick={() => { stopVoiceInput(); setShowForm(false); }} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-900"><X size={18} /></button>
+            </div>
           </div>
-          <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-            Clear location details help Jan Samadhan AI route this complaint to the right department and officer.
+          <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-600">
+              <span className="inline-flex items-center gap-1 rounded-full bg-cyan-50 px-3 py-1 text-cyan-700"><ShieldCheck size={13} /> AI classification</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700"><MapPin size={13} /> Location routing</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-indigo-700"><Paperclip size={13} /> Photo, PDF, audio, video</span>
+            </div>
+          </div>
+          <div className="mb-4 flex gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            <AlertCircle size={18} className="mt-0.5 shrink-0" />
+            <p>Write one clear issue per registration. Location, documents, media proof, and voice input help officers verify and resolve faster.</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -412,11 +535,12 @@ export default function CitizenDashboard() {
             </div>
             <div className="flex gap-3">
               <button type="submit" disabled={createMutation.isPending} className="btn-primary">
-                {createMutation.isPending ? "Submitting..." : "Submit Complaint"}
+                {createMutation.isPending ? "Submitting..." : "Submit Grievance"}
               </button>
               <button type="button" onClick={() => { stopVoiceInput(); setShowForm(false); }} className="btn-secondary">Cancel</button>
             </div>
           </form>
+          </div>
         </div>
       )}
 
@@ -428,12 +552,54 @@ export default function CitizenDashboard() {
           action={<button onClick={() => setShowForm(true)} className="btn-primary">Submit Complaint</button>} />
       ) : (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="badge bg-green-50 text-green-700">Assigned to You</span>
-            <span className="badge bg-orange-50 text-orange-700">Escalated to You</span>
-            <span className="badge bg-indigo-50 text-indigo-700">Head</span>
+          <div className="card p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Case Register</p>
+                <h2 className="text-lg font-bold text-slate-950">My lodged grievances</h2>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    className="input min-w-64 pl-9"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    placeholder="Search registration ID, subject, office"
+                  />
+                </div>
+                <select
+                  className="input sm:w-48"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  aria-label="Filter grievances by status"
+                >
+                  <option value="ALL">All grievances</option>
+                  <option value="PENDING_WORK">Pending work</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="ASSIGNED">Assigned</option>
+                  <option value="IN_PROGRESS">In progress</option>
+                  <option value="ESCALATED">Escalated</option>
+                  <option value="RESOLVED">Resolved</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              </div>
+            </div>
           </div>
-          {complaints.map((c) => (
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="badge bg-cyan-50 text-cyan-700">Registration ID enabled</span>
+            <span className="badge bg-green-50 text-green-700">Officer assignment visible</span>
+            <span className="badge bg-orange-50 text-orange-700">Reminder available</span>
+            <span className="badge bg-indigo-50 text-indigo-700">Feedback after disposal</span>
+          </div>
+          {filteredComplaints.length === 0 ? (
+            <EmptyState
+              icon="🔎"
+              title="No matching grievances"
+              description="Change the search or status filter to view more records."
+              action={<button type="button" onClick={() => { setSearchText(""); setStatusFilter("ALL"); }} className="btn-secondary">Reset filters</button>}
+            />
+          ) : filteredComplaints.map((c) => (
             <div key={c.id} onClick={() => setSelected(selected?.id === c.id ? null : c)}
               className="card p-4 cursor-pointer hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between gap-4">
@@ -442,7 +608,7 @@ export default function CitizenDashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-gray-900 truncate">{c.title}</p>
-                      <span className="text-xs text-gray-400 font-mono">#{c.ticket_id}</span>
+                      <span className="rounded bg-slate-100 px-2 py-1 text-xs font-mono font-semibold text-slate-600">Reg. ID {c.ticket_id}</span>
                     </div>
                     <p className="text-sm text-gray-500 truncate mt-0.5">{c.description}</p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -465,12 +631,28 @@ export default function CitizenDashboard() {
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 whitespace-nowrap">{formatDate(c.created_at)}</p>
+                <div className="hidden min-w-36 text-right sm:block">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400">Submitted</p>
+                  <p className="text-xs font-medium text-slate-500">{formatDate(c.created_at)}</p>
+                </div>
               </div>
               {selected?.id === c.id && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <button type="button" onClick={(event) => { event.stopPropagation(); sendReminder(c); }} className="btn-secondary inline-flex items-center gap-2 text-sm">
+                      <BellRing size={15} /> Send Reminder
+                    </button>
+                    <button type="button" onClick={(event) => { event.stopPropagation(); navigator.clipboard?.writeText(c.ticket_id); toast.success("Registration ID copied"); }} className="btn-secondary inline-flex items-center gap-2 text-sm">
+                      <ClipboardList size={15} /> Copy Registration ID
+                    </button>
+                    {c.status === "RESOLVED" && !c.citizen_rating && (
+                      <button type="button" onClick={(event) => { event.stopPropagation(); openFeedback(c); }} className="btn-primary inline-flex items-center gap-2 text-sm">
+                        <MessageSquareReply size={15} /> Give Feedback
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <InfoSection title="Routing" icon="🧭">
+                    <InfoSection title="Routing and Office" icon="🧭">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <DetailItem label="Department" value={c.department_name} accent />
                         <DetailItem label="Current Level" value={c.current_level} accent />
@@ -483,7 +665,7 @@ export default function CitizenDashboard() {
                         <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
                       </div>
                     </InfoSection>
-                    <InfoSection title="Status" icon="📌">
+                    <InfoSection title="Status and SLA" icon="📌">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <DetailItem label="AI Category" value={`${c.ai_category} (${Math.round((c.ai_confidence || 0) * 100)}%)`} accent />
                         <DetailItem label="Priority" value={c.priority} />
@@ -514,9 +696,15 @@ export default function CitizenDashboard() {
                         </div>
                       )}
                     </InfoSection>
-                    <InfoSection title="Timeline" icon="🕒">
+                    <InfoSection title="Action Timeline" icon="🕒">
                       <TimelineList
                         items={[
+                          {
+                            top: "Grievance Registered",
+                            middle: `Registration ID ${c.ticket_id}`,
+                            note: c.department_name ? `Routed to ${c.department_name}` : "AI routing in progress",
+                            date: formatDate(c.created_at),
+                          },
                           ...(c.forwarding_records || []).slice(0, 4).map((r) => ({
                             top: `${r.action} · ${r.from_level} → ${r.to_level}`,
                             middle: `${r.from_user_name} → ${r.to_user_name}`,
@@ -535,14 +723,16 @@ export default function CitizenDashboard() {
                     </InfoSection>
                   </div>
                   {c.officer_remarks && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
-                      <span className="font-medium text-blue-700">Officer remarks:</span> {c.officer_remarks}
+                    <div className="mt-3 flex gap-3 rounded-lg bg-blue-50 p-3 text-sm">
+                      <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-blue-700" />
+                      <p><span className="font-medium text-blue-700">Officer remarks:</span> {c.officer_remarks}</p>
                     </div>
                   )}
                   {c.is_duplicate && (
-                    <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm">
-                      <span className="font-medium text-amber-700">Duplicate intelligence:</span>{" "}
-                      This complaint is linked to {c.duplicate_of ? `master ticket #${c.duplicate_of}` : "another primary complaint"} for combined action.
+                    <div className="mt-3 flex gap-3 rounded-lg bg-amber-50 p-3 text-sm">
+                      <RotateCcw size={18} className="mt-0.5 shrink-0 text-amber-700" />
+                      <p><span className="font-medium text-amber-700">Duplicate intelligence:</span>{" "}
+                      This complaint is linked to {c.duplicate_of ? `master ticket #${c.duplicate_of}` : "another primary complaint"} for combined action.</p>
                     </div>
                   )}
                   {c.status === "RESOLVED" && !c.citizen_rating && (
