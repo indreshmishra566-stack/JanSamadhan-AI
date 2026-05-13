@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.conf import settings
-from django.core.cache import cache
 from django.core.management import call_command
 from django.core.mail import get_connection, send_mail
 from django.utils import timezone
@@ -108,12 +107,13 @@ def _registration_email_configured():
 
 
 def _create_and_send_registration_otp(user):
-    resend_key = f"registration-otp-sent:{user.id}"
-    try:
-        if cache.get(resend_key):
-            return None, False, "Please wait before requesting another OTP."
-    except Exception as exc:
-        logger.warning("Registration OTP throttle cache unavailable for user %s: %s", user.username, exc)
+    recent_otp = LoginOTP.objects.filter(
+        user=user,
+        created_at__gte=timezone.now() - timezone.timedelta(seconds=60),
+        consumed_at__isnull=True,
+    ).order_by("-created_at").first()
+    if recent_otp:
+        return recent_otp, False, "Please wait before requesting another OTP."
 
     LoginOTP.objects.filter(user=user, consumed_at__isnull=True).update(consumed_at=timezone.now())
     code = f"{random.SystemRandom().randint(0, 999999):06d}"
@@ -121,11 +121,6 @@ def _create_and_send_registration_otp(user):
     message = f"Your Jan Samadhan AI email verification OTP is {code}. It expires in 10 minutes."
     otp = LoginOTP.objects.create(user=user, code=code, expires_at=expires_at)
     email_sent, delivery_note = _deliver_email_otp(otp, user, "Verify your Jan Samadhan AI email", message)
-    if email_sent:
-        try:
-            cache.set(resend_key, True, timeout=60)
-        except Exception as exc:
-            logger.warning("Registration OTP throttle cache set failed for user %s: %s", user.username, exc)
     return otp, email_sent, delivery_note
 
 
@@ -412,6 +407,9 @@ class RegisterView(generics.CreateAPIView):
                 "email": existing_user.email,
                 **_otp_response_extra(otp, email_sent),
             }, status=status.HTTP_200_OK)
+
+        if User.objects.filter(Q(username=username) | Q(email=email)).exists():
+            return Response({"detail": "This email is already used by another account. Please sign in."}, status=400)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
