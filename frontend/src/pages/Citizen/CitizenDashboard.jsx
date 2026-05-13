@@ -6,7 +6,23 @@ import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, Emp
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { X, MapPin, Navigation, Mic, MicOff, ImagePlus, Trash2 } from "lucide-react";
+import { X, MapPin, Navigation, Mic, MicOff, ImagePlus, Trash2, FileAudio, FileText, FileVideo, Paperclip } from "lucide-react";
+
+const COMPLAINT_ATTACHMENT_ACCEPT = "image/*,application/pdf,audio/*,video/*";
+
+const getAttachmentKind = (file) => {
+  if (!file?.type) return "file";
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("audio/")) return "audio";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type === "application/pdf") return "pdf";
+  return "file";
+};
+
+const isAllowedComplaintAttachment = (file) => {
+  if (!file) return false;
+  return ["image", "audio", "video", "pdf"].includes(getAttachmentKind(file));
+};
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
@@ -19,7 +35,7 @@ export default function CitizenDashboard() {
   const [profileEditRequest, setProfileEditRequest] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("hi-IN");
-  const [attachmentPreview, setAttachmentPreview] = useState("");
+  const [attachmentPreview, setAttachmentPreview] = useState(null);
   const recognitionRef = useRef(null);
   const voiceBaseRef = useRef("");
   const emptyForm = {
@@ -62,13 +78,14 @@ export default function CitizenDashboard() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!form.attachment || !form.attachment.type?.startsWith("image/")) {
-      setAttachmentPreview("");
+    const kind = getAttachmentKind(form.attachment);
+    if (!form.attachment || !["image", "audio", "video"].includes(kind)) {
+      setAttachmentPreview(null);
       return undefined;
     }
 
     const previewUrl = URL.createObjectURL(form.attachment);
-    setAttachmentPreview(previewUrl);
+    setAttachmentPreview({ kind, url: previewUrl });
     return () => URL.revokeObjectURL(previewUrl);
   }, [form.attachment]);
 
@@ -164,12 +181,23 @@ export default function CitizenDashboard() {
       setForm((prev) => ({ ...prev, attachment: null }));
       return;
     }
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+    if (!isAllowedComplaintAttachment(file)) {
+      toast.error("Please select a photo, PDF, audio, or video file");
       return;
     }
     setForm((prev) => ({ ...prev, attachment: file }));
   };
+
+  const selectedAttachmentKind = getAttachmentKind(form.attachment);
+  const AttachmentIcon = selectedAttachmentKind === "audio"
+    ? FileAudio
+    : selectedAttachmentKind === "video"
+      ? FileVideo
+      : selectedAttachmentKind === "pdf"
+        ? FileText
+        : selectedAttachmentKind === "image"
+          ? ImagePlus
+          : Paperclip;
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -332,25 +360,43 @@ export default function CitizenDashboard() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image proof (optional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Attachment proof (optional)</label>
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-cyan-200 bg-cyan-50/50 px-4 py-5 text-center transition hover:bg-cyan-50">
-                <ImagePlus size={24} className="text-cyan-700" />
+                <AttachmentIcon size={24} className="text-cyan-700" />
                 <span className="text-sm font-semibold text-gray-800">
-                  {form.attachment ? form.attachment.name : "Upload or capture an image"}
+                  {form.attachment ? form.attachment.name : "Upload photo, PDF, audio, or video"}
                 </span>
-                <span className="text-xs text-gray-500">Photos from camera or gallery are accepted</span>
+                <span className="text-xs text-gray-500">Camera photos, documents, recordings, and videos are accepted</span>
                 <input
                   key={form.attachment ? form.attachment.name : "empty-attachment"}
                   type="file"
-                  accept="image/*"
-                  capture="environment"
+                  accept={COMPLAINT_ATTACHMENT_ACCEPT}
                   className="sr-only"
                   onChange={(e) => handleAttachmentChange(e.target.files?.[0])}
                 />
               </label>
-              {attachmentPreview && (
+              {form.attachment && (
                 <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white">
-                  <img src={attachmentPreview} alt="Selected complaint proof" className="h-48 w-full object-cover" />
+                  {attachmentPreview?.kind === "image" && (
+                    <img src={attachmentPreview.url} alt="Selected complaint proof" className="h-48 w-full object-cover" />
+                  )}
+                  {attachmentPreview?.kind === "audio" && (
+                    <div className="bg-gray-50 p-4">
+                      <audio src={attachmentPreview.url} controls className="w-full" />
+                    </div>
+                  )}
+                  {attachmentPreview?.kind === "video" && (
+                    <video src={attachmentPreview.url} controls className="max-h-72 w-full bg-black object-contain" />
+                  )}
+                  {selectedAttachmentKind === "pdf" && (
+                    <div className="flex items-center gap-3 bg-gray-50 px-4 py-5">
+                      <FileText size={28} className="shrink-0 text-cyan-700" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-800">{form.attachment.name}</p>
+                        <p className="text-xs text-gray-500">PDF document selected</p>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs text-gray-600">
                     <span className="truncate">{form.attachment?.name}</span>
                     <button
