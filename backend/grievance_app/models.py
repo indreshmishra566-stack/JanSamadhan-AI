@@ -57,7 +57,7 @@ class LoginOTP(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     consumed_at = models.DateTimeField(null=True, blank=True)
-    delivery_note = models.CharField(max_length=255, blank=True)
+    delivery_note = models.TextField(blank=True)
 
     class Meta:
         indexes = [

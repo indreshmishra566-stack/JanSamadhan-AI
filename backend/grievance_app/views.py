@@ -59,11 +59,14 @@ def _token_response(user):
 
 
 def _deliver_email_otp(otp, user, subject, message):
+    def save_delivery_note(note):
+        otp.delivery_note = str(note or "")[:1000]
+        otp.save(update_fields=["delivery_note"])
+
     try:
         if not user.email:
             delivery_note = "No email on account."
-            otp.delivery_note = delivery_note
-            otp.save(update_fields=["delivery_note"])
+            save_delivery_note(delivery_note)
             return False, delivery_note
 
         if (
@@ -72,8 +75,7 @@ def _deliver_email_otp(otp, user, subject, message):
             and (not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD)
         ):
             delivery_note = "Email is not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD."
-            otp.delivery_note = delivery_note
-            otp.save(update_fields=["delivery_note"])
+            save_delivery_note(delivery_note)
             return False, delivery_note
 
         connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
@@ -86,15 +88,21 @@ def _deliver_email_otp(otp, user, subject, message):
             connection=connection,
         )
         delivery_note = "Email sent."
-        otp.delivery_note = delivery_note
-        otp.save(update_fields=["delivery_note"])
+        save_delivery_note(delivery_note)
         return True, delivery_note
     except Exception as exc:
         logger.exception("Email OTP failed for user %s", user.username)
         delivery_note = f"Email failed: {exc}"
-        otp.delivery_note = delivery_note
-        otp.save(update_fields=["delivery_note"])
+        save_delivery_note(delivery_note)
         return False, delivery_note
+
+
+def _registration_email_configured():
+    if settings.EMAIL_BACKEND != "django.core.mail.backends.smtp.EmailBackend":
+        return True
+    if settings.EMAIL_HOST == "smtp.gmail.com":
+        return bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD)
+    return True
 
 
 def _create_and_send_registration_otp(user):
@@ -164,6 +172,10 @@ def _activate_citizen_without_otp(user):
     user.is_active = True
     user.is_verified = True
     user.save(update_fields=["is_active", "is_verified"])
+
+
+def _email_verification_required():
+    return getattr(settings, "CITIZEN_EMAIL_VERIFICATION_REQUIRED", True) and _registration_email_configured()
 
 
 def _otp_response_extra(otp, email_sent):
@@ -379,7 +391,7 @@ class RegisterView(generics.CreateAPIView):
             if existing_user.is_active and existing_user.is_verified:
                 return Response({"detail": "A verified account already exists. Please sign in."}, status=400)
 
-            if not getattr(settings, "CITIZEN_EMAIL_VERIFICATION_REQUIRED", True):
+            if not _email_verification_required():
                 _activate_citizen_without_otp(existing_user)
                 return Response({
                     "verification_required": False,
@@ -402,7 +414,7 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        if not getattr(settings, "CITIZEN_EMAIL_VERIFICATION_REQUIRED", True):
+        if not _email_verification_required():
             _activate_citizen_without_otp(user)
             return Response({
                 "verification_required": False,
