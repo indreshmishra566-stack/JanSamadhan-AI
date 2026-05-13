@@ -56,11 +56,16 @@ export default function CitizenDashboard() {
   const [selected, setSelected] = useState(null);
   const [profileEditRequest, setProfileEditRequest] = useState(0);
   const [isListening, setIsListening] = useState(false);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("hi-IN");
   const [attachmentPreview, setAttachmentPreview] = useState(null);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchText, setSearchText] = useState("");
+  const [gpsNote, setGpsNote] = useState("");
   const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const voiceBaseRef = useRef("");
   const emptyForm = {
     title: "",
@@ -83,7 +88,15 @@ export default function CitizenDashboard() {
         recognitionRef.current = null;
       }
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        mediaRecorderRef.current = null;
+      }
+    }
     setIsListening(false);
+    setIsRecordingAudio(false);
   }, []);
 
   const { data, isLoading } = useQuery({
@@ -175,7 +188,53 @@ export default function CitizenDashboard() {
     createMutation.mutate(fd);
   };
 
-  const toggleVoiceInput = () => {
+  const attachRecordedAudio = (blob) => {
+    const file = new File([blob], `complaint-recording-${Date.now()}.webm`, { type: blob.type || "audio/webm" });
+    setForm((prev) => ({
+      ...prev,
+      attachment: file,
+      description: prev.description.trim()
+        ? prev.description
+        : "Audio recording attached as complaint description proof.",
+    }));
+    toast.success("Audio recording attached to complaint proof");
+  };
+
+  const startAudioRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      toast.error("Audio recording is not supported in this browser");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data?.size) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setIsRecordingAudio(false);
+        setIsListening(false);
+        if (audioChunksRef.current.length) {
+          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+          attachRecordedAudio(blob);
+        }
+        mediaRecorderRef.current = null;
+      };
+      recorder.start();
+      setIsRecordingAudio(true);
+      setIsListening(true);
+      toast.success("Recording started. Speak your complaint, then press Stop.");
+    } catch {
+      toast.error("Microphone permission is needed for audio recording");
+    }
+  };
+
+  const toggleVoiceInput = async () => {
     if (isListening) {
       stopVoiceInput();
       return;
@@ -183,7 +242,7 @@ export default function CitizenDashboard() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error("Voice input is not supported in this browser");
+      await startAudioRecording();
       return;
     }
 
@@ -246,22 +305,61 @@ export default function CitizenDashboard() {
           ? ImagePlus
           : Paperclip;
 
-  const detectLocation = () => {
+  const reverseGeocode = async (latitude, longitude) => {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+    );
+    if (!response.ok) throw new Error("Reverse geocoding failed");
+    return response.json();
+  };
+
+  const detectLocation = async () => {
     if (!navigator.geolocation) {
       toast.error("Location detection is not supported in this browser");
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setForm((prev) => ({
-          ...prev,
-          latitude: coords.latitude.toFixed(6),
-          longitude: coords.longitude.toFixed(6),
-        }));
-        toast.success("Location coordinates added");
-      },
-      () => toast.error("Could not access your location")
-    );
+    setIsDetectingLocation(true);
+    setGpsNote("");
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        });
+      });
+      const { coords } = position;
+      const latitude = coords.latitude.toFixed(6);
+      const longitude = coords.longitude.toFixed(6);
+      let locationPatch = { latitude, longitude };
+
+      try {
+        const place = await reverseGeocode(latitude, longitude);
+        const address = place.address || {};
+        locationPatch = {
+          ...locationPatch,
+          location: place.display_name || [
+            address.road,
+            address.suburb || address.neighbourhood,
+            address.city || address.town || address.village,
+          ].filter(Boolean).join(", "),
+          state: address.state || form.state,
+          district: address.state_district || address.county || address.city_district || address.city || address.town || form.district,
+          block: address.suburb || address.neighbourhood || address.village || address.town || address.city_district || form.block,
+        };
+        setGpsNote(`GPS filled address details. Accuracy: about ${Math.round(coords.accuracy)} meters.`);
+      } catch {
+        setGpsNote(`GPS coordinates filled. Address lookup failed, so please type address details manually. Accuracy: about ${Math.round(coords.accuracy)} meters.`);
+      }
+
+      setForm((prev) => ({ ...prev, ...locationPatch }));
+      toast.success("GPS location details added");
+    } catch (error) {
+      const denied = error?.code === 1;
+      toast.error(denied ? "Please allow location permission for GPS autofill" : "Could not access your GPS location");
+    } finally {
+      setIsDetectingLocation(false);
+    }
   };
 
   const sendReminder = (complaint) => {
@@ -426,19 +524,24 @@ export default function CitizenDashboard() {
                     aria-pressed={isListening}
                   >
                     {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-                    {isListening ? "Stop voice" : "Voice input"}
+                    {isRecordingAudio ? "Stop recording" : isListening ? "Stop voice" : "Voice / Record"}
                   </button>
                 </div>
               </div>
               <textarea className="input min-h-24 resize-y" value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Describe the issue clearly. AI will classify and route it." required />
-              {isListening && (
+              {isRecordingAudio ? (
+                <p className="mt-1 text-xs font-medium text-red-700">Recording audio proof now. Press Stop recording when complete; it will be attached below.</p>
+              ) : isListening && (
                 <p className="mt-1 text-xs font-medium text-cyan-700">Listening now. Speak clearly and stop when the description is complete.</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
+              <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-sm font-medium text-gray-700">Location / Address</label>
+                <span className="text-xs font-medium text-gray-500">Use GPS to fill address boxes automatically</span>
+              </div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <MapPin size={16} className="absolute left-3 top-2.5 text-gray-400" />
@@ -446,16 +549,23 @@ export default function CitizenDashboard() {
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
                     placeholder="Street, ward, landmark, or area" />
                 </div>
-                <button type="button" onClick={detectLocation} className="btn-secondary flex items-center gap-2 shrink-0">
-                  <Navigation size={15} /> GPS
+                <button type="button" onClick={detectLocation} disabled={isDetectingLocation} className="btn-secondary flex items-center gap-2 shrink-0">
+                  <Navigation size={15} /> {isDetectingLocation ? "Detecting..." : "GPS Fill"}
                 </button>
               </div>
+              {gpsNote && <p className="mt-2 text-xs font-medium text-emerald-700">{gpsNote}</p>}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                <Navigation size={15} /> GPS filled details
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
               {[
                 ["state", "State", "Uttar Pradesh"],
                 ["district", "District", "Lucknow"],
                 ["block", "Area / Block", "Chinhat"],
+                ["latitude", "Latitude", "23.259933"],
+                ["longitude", "Longitude", "77.412613"],
               ].map(([key, label, placeholder]) => (
                 <div key={key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -467,21 +577,8 @@ export default function CitizenDashboard() {
                   />
                 </div>
               ))}
-            </div>
-            {(form.latitude || form.longitude) && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-                  <input className="input" value={form.latitude}
-                    onChange={(e) => setForm({ ...form, latitude: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-                  <input className="input" value={form.longitude}
-                    onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
-                </div>
               </div>
-            )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Attachment proof (optional)</label>
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-cyan-200 bg-cyan-50/50 px-4 py-5 text-center transition hover:bg-cyan-50">
