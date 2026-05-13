@@ -313,6 +313,44 @@ export default function CitizenDashboard() {
     return response.json();
   };
 
+  const getBestGpsPosition = () => new Promise((resolve, reject) => {
+    let bestPosition = null;
+    let settled = false;
+    const finish = (position) => {
+      if (settled) return;
+      settled = true;
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      window.clearTimeout(timeoutId);
+      resolve(position);
+    };
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      window.clearTimeout(timeoutId);
+      if (bestPosition) resolve(bestPosition);
+      else reject(error);
+    };
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        if (!bestPosition || position.coords.accuracy < bestPosition.coords.accuracy) {
+          bestPosition = position;
+        }
+        if (position.coords.accuracy <= 75) finish(position);
+      },
+      fail,
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 0,
+      }
+    );
+    const timeoutId = window.setTimeout(() => {
+      if (bestPosition) finish(bestPosition);
+      else fail(new Error("GPS timeout"));
+    }, 12000);
+  });
+
   const detectLocation = async () => {
     if (!navigator.geolocation) {
       toast.error("Location detection is not supported in this browser");
@@ -321,39 +359,54 @@ export default function CitizenDashboard() {
     setIsDetectingLocation(true);
     setGpsNote("");
     try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-        });
-      });
+      const position = await getBestGpsPosition();
       const { coords } = position;
       const latitude = coords.latitude.toFixed(6);
       const longitude = coords.longitude.toFixed(6);
+      const accuracy = Math.round(coords.accuracy || 0);
+      const preciseEnough = accuracy > 0 && accuracy <= 1000;
       let locationPatch = { latitude, longitude };
 
       try {
         const place = await reverseGeocode(latitude, longitude);
         const address = place.address || {};
+        const preciseArea = [
+          address.neighbourhood,
+          address.suburb,
+          address.residential,
+          address.quarter,
+          address.city_district,
+          address.village,
+          address.town,
+          address.city,
+        ].filter(Boolean).find((part, index, parts) => parts.indexOf(part) === index);
+        const preciseAddress = [
+          address.house_number && address.road ? `${address.house_number} ${address.road}` : address.road,
+          preciseArea,
+          address.city || address.town || address.village,
+          address.state,
+          address.postcode,
+          address.country,
+        ].filter(Boolean).filter((part, index, parts) => parts.indexOf(part) === index).join(", ");
         locationPatch = {
           ...locationPatch,
-          location: place.display_name || [
-            address.road,
-            address.suburb || address.neighbourhood,
-            address.city || address.town || address.village,
-          ].filter(Boolean).join(", "),
+          location: preciseEnough ? (preciseAddress || place.display_name || form.location) : form.location,
           state: address.state || form.state,
           district: address.state_district || address.county || address.city_district || address.city || address.town || form.district,
-          block: address.suburb || address.neighbourhood || address.village || address.town || address.city_district || form.block,
+          block: preciseEnough ? (preciseArea || address.road || form.block) : form.block,
         };
-        setGpsNote(`GPS filled address details. Accuracy: about ${Math.round(coords.accuracy)} meters.`);
+        setGpsNote(
+          preciseEnough
+            ? `Precise GPS filled ${preciseArea ? preciseArea : "your area"} details. Accuracy: about ${accuracy} meters.`
+            : `GPS is approximate (${accuracy} meters), so exact locality like Saket Nagar cannot be trusted. Turn on device location/precise location, move near a window, then press GPS Fill again; or type your exact area manually.`
+        );
       } catch {
-        setGpsNote(`GPS coordinates filled. Address lookup failed, so please type address details manually. Accuracy: about ${Math.round(coords.accuracy)} meters.`);
+        setGpsNote(`GPS coordinates filled. Address lookup failed, so please type address details manually. Accuracy: about ${accuracy} meters.`);
       }
 
       setForm((prev) => ({ ...prev, ...locationPatch }));
-      toast.success("GPS location details added");
+      if (preciseEnough) toast.success("Precise GPS location details added");
+      else toast.error("GPS is too approximate for exact locality");
     } catch (error) {
       const denied = error?.code === 1;
       toast.error(denied ? "Please allow location permission for GPS autofill" : "Could not access your GPS location");
@@ -553,7 +606,13 @@ export default function CitizenDashboard() {
                   <Navigation size={15} /> {isDetectingLocation ? "Detecting..." : "GPS Fill"}
                 </button>
               </div>
-              {gpsNote && <p className="mt-2 text-xs font-medium text-emerald-700">{gpsNote}</p>}
+              {gpsNote && (
+                <p className={`mt-2 rounded-md px-3 py-2 text-xs font-medium ${
+                  gpsNote.includes("approximate") ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"
+                }`}>
+                  {gpsNote}
+                </p>
+              )}
             </div>
             <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-800">
