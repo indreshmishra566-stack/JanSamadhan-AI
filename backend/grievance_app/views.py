@@ -190,7 +190,7 @@ def _registration_exception_response(exc):
     message = str(exc)[:300]
     status_code = status.HTTP_400_BAD_REQUEST if isinstance(exc, IntegrityError) else status.HTTP_500_INTERNAL_SERVER_ERROR
     return Response({
-        "detail": f"Registration failed: {type(exc).__name__}",
+        "detail": f"Registration failed: {type(exc).__name__}: {message}",
         "error": message,
     }, status=status_code)
 
