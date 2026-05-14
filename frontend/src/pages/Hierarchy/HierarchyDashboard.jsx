@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hierarchyApi, departmentApi } from "../../api";
 import {
-  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills,
+  PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills, LocationMap,
 } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
@@ -322,6 +322,9 @@ export default function HierarchyDashboard() {
                             <DetailItem label="District" value={c.district} />
                             <DetailItem label="Block / Area" value={c.block} />
                             <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
+                            <div className="sm:col-span-2">
+                              <LocationMap latitude={c.latitude} longitude={c.longitude} label={`Complaint ${c.ticket_id} map`} />
+                            </div>
                           </div>
                         </InfoSection>
                         <InfoSection title="Status" icon="📌">

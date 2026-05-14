@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { complaintApi } from "../../api";
-import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills } from "../../components/Shared";
+import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills, LocationMap } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -938,6 +938,7 @@ export default function CitizenDashboard() {
                   <p className="text-xs leading-5 text-emerald-700 md:col-span-2">
                     Latitude and longitude are map numbers. Citizens can leave them as GPS filled values; officers use them to find the spot accurately.
                   </p>
+                  <LocationMap latitude={form.latitude} longitude={form.longitude} label="Selected complaint location" className="md:col-span-2" />
                 </div>
               )}
             </div>
@@ -1138,6 +1139,9 @@ export default function CitizenDashboard() {
                         <DetailItem label="District" value={c.district} />
                         <DetailItem label="Block / Area" value={c.block} />
                         <DetailItem label="Coordinates" value={c.latitude && c.longitude ? `${c.latitude}, ${c.longitude}` : ""} />
+                        <div className="sm:col-span-2">
+                          <LocationMap latitude={c.latitude} longitude={c.longitude} label={`Complaint ${c.ticket_id} map`} />
+                        </div>
                       </div>
                     </InfoSection>
                     <InfoSection title="Status and SLA" icon="📌">

@@ -1,5 +1,5 @@
 import { PRIORITY_COLORS, STATUS_COLORS, CATEGORY_ICONS } from "../../utils/helpers";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink, MapPin } from "lucide-react";
 
 export function PriorityBadge({ priority }) {
   return (
@@ -76,6 +76,50 @@ export function DetailItem({ label, value, accent = false }) {
     <div>
       <p className="text-[11px] uppercase tracking-wide text-gray-400">{label}</p>
       <p className={`text-sm mt-1 ${accent ? "font-semibold text-gray-900" : "text-gray-700"}`}>{value || "—"}</p>
+    </div>
+  );
+}
+
+export function LocationMap({ latitude, longitude, label = "Complaint location", className = "" }) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return (
+      <div className={`rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 ${className}`}>
+        Map will appear after GPS coordinates are captured.
+      </div>
+    );
+  }
+
+  const delta = 0.004;
+  const bbox = [lon - delta, lat - delta, lon + delta, lat + delta].join(",");
+  const marker = `${lat},${lon}`;
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(marker)}`;
+  const directionsUrl = `https://www.openstreetmap.org/directions?to=${encodeURIComponent(marker)}`;
+  const viewUrl = `https://www.openstreetmap.org/?mlat=${encodeURIComponent(lat)}&mlon=${encodeURIComponent(lon)}#map=18/${encodeURIComponent(lat)}/${encodeURIComponent(lon)}`;
+
+  return (
+    <div className={`overflow-hidden rounded-xl border border-slate-200 bg-white ${className}`}>
+      <iframe
+        title={label}
+        src={mapUrl}
+        className="h-56 w-full border-0"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-3 py-2 text-xs">
+        <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+          <MapPin size={13} /> {lat.toFixed(6)}, {lon.toFixed(6)}
+        </span>
+        <div className="flex gap-2">
+          <a href={viewUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-cyan-700 hover:underline">
+            Open map <ExternalLink size={12} />
+          </a>
+          <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:underline">
+            Directions <ExternalLink size={12} />
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
