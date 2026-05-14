@@ -711,14 +711,14 @@ class CitizenFeedbackView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsCitizen]
 
     def get_queryset(self):
-        return Complaint.objects.filter(citizen=self.request.user, status="RESOLVED")
+        return Complaint.objects.filter(citizen=self.request.user, assigned_officer__isnull=False)
 
     def perform_update(self, serializer):
         complaint = serializer.save()
         ComplaintHistory.objects.create(
             complaint=complaint,
             changed_by=self.request.user,
-            note=f"Citizen rated: {complaint.citizen_rating}/5",
+            note=f"Citizen rated assigned handler: {complaint.citizen_rating}/5",
         )
 
 

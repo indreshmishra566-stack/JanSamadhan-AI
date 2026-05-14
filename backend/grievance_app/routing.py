@@ -5,7 +5,8 @@ from django.db.models import Case, IntegerField, Q, Value, When
 from .models import Department, User
 
 
-OFFICER_ROLES = ["OFFICER", "ADMIN"]
+OFFICER_ROLES = ["OFFICER"]
+FALLBACK_ROLES = ["ADMIN"]
 
 
 ROLE_ORDER = Case(
@@ -57,7 +58,7 @@ def find_department_owner(department):
 
     return (
         User.objects
-        .filter(role="ADMIN", is_active=True)
+        .filter(role__in=FALLBACK_ROLES, is_active=True)
         .order_by(ROLE_ORDER, "date_joined")
         .first()
     )
@@ -212,6 +213,59 @@ def find_nearest_branch_officer(department, validated_data, citizen=None):
     return best if best_score > 0 else None
 
 
+def find_nearest_any_officer(validated_data, citizen=None):
+    target_state = _normalized(validated_data.get("state") or getattr(citizen, "state", ""))
+    target_district = _normalized(validated_data.get("district") or getattr(citizen, "district", ""))
+    target_block = _normalized(validated_data.get("block") or getattr(citizen, "block", ""))
+    location_text = _normalized(validated_data.get("location"))
+
+    candidates = list(
+        User.objects.filter(role__in=OFFICER_ROLES, is_active=True)
+        .exclude(id=getattr(citizen, "id", None))
+        .select_related("department", "reports_to")
+        .order_by(ROLE_ORDER, "date_joined")
+    )
+    if not candidates:
+        return None
+
+    verified = [candidate for candidate in candidates if candidate.is_verified]
+    candidate_pool = verified or candidates
+
+    def score(candidate):
+        candidate_state = _normalized(candidate.state)
+        candidate_district = _normalized(candidate.district)
+        candidate_block = _normalized(candidate.block)
+        total = 0
+        if target_state and candidate_state == target_state:
+            total += 100
+        if target_district and candidate_district == target_district:
+            total += 220
+        if target_block and candidate_block == target_block:
+            total += 320
+        if location_text:
+            if candidate_block and candidate_block in location_text:
+                total += 180
+            if candidate_district and candidate_district in location_text:
+                total += 120
+            if candidate_state and candidate_state in location_text:
+                total += 60
+        if candidate.reports_to_id:
+            total += 20
+        return total
+
+    ranked = sorted(
+        candidate_pool,
+        key=lambda candidate: (
+            score(candidate),
+            int(candidate.is_verified),
+            int(bool(candidate.reports_to_id)),
+            -candidate.id,
+        ),
+        reverse=True,
+    )
+    return ranked[0] if ranked else None
+
+
 def apply_initial_grievance_routing(validated_data, category, citizen=None):
     department = find_department_for_category(category)
     if not department:
@@ -223,6 +277,8 @@ def apply_initial_grievance_routing(validated_data, category, citizen=None):
     validated_data["block"] = validated_data.get("block") or getattr(citizen, "block", "")
 
     officer = find_nearest_branch_officer(department, validated_data, citizen=citizen)
+    if not officer:
+        officer = find_nearest_any_officer(validated_data, citizen=citizen)
     if officer:
         validated_data["current_level"] = "OFFICER"
     else:

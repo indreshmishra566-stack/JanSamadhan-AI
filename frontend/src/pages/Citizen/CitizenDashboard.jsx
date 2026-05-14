@@ -132,7 +132,7 @@ export default function CitizenDashboard() {
   const disposedStatuses = ["RESOLVED", "CLOSED", "REJECTED"];
   const pendingComplaints = complaints.filter((c) => !disposedStatuses.includes(c.status));
   const disposedComplaints = complaints.filter((c) => disposedStatuses.includes(c.status));
-  const resolvedWithoutFeedback = complaints.filter((c) => c.status === "RESOLVED" && !c.citizen_rating);
+  const assignedWithoutRating = complaints.filter((c) => c.assigned_officer && !c.citizen_rating);
   const escalatedComplaints = complaints.filter((c) => c.status === "ESCALATED");
   const latestComplaint = complaints[0];
 
@@ -528,7 +528,7 @@ export default function CitizenDashboard() {
 
   const openFeedback = (complaint) => {
     setSelected(complaint);
-    toast("Feedback form is available inside resolved complaint details.");
+    toast("Rating form is available inside complaint details.");
   };
 
   const stats = [
@@ -562,10 +562,10 @@ export default function CitizenDashboard() {
     },
     {
       title: "Feedback / Appeal",
-      text: resolvedWithoutFeedback.length ? `${resolvedWithoutFeedback.length} resolved case${resolvedWithoutFeedback.length > 1 ? "s" : ""} awaiting citizen feedback.` : "Feedback opens after officer resolution.",
+      text: assignedWithoutRating.length ? `${assignedWithoutRating.length} assigned case${assignedWithoutRating.length > 1 ? "s" : ""} awaiting officer/admin rating.` : "All assigned handlers are rated.",
       icon: Star,
-      action: () => resolvedWithoutFeedback[0] ? openFeedback(resolvedWithoutFeedback[0]) : toast("No resolved case is awaiting feedback."),
-      cta: "Give feedback",
+      action: () => assignedWithoutRating[0] ? openFeedback(assignedWithoutRating[0]) : toast("No assigned case is awaiting rating."),
+      cta: "Rate handler",
     },
   ];
 
@@ -877,7 +877,7 @@ export default function CitizenDashboard() {
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Case Register</p>
                 <h2 className="text-lg font-bold text-slate-950">My lodged grievances</h2>
-                <p className="mt-1 text-sm text-slate-500">Search, filter, open details, copy registration ID, send reminder, and give feedback after disposal.</p>
+                <p className="mt-1 text-sm text-slate-500">Search, filter, open details, copy registration ID, send reminder, and rate the assigned officer/admin.</p>
               </div>
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_220px]">
                 <div className="relative min-w-0">
@@ -949,6 +949,9 @@ export default function CitizenDashboard() {
                       {c.supervising_head_name && (
                         <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
                       )}
+                      {c.citizen_rating && (
+                        <span className="badge bg-yellow-50 text-yellow-700">Rated {c.citizen_rating}/5</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -966,9 +969,9 @@ export default function CitizenDashboard() {
                     <button type="button" onClick={(event) => { event.stopPropagation(); navigator.clipboard?.writeText(c.ticket_id); toast.success("Registration ID copied"); }} className="btn-secondary inline-flex items-center gap-2 text-sm">
                       <ClipboardList size={15} /> Copy Registration ID
                     </button>
-                    {c.status === "RESOLVED" && !c.citizen_rating && (
+                    {c.assigned_officer && !c.citizen_rating && (
                       <button type="button" onClick={(event) => { event.stopPropagation(); openFeedback(c); }} className="btn-primary inline-flex items-center gap-2 text-sm">
-                        <MessageSquareReply size={15} /> Give Feedback
+                        <MessageSquareReply size={15} /> Rate Assigned Handler
                       </button>
                     )}
                   </div>
@@ -979,6 +982,7 @@ export default function CitizenDashboard() {
                         <DetailItem label="Current Level" value={c.current_level} accent />
                         <DetailItem label="Assigned Local Officer" value={c.officer_name} />
                         <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
+                        <DetailItem label="Your Handler Rating" value={c.citizen_rating ? `${c.citizen_rating}/5` : "Not rated yet"} />
                         <DetailItem label="Location" value={c.location} />
                         <DetailItem label="State" value={c.state} />
                         <DetailItem label="District" value={c.district} />
@@ -1056,8 +1060,14 @@ export default function CitizenDashboard() {
                       This complaint is linked to {c.duplicate_of ? `master ticket #${c.duplicate_of}` : "another primary complaint"} for combined action.</p>
                     </div>
                   )}
-                  {c.status === "RESOLVED" && !c.citizen_rating && (
-                    <FeedbackForm complaintId={c.id} onDone={() => qc.invalidateQueries(["my-complaints"])} />
+                  {c.citizen_rating && (
+                    <div className="mt-3 flex gap-3 rounded-lg bg-yellow-50 p-3 text-sm">
+                      <Star size={18} className="mt-0.5 shrink-0 text-yellow-600" />
+                      <p><span className="font-medium text-yellow-700">Your rating for assigned handler:</span> {c.citizen_rating}/5{c.citizen_feedback ? ` · ${c.citizen_feedback}` : ""}</p>
+                    </div>
+                  )}
+                  {c.assigned_officer && !c.citizen_rating && (
+                    <FeedbackForm complaintId={c.id} handlerName={c.officer_name || "assigned admin/officer"} onDone={() => qc.invalidateQueries(["my-complaints"])} />
                   )}
                 </div>
               )}
@@ -1069,7 +1079,7 @@ export default function CitizenDashboard() {
   );
 }
 
-function FeedbackForm({ complaintId, onDone }) {
+function FeedbackForm({ complaintId, handlerName, onDone }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const mutation = useMutation({
@@ -1077,8 +1087,9 @@ function FeedbackForm({ complaintId, onDone }) {
     onSuccess: () => { toast.success("Thank you for your feedback!"); onDone(); },
   });
   return (
-    <div className="mt-3 p-4 bg-green-50 rounded-lg">
-      <p className="text-sm font-medium text-green-800 mb-2">Rate your experience:</p>
+    <div className="mt-3 rounded-lg bg-green-50 p-4" onClick={(event) => event.stopPropagation()}>
+      <p className="text-sm font-medium text-green-800 mb-1">Rate assigned officer/admin</p>
+      <p className="mb-2 text-xs text-green-700">This rating is saved for {handlerName || "the assigned handler"} on this complaint.</p>
       <div className="flex gap-2 mb-2">
         {[1, 2, 3, 4, 5].map((n) => (
           <button type="button" key={n} onClick={() => setRating(n)}
@@ -1086,9 +1097,9 @@ function FeedbackForm({ complaintId, onDone }) {
         ))}
       </div>
       <textarea className="input text-sm mb-2" value={feedback} onChange={(e) => setFeedback(e.target.value)}
-        placeholder="Any comments?" rows={2} />
+        placeholder="Write comment about officer/admin response, if any" rows={2} />
       <button type="button" onClick={() => mutation.mutate()} disabled={!rating || mutation.isPending} className="btn-primary text-sm py-1.5">
-        Submit Feedback
+        Submit Rating
       </button>
     </div>
   );
