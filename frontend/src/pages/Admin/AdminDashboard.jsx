@@ -7,7 +7,7 @@ import {
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { Trash2, ChevronDown, ChevronUp, Plus, Building2 } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp, Plus, Building2, Search } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -26,6 +26,41 @@ const OFFICER_ROLES = ["OFFICER"];
 
 function getOfficerLabel(user) {
   return user?.designation?.trim() || ROLE_LABELS[user?.role] || user?.role;
+}
+
+const OFFICER_LEVELS = [
+  { key: "ALL", label: "All", hint: "Every officer" },
+  { key: "CENTRAL", label: "Central", hint: "Top-level or root department" },
+  { key: "STATE", label: "State", hint: "State mapped officers" },
+  { key: "DISTRICT", label: "District", hint: "District mapped officers" },
+  { key: "LOCAL", label: "Local", hint: "Block or local area officers" },
+];
+
+function getDepartmentDepth(departments, departmentId) {
+  const byId = new Map(departments.map((department) => [department.id, department]));
+  let depth = 0;
+  let cursor = byId.get(departmentId);
+  const seen = new Set();
+  while (cursor?.parent && !seen.has(cursor.id)) {
+    seen.add(cursor.id);
+    depth += 1;
+    cursor = byId.get(cursor.parent);
+  }
+  return depth;
+}
+
+function getOfficerLevel(officer, departments = []) {
+  const depth = getDepartmentDepth(departments, officer?.department);
+  if (officer?.block) return "LOCAL";
+  if (depth >= 2) return "LOCAL";
+  if (officer?.district) return "DISTRICT";
+  if (depth === 1) return "DISTRICT";
+  if (officer?.state && officer.state.toLowerCase() !== "india") return "STATE";
+  return "CENTRAL";
+}
+
+function getOfficerLevelLabel(officer, departments = []) {
+  return OFFICER_LEVELS.find((level) => level.key === getOfficerLevel(officer, departments))?.label || "Officer";
 }
 
 export default function AdminDashboard() {
@@ -541,6 +576,9 @@ function OfficerManagement({ departments, officers, onChanged }) {
   const [showForm, setShowForm] = useState(false);
   const [editingOfficer, setEditingOfficer] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [levelFilter, setLevelFilter] = useState("ALL");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [officerSearch, setOfficerSearch] = useState("");
 
   const createMutation = useMutation({
     mutationFn: (data) => adminApi.createOfficer(data),
@@ -577,11 +615,75 @@ function OfficerManagement({ departments, officers, onChanged }) {
     });
   };
 
+  const officerLevelCounts = OFFICER_LEVELS.reduce((acc, level) => {
+    acc[level.key] = level.key === "ALL"
+      ? officers.length
+      : officers.filter((officer) => getOfficerLevel(officer, departments) === level.key).length;
+    return acc;
+  }, {});
+
+  const visibleOfficers = officers.filter((officer) => {
+    const matchesLevel = levelFilter === "ALL" || getOfficerLevel(officer, departments) === levelFilter;
+    const matchesDepartment = !departmentFilter || String(officer.department || "") === String(departmentFilter);
+    const query = officerSearch.trim().toLowerCase();
+    const haystack = [
+      officer.first_name,
+      officer.last_name,
+      officer.email,
+      officer.designation,
+      officer.department_name,
+      officer.state,
+      officer.district,
+      officer.block,
+      officer.reports_to_name,
+    ].filter(Boolean).join(" ").toLowerCase();
+    return matchesLevel && matchesDepartment && (!query || haystack.includes(query));
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Officer Management ({officers.length})</h2>
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Officer Directory ({visibleOfficers.length}/{officers.length})</h2>
+          <p className="text-sm text-gray-500">Find officers by level, department, name, email, posting, or reporting chain.</p>
+        </div>
         <button onClick={() => { setShowForm(!showForm); setEditingOfficer(null); }} className="btn-primary text-sm">+ Add Officer</button>
+      </div>
+
+      <div className="card mb-5 p-4">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_220px]">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+            <input
+              className="input pl-9 text-sm"
+              value={officerSearch}
+              onChange={(e) => setOfficerSearch(e.target.value)}
+              placeholder="Search officer, email, department, posting, reporting"
+            />
+          </div>
+          <select className="input text-sm" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+            <option value="">All departments</option>
+            {departments.map((department) => (
+              <option key={department.id} value={department.id}>{department.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-5">
+          {OFFICER_LEVELS.map((level) => (
+            <button
+              key={level.key}
+              type="button"
+              onClick={() => setLevelFilter(level.key)}
+              className={levelFilter === level.key
+                ? "rounded-lg border border-cyan-300 bg-cyan-50 px-3 py-3 text-left shadow-sm"
+                : "rounded-lg border border-gray-200 bg-white px-3 py-3 text-left hover:border-cyan-200 hover:bg-cyan-50/40"}
+            >
+              <span className="block text-sm font-bold text-gray-900">{level.label}</span>
+              <span className="mt-1 block text-xl font-extrabold text-cyan-700">{officerLevelCounts[level.key] || 0}</span>
+              <span className="mt-1 block text-[11px] leading-4 text-gray-500">{level.hint}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {showForm && (
@@ -638,8 +740,11 @@ function OfficerManagement({ departments, officers, onChanged }) {
         </div>
       )}
 
+      {visibleOfficers.length === 0 ? (
+        <EmptyState icon="👥" title="No officers match this filter" description="Change the level, department, or search text." />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {officers.map((o) => (
+        {visibleOfficers.map((o) => (
           <div key={o.id} className="card p-4">
             {editingOfficer === o.id ? (
               <div>
@@ -714,6 +819,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
                 </div>
                 <div className="mt-3 flex gap-2 flex-wrap">
                   <span className="badge bg-blue-50 text-blue-700">{getOfficerLabel(o)}</span>
+                  <span className="badge bg-cyan-50 text-cyan-700">{getOfficerLevelLabel(o, departments)}</span>
                   {o.department_name && <span className="badge bg-gray-100 text-gray-600">{o.department_name}</span>}
                   {o.reports_to_name && <span className="badge bg-amber-50 text-amber-700">Reports to: {o.reports_to_name}</span>}
                   {o.employee_id && <span className="badge bg-gray-100 text-gray-600">ID: {o.employee_id}</span>}
@@ -728,6 +834,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }
