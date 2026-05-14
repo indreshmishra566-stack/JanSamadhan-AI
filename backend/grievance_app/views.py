@@ -934,7 +934,7 @@ class HierarchyComplaintListView(generics.ListAPIView):
             qs = Complaint.objects.all()
         else:
             qs = Complaint.objects.filter(_complaint_owner_filter(user))
-        qs = qs.prefetch_related("history", "forwarding_records")
+        qs = qs.prefetch_related("history", "forwarding_records", "handler_ratings")
 
         status_f = self.request.query_params.get("status")
         priority_f = self.request.query_params.get("priority")
@@ -982,7 +982,7 @@ class AdminComplaintListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get_queryset(self):
-        qs = Complaint.objects.all().prefetch_related("history", "forwarding_records")
+        qs = Complaint.objects.all().prefetch_related("history", "forwarding_records", "handler_ratings")
         status_f = self.request.query_params.get("status")
         dept_f = self.request.query_params.get("department")
         priority_f = self.request.query_params.get("priority")

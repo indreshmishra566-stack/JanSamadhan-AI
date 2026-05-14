@@ -9,7 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import {
   ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, AlertTriangle,
-  Users, UserPlus, ChevronDown, ChevronUp, X, Search,
+  Users, UserPlus, ChevronDown, ChevronUp, X, Search, Star,
 } from "lucide-react";
 
 const ROLE_LABELS = {
@@ -65,6 +65,10 @@ function officerPostingText(officer) {
   return [officer?.state, officer?.district, officer?.block, officer?.village].filter(Boolean).join(" / ") || "Not mapped";
 }
 
+function getReceivedRating(complaint, officerId) {
+  return (complaint?.handler_ratings || []).find((rating) => Number(rating.officer) === Number(officerId));
+}
+
 export default function HierarchyDashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -100,12 +104,19 @@ export default function HierarchyDashboard() {
   const profileDepartment = departments.find((department) => department.id === user?.department)
     || (user?.department_name ? { name: user.department_name } : null);
   const createdDepartments = departments.filter((department) => department.created_by === user?.id);
+  const receivedRatings = complaints
+    .flatMap((complaint) => (complaint.handler_ratings || []).map((rating) => ({ ...rating, complaint })))
+    .filter((rating) => Number(rating.officer) === Number(user?.id));
+  const averageReceivedRating = receivedRatings.length
+    ? (receivedRatings.reduce((sum, rating) => sum + Number(rating.rating || 0), 0) / receivedRatings.length).toFixed(1)
+    : "—";
 
   const stats = [
     { label: "Department Cases", value: complaints.length, icon: "📋", color: "blue" },
     { label: "In Progress", value: complaints.filter((c) => c.status === "IN_PROGRESS").length, icon: "🔄", color: "purple" },
     { label: "Escalated", value: complaints.filter((c) => c.status === "ESCALATED").length, icon: "🚨", color: "red" },
     { label: "Resolved", value: complaints.filter((c) => c.status === "RESOLVED").length, icon: "✅", color: "green" },
+    { label: "My Rating", value: averageReceivedRating === "—" ? "—" : `${averageReceivedRating}★`, icon: "⭐", color: "yellow", sub: `${receivedRatings.length} citizen rating${receivedRatings.length === 1 ? "" : "s"}` },
   ];
 
   // Update complaint status
@@ -173,7 +184,7 @@ export default function HierarchyDashboard() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 mt-6">
         {stats.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
@@ -223,6 +234,14 @@ export default function HierarchyDashboard() {
             <div className="space-y-3">
               {complaints.map((c) => (
                 <div key={c.id} className="card p-4">
+                  {(() => {
+                    const myRating = getReceivedRating(c, user?.id);
+                    return myRating ? (
+                      <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-yellow-50 px-3 py-2 text-xs font-semibold text-yellow-700">
+                        <Star size={14} /> Citizen rated you {myRating.rating}/5{myRating.feedback ? ` · ${myRating.feedback}` : ""}
+                      </div>
+                    ) : null;
+                  })()}
                   {/* Main row */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -256,6 +275,9 @@ export default function HierarchyDashboard() {
                           )}
                           {c.supervising_head_name && (
                             <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
+                          )}
+                          {getReceivedRating(c, user?.id) && (
+                            <span className="badge bg-yellow-50 text-yellow-700">Your rating: {getReceivedRating(c, user?.id).rating}/5</span>
                           )}
                         </div>
                       </div>
@@ -335,8 +357,14 @@ export default function HierarchyDashboard() {
                             <DetailItem label="SLA Deadline" value={formatDate(c.sla_deadline)} />
                             <DetailItem label="Created" value={formatDate(c.created_at)} />
                             <DetailItem label="Resolved" value={formatDate(c.resolved_at)} />
+                            <DetailItem label="Your Citizen Rating" value={getReceivedRating(c, user?.id) ? `${getReceivedRating(c, user?.id).rating}/5` : "Not rated yet"} />
                             <DetailItem label="Duplicate Status" value={c.is_duplicate ? `Duplicate of #${c.duplicate_of || "master complaint"}` : "Primary complaint"} />
                           </div>
+                          {getReceivedRating(c, user?.id)?.feedback && (
+                            <div className="mt-3 rounded-lg border border-yellow-100 bg-yellow-50 p-3 text-sm text-yellow-800">
+                              <span className="font-semibold">Citizen feedback:</span> {getReceivedRating(c, user?.id).feedback}
+                            </div>
+                          )}
                           {c.translated_description && c.translated_description !== c.description && (
                             <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200 text-sm">
                               <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Translated Description</p>
@@ -437,7 +465,12 @@ export default function HierarchyDashboard() {
         />
       )}
 
-      {tab === "profile" && <ProfilePanel />}
+      {tab === "profile" && (
+        <div className="space-y-4">
+          <OfficerRatingsPanel ratings={receivedRatings} average={averageReceivedRating} />
+          <ProfilePanel />
+        </div>
+      )}
 
       {/* ── FORWARD MODAL ── */}
       {forwardModal && (
@@ -507,6 +540,45 @@ export default function HierarchyDashboard() {
             </div>
           </div>
         </Modal>
+      )}
+    </div>
+  );
+}
+
+function OfficerRatingsPanel({ ratings, average }) {
+  return (
+    <div className="card p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-yellow-600">Citizen ratings</p>
+          <h2 className="mt-1 text-lg font-semibold text-slate-950">Ratings received</h2>
+          <p className="mt-1 text-sm text-slate-500">Ratings citizens gave to you for complaints you handled.</p>
+        </div>
+        <div className="rounded-lg bg-yellow-50 px-4 py-3 text-right">
+          <p className="text-xs font-semibold text-yellow-700">Average</p>
+          <p className="text-2xl font-extrabold text-yellow-800">{average === "—" ? "—" : `${average}★`}</p>
+        </div>
+      </div>
+      {ratings.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+          No citizen rating has reached your officer account yet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {ratings.map((rating) => (
+            <div key={rating.id} className="rounded-lg border border-yellow-100 bg-yellow-50/70 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-900">{rating.complaint?.title || "Complaint"}</p>
+                  <p className="mt-1 text-xs font-mono text-slate-500">#{rating.complaint?.ticket_id}</p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-yellow-700">{rating.rating}/5</span>
+              </div>
+              {rating.feedback && <p className="mt-3 text-sm text-slate-700">{rating.feedback}</p>}
+              <p className="mt-3 text-xs text-slate-400">{formatDate(rating.updated_at || rating.created_at)}</p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
