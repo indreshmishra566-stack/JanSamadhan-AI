@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import {
   AlertCircle,
   BellRing,
+  Bot,
   CheckCircle2,
   ClipboardList,
   FileAudio,
@@ -16,6 +17,7 @@ import {
   FileVideo,
   ImagePlus,
   MapPin,
+  MessageCircle,
   MessageSquareReply,
   Mic,
   MicOff,
@@ -48,6 +50,73 @@ const isAllowedComplaintAttachment = (file) => {
   return ["image", "audio", "video", "pdf"].includes(getAttachmentKind(file));
 };
 
+const CHAT_QUICK_PROMPTS = [
+  "How do I file a complaint?",
+  "Show my pending complaints",
+  "How to use GPS?",
+  "How to rate officer?",
+];
+
+function buildCitizenBotReply(message, context) {
+  const text = message.trim().toLowerCase();
+  const { complaints, pendingComplaints, assignedWithoutRating, latestComplaint, openLodgeForm, openProfile } = context;
+
+  if (!text) {
+    return "Please type your question. I can help with filing a complaint, tracking status, GPS, attachments, reminders, or officer rating.";
+  }
+
+  if (text.includes("file") || text.includes("complaint") || text.includes("grievance") || text.includes("submit") || text.includes("lodge")) {
+    return {
+      text: "To file a complaint, tap Lodge Grievance, add a clear title, describe one issue, use GPS Fill for location, attach photo/PDF/audio/video proof if available, then submit.",
+      action: openLodgeForm,
+      actionLabel: "Open complaint form",
+    };
+  }
+
+  if (text.includes("pending") || text.includes("status") || text.includes("track")) {
+    if (!complaints.length) return "You have not filed any complaints yet. Start with Lodge Grievance.";
+    if (!pendingComplaints.length) return "You have no pending complaints right now.";
+    const latestPending = pendingComplaints[0];
+    return `You have ${pendingComplaints.length} pending complaint${pendingComplaints.length > 1 ? "s" : ""}. Latest: ${latestPending.ticket_id} - ${latestPending.title} (${latestPending.status}).`;
+  }
+
+  if (text.includes("gps") || text.includes("location") || text.includes("address")) {
+    return "Use GPS Fill in the complaint form. If accuracy is poor, turn on device location/precise location, move near a window, press GPS Fill again, or type the exact area manually.";
+  }
+
+  if (text.includes("photo") || text.includes("pdf") || text.includes("audio") || text.includes("video") || text.includes("record") || text.includes("attachment")) {
+    return "You can upload photo, PDF, audio, or video proof. You can also record voice or video directly from the complaint form and it will attach automatically.";
+  }
+
+  if (text.includes("rate") || text.includes("rating") || text.includes("feedback") || text.includes("officer")) {
+    if (assignedWithoutRating.length) {
+      const complaint = assignedWithoutRating[0];
+      return `You can rate the assigned handler on complaint ${complaint.ticket_id} - ${complaint.title}. Open its details and use Rate Assigned Handler.`;
+    }
+    return "Ratings appear inside complaint details after a complaint has an assigned officer/admin. Your current assigned handlers are already rated or no complaint is assigned yet.";
+  }
+
+  if (text.includes("reminder") || text.includes("follow")) {
+    if (!pendingComplaints.length) return "No pending complaint needs a reminder right now.";
+    return `You can send a reminder from complaint details. Your latest active case is ${pendingComplaints[0].ticket_id}.`;
+  }
+
+  if (text.includes("profile") || text.includes("password") || text.includes("change")) {
+    return {
+      text: "Open Profile to update your details or change password.",
+      action: openProfile,
+      actionLabel: "Open profile",
+    };
+  }
+
+  if (text.includes("latest") || text.includes("last")) {
+    if (!latestComplaint) return "No complaint is registered yet.";
+    return `Latest complaint: ${latestComplaint.ticket_id} - ${latestComplaint.title}. Status: ${latestComplaint.status}. Department: ${latestComplaint.department_name || "routing pending"}.`;
+  }
+
+  return "I can help with filing complaints, GPS/location, uploading media proof, tracking status, sending reminders, and rating the assigned officer/admin. Try asking: How do I file a complaint?";
+}
+
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -67,6 +136,15 @@ export default function CitizenDashboard() {
   const [searchText, setSearchText] = useState("");
   const [gpsNote, setGpsNote] = useState("");
   const [showAdvancedGps, setShowAdvancedGps] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatText, setChatText] = useState("");
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      role: "bot",
+      text: "Hi, I can help you file complaints, use GPS, track status, attach proof, send reminders, and rate the assigned officer/admin.",
+    },
+  ]);
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const videoRecorderRef = useRef(null);
@@ -529,6 +607,46 @@ export default function CitizenDashboard() {
   const openFeedback = (complaint) => {
     setSelected(complaint);
     toast("Rating form is available inside complaint details.");
+  };
+
+  const openLodgeForm = () => {
+    setTab("complaints");
+    setShowForm(true);
+    setChatOpen(false);
+  };
+
+  const openProfileFromChat = () => {
+    setTab("profile");
+    setChatOpen(false);
+  };
+
+  const sendChatMessage = (message = chatText) => {
+    const trimmed = message.trim();
+    if (!trimmed) return;
+
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      text: trimmed,
+    };
+    const reply = buildCitizenBotReply(trimmed, {
+      complaints,
+      pendingComplaints,
+      assignedWithoutRating,
+      latestComplaint,
+      openLodgeForm,
+      openProfile: openProfileFromChat,
+    });
+    const botMessage = {
+      id: Date.now() + 1,
+      role: "bot",
+      text: typeof reply === "string" ? reply : reply.text,
+      action: typeof reply === "string" ? null : reply.action,
+      actionLabel: typeof reply === "string" ? "" : reply.actionLabel,
+    };
+
+    setChatMessages((messages) => [...messages, userMessage, botMessage]);
+    setChatText("");
   };
 
   const stats = [
@@ -1075,6 +1193,105 @@ export default function CitizenDashboard() {
           ))}
         </div>
       ))}
+      <CitizenChatbot
+        open={chatOpen}
+        onToggle={() => setChatOpen((open) => !open)}
+        messages={chatMessages}
+        input={chatText}
+        onInputChange={setChatText}
+        onSend={sendChatMessage}
+        pendingCount={pendingComplaints.length}
+        ratingCount={assignedWithoutRating.length}
+      />
+    </div>
+  );
+}
+
+function CitizenChatbot({ open, onToggle, messages, input, onInputChange, onSend, pendingCount, ratingCount }) {
+  return (
+    <div className="fixed bottom-4 right-4 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3">
+      {open && (
+        <div className="w-[min(380px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-cyan-100 bg-white shadow-2xl">
+          <div className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-400 text-slate-950">
+                <Bot size={19} />
+              </span>
+              <div>
+                <p className="text-sm font-bold">Citizen Help Chat</p>
+                <p className="text-xs text-slate-300">Complaint, GPS, status, rating</p>
+              </div>
+            </div>
+            <button type="button" onClick={onToggle} className="rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white">
+              <X size={17} />
+            </button>
+          </div>
+          <div className="flex max-h-80 flex-col gap-3 overflow-y-auto bg-slate-50 p-4">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <span className="rounded-lg bg-white px-3 py-2 font-medium text-slate-600 shadow-sm">{pendingCount} pending</span>
+              <span className="rounded-lg bg-white px-3 py-2 font-medium text-slate-600 shadow-sm">{ratingCount} to rate</span>
+            </div>
+            {messages.map((message) => (
+              <div key={message.id} className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                <div className={message.role === "user"
+                  ? "max-w-[82%] rounded-lg bg-cyan-600 px-3 py-2 text-sm text-white"
+                  : "max-w-[86%] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"}
+                >
+                  <p>{message.text}</p>
+                  {message.action && (
+                    <button
+                      type="button"
+                      onClick={message.action}
+                      className="mt-2 rounded-md bg-cyan-50 px-2 py-1 text-xs font-bold text-cyan-700 hover:bg-cyan-100"
+                    >
+                      {message.actionLabel}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-slate-200 bg-white p-3">
+            <div className="mb-2 flex flex-wrap gap-2">
+              {CHAT_QUICK_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => onSend(prompt)}
+                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-cyan-50 hover:text-cyan-700"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                onSend();
+              }}
+            >
+              <input
+                className="input text-sm"
+                value={input}
+                onChange={(event) => onInputChange(event.target.value)}
+                placeholder="Ask about complaint, GPS, status..."
+              />
+              <button type="submit" className="btn-primary inline-flex items-center gap-1 px-3 text-sm">
+                <Send size={15} /> Send
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-slate-950 shadow-xl transition hover:-translate-y-0.5 hover:bg-cyan-400"
+        aria-label={open ? "Close citizen chatbot" : "Open citizen chatbot"}
+      >
+        {open ? <X size={22} /> : <MessageCircle size={24} />}
+      </button>
     </div>
   );
 }
