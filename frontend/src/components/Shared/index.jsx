@@ -124,6 +124,80 @@ export function LocationMap({ latitude, longitude, label = "Complaint location",
   );
 }
 
+export function LocationPickerMap({ latitude, longitude, onPick, label = "Pick exact complaint location", className = "" }) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  const centerLat = Number.isFinite(lat) ? lat : 23.259933;
+  const centerLon = Number.isFinite(lon) ? lon : 77.412613;
+  const zoom = Number.isFinite(lat) && Number.isFinite(lon) ? 16 : 12;
+
+  const project = (pointLat, pointLon, zoomLevel) => {
+    const sinLat = Math.sin((pointLat * Math.PI) / 180);
+    const worldSize = 256 * 2 ** zoomLevel;
+    return {
+      x: ((pointLon + 180) / 360) * worldSize,
+      y: (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * worldSize,
+    };
+  };
+
+  const unproject = (x, y, zoomLevel) => {
+    const worldSize = 256 * 2 ** zoomLevel;
+    const lng = (x / worldSize) * 360 - 180;
+    const n = Math.PI - (2 * Math.PI * y) / worldSize;
+    const latValue = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+    return { latitude: latValue, longitude: lng };
+  };
+
+  const center = project(centerLat, centerLon, zoom);
+  const tileX = Math.floor(center.x / 256);
+  const tileY = Math.floor(center.y / 256);
+  const maxTile = 2 ** zoom - 1;
+  const safeTileX = Math.min(Math.max(tileX, 0), maxTile);
+  const safeTileY = Math.min(Math.max(tileY, 0), maxTile);
+  const tileUrl = `https://tile.openstreetmap.org/${zoom}/${safeTileX}/${safeTileY}.png`;
+  const markerOffsetX = center.x - safeTileX * 256;
+  const markerOffsetY = center.y - safeTileY * 256;
+
+  const handleClick = (event) => {
+    if (!onPick) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = ((event.clientX - rect.left) / rect.width) * 256;
+    const clickY = ((event.clientY - rect.top) / rect.height) * 256;
+    const picked = unproject(safeTileX * 256 + clickX, safeTileY * 256 + clickY, zoom);
+    onPick({
+      latitude: picked.latitude.toFixed(6),
+      longitude: picked.longitude.toFixed(6),
+    });
+  };
+
+  return (
+    <div className={`overflow-hidden rounded-xl border border-emerald-200 bg-white ${className}`}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className="relative block h-64 w-full cursor-crosshair overflow-hidden bg-slate-100 text-left"
+        aria-label={label}
+      >
+        <img src={tileUrl} alt="" className="h-full w-full object-cover" draggable={false} />
+        {Number.isFinite(lat) && Number.isFinite(lon) && (
+          <span
+            className="absolute z-10 -translate-x-1/2 -translate-y-full text-red-600 drop-shadow"
+            style={{ left: `${(markerOffsetX / 256) * 100}%`, top: `${(markerOffsetY / 256) * 100}%` }}
+          >
+            <MapPin size={30} fill="currentColor" />
+          </span>
+        )}
+        <span className="absolute bottom-2 left-2 rounded-md bg-white/95 px-2 py-1 text-xs font-semibold text-slate-700 shadow">
+          Click map tile to set exact pin
+        </span>
+      </button>
+      <div className="border-t border-emerald-100 px-3 py-2 text-xs text-slate-500">
+        Free OpenStreetMap tile preview. Use GPS first, then click the map to adjust the exact complaint point.
+      </div>
+    </div>
+  );
+}
+
 export function TimelineList({ items, emptyText = "No timeline events yet." }) {
   if (!items?.length) {
     return <p className="text-sm text-gray-400">{emptyText}</p>;
