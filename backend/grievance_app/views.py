@@ -379,6 +379,8 @@ def _build_user_payload(data, creator):
         "state": data.get("state", ""),
         "district": data.get("district", ""),
         "block": data.get("block", ""),
+        "village": data.get("village", ""),
+        "jurisdiction_level": data.get("jurisdiction_level", ""),
         "created_by": creator,
         "reports_to": reports_to,
         "is_verified": bool(data.get("is_verified", True)),

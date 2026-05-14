@@ -15,6 +15,13 @@ class User(AbstractUser):
         ("FEMALE", "Female"),
         ("TRANSGENDER", "Transgender"),
     ]
+    JURISDICTION_CHOICES = [
+        ("CENTRAL", "Central"),
+        ("STATE", "State"),
+        ("DISTRICT", "District"),
+        ("BLOCK", "Block"),
+        ("VILLAGE", "Village / Ward"),
+    ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="CITIZEN")
     designation = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=15, blank=True)
@@ -32,6 +39,8 @@ class User(AbstractUser):
     state = models.CharField(max_length=100, blank=True)
     district = models.CharField(max_length=100, blank=True)
     block = models.CharField(max_length=100, blank=True)
+    village = models.CharField(max_length=120, blank=True)
+    jurisdiction_level = models.CharField(max_length=20, choices=JURISDICTION_CHOICES, blank=True)
     created_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="subordinates"
     )

@@ -25,10 +25,11 @@ function getOfficerLabel(user) {
 
 const OFFICER_LEVELS = [
   { key: "ALL", label: "All", hint: "Every officer" },
-  { key: "CENTRAL", label: "Central", hint: "Root department" },
-  { key: "STATE", label: "State", hint: "State mapped" },
-  { key: "DISTRICT", label: "District", hint: "District mapped" },
-  { key: "LOCAL", label: "Local", hint: "Block or area" },
+  { key: "CENTRAL", label: "Central", hint: "National or main department" },
+  { key: "STATE", label: "State", hint: "State level office" },
+  { key: "DISTRICT", label: "District", hint: "District level office" },
+  { key: "BLOCK", label: "Block", hint: "Block or tehsil office" },
+  { key: "VILLAGE", label: "Village/Ward", hint: "Village, ward, or local area" },
 ];
 
 function getDepartmentDepth(departments, departmentId) {
@@ -45,9 +46,11 @@ function getDepartmentDepth(departments, departmentId) {
 }
 
 function getOfficerLevel(officer, departments = []) {
+  if (officer?.jurisdiction_level) return officer.jurisdiction_level;
   const depth = getDepartmentDepth(departments, officer?.department);
-  if (officer?.block) return "LOCAL";
-  if (depth >= 2) return "LOCAL";
+  if (officer?.village) return "VILLAGE";
+  if (officer?.block) return "BLOCK";
+  if (depth >= 2) return "BLOCK";
   if (officer?.district) return "DISTRICT";
   if (depth === 1) return "DISTRICT";
   if (officer?.state && officer.state.toLowerCase() !== "india") return "STATE";
@@ -56,6 +59,10 @@ function getOfficerLevel(officer, departments = []) {
 
 function getOfficerLevelLabel(officer, departments = []) {
   return OFFICER_LEVELS.find((level) => level.key === getOfficerLevel(officer, departments))?.label || "Officer";
+}
+
+function officerPostingText(officer) {
+  return [officer?.state, officer?.district, officer?.block, officer?.village].filter(Boolean).join(" / ") || "Not mapped";
 }
 
 export default function HierarchyDashboard() {
@@ -508,7 +515,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
     email: "", password: "", phone: "",
     first_name: "", last_name: "", employee_id: "",
     department_id: user?.department || "", role: "OFFICER", designation: "", reports_to: "",
-    state: user?.state || "", district: user?.district || "", block: user?.block || "",
+    jurisdiction_level: "DISTRICT", state: user?.state || "", district: user?.district || "", block: user?.block || "", village: "",
   };
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
@@ -516,6 +523,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   const [editForm, setEditForm] = useState({});
   const [levelFilter, setLevelFilter] = useState("ALL");
   const [departmentFilter, setDepartmentFilter] = useState("");
+  const [placeFilters, setPlaceFilters] = useState({ state: "", district: "", block: "", village: "" });
   const [officerSearch, setOfficerSearch] = useState("");
 
   const createMutation = useMutation({
@@ -555,6 +563,8 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
       state: officer.state || "",
       district: officer.district || "",
       block: officer.block || "",
+      village: officer.village || "",
+      jurisdiction_level: officer.jurisdiction_level || getOfficerLevel(officer, departments),
       reports_to: officer.reports_to || "",
       password: "",
     });
@@ -570,6 +580,10 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   const visibleOfficers = departmentOfficers.filter((officer) => {
     const matchesLevel = levelFilter === "ALL" || getOfficerLevel(officer, departments) === levelFilter;
     const matchesDepartment = !departmentFilter || String(officer.department || "") === String(departmentFilter);
+    const matchesPlace = ["state", "district", "block", "village"].every((key) => {
+      const filter = placeFilters[key].trim().toLowerCase();
+      return !filter || String(officer[key] || "").toLowerCase().includes(filter);
+    });
     const query = officerSearch.trim().toLowerCase();
     const haystack = [
       officer.first_name,
@@ -580,9 +594,11 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
       officer.state,
       officer.district,
       officer.block,
+      officer.village,
+      getOfficerLevelLabel(officer, departments),
       officer.reports_to_name,
     ].filter(Boolean).join(" ").toLowerCase();
-    return matchesLevel && matchesDepartment && (!query || haystack.includes(query));
+    return matchesLevel && matchesDepartment && matchesPlace && (!query || haystack.includes(query));
   });
 
   return (
@@ -618,7 +634,23 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
             ))}
           </select>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-5">
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            ["state", "State"],
+            ["district", "District"],
+            ["block", "Block / Tehsil"],
+            ["village", "Village / Ward"],
+          ].map(([key, label]) => (
+            <input
+              key={key}
+              className="input text-sm"
+              value={placeFilters[key]}
+              onChange={(e) => setPlaceFilters({ ...placeFilters, [key]: e.target.value })}
+              placeholder={`Filter ${label}`}
+            />
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
           {OFFICER_LEVELS.map((level) => (
             <button
               key={level.key}
@@ -662,6 +694,15 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
               </select>
             </div>
             <div>
+              <label className="text-xs text-gray-500 mb-1 block">Officer Category *</label>
+              <select className="input text-sm" value={form.jurisdiction_level}
+                onChange={(e) => setForm({ ...form, jurisdiction_level: e.target.value })}>
+                {OFFICER_LEVELS.filter((level) => level.key !== "ALL").map((level) => (
+                  <option key={level.key} value={level.key}>{level.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="text-xs text-gray-500 mb-1 block">Department</label>
               <select className="input text-sm" value={form.department_id}
                 onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
@@ -684,7 +725,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                 ))}
               </select>
             </div>
-            {[["state","State"],["district","District"],["block","Block"]].map(([k, l]) => (
+            {[["state","State"],["district","District"],["block","Block / Tehsil"],["village","Village / Ward"]].map(([k, l]) => (
               <div key={k}>
                 <label className="text-xs text-gray-500 mb-1 block">{l}</label>
                 <input className="input text-sm" value={form[k]}
@@ -720,12 +761,20 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                 <div>
                   <h4 className="font-medium mb-3 text-sm">Edit Officer</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {[["first_name","First Name"],["last_name","Last Name"],["email","Email"],["phone","Phone"],["employee_id","Employee ID"],["state","State"],["district","District"],["block","Block"]].map(([k,l]) => (
+                    {[["first_name","First Name"],["last_name","Last Name"],["email","Email"],["phone","Phone"],["employee_id","Employee ID"],["state","State"],["district","District"],["block","Block / Tehsil"],["village","Village / Ward"]].map(([k,l]) => (
                       <div key={k}>
                         <label className="text-xs text-gray-500 mb-1 block">{l}</label>
                         <input className="input text-xs py-1" value={editForm[k]} onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })} />
                       </div>
                     ))}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Officer Category</label>
+                      <select className="input text-xs py-1" value={editForm.jurisdiction_level} onChange={(e) => setEditForm({ ...editForm, jurisdiction_level: e.target.value })}>
+                        {OFFICER_LEVELS.filter((level) => level.key !== "ALL").map((level) => (
+                          <option key={level.key} value={level.key}>{level.label}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">New Password</label>
                       <input
@@ -792,7 +841,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
                     {!s.is_active && <span className="badge bg-red-50 text-red-700">Inactive</span>}
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    {s.employee_id ? `ID: ${s.employee_id} · ` : ""}Posting: {[s.state, s.district, s.block].filter(Boolean).join(" / ") || "Not mapped"}
+                    {s.employee_id ? `ID: ${s.employee_id} · ` : ""}Posting: {officerPostingText(s)}
                   </p>
                 </>
               )}

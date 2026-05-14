@@ -34,7 +34,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "phone", "role", "first_name", "last_name",
                   "gender", "address_line", "sub_locality", "locality", "country", "pincode",
                   "designation", "department", "department_name", "employee_id", "is_verified", "date_joined",
-                  "state", "district", "block", "created_by", "reports_to", "reports_to_name", "is_active"]
+                  "state", "district", "block", "village", "jurisdiction_level",
+                  "created_by", "reports_to", "reports_to_name", "is_active"]
         read_only_fields = ["date_joined", "is_verified"]
 
 
