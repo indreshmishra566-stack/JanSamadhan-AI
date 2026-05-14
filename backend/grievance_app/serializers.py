@@ -190,7 +190,7 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         from django.conf import settings
         from django.utils import timezone
 
-        text = validated_data["description"]
+        text = f"{validated_data.get('title', '')}\n{validated_data.get('description', '')}".strip()
         ai_result = classify_complaint(text)
 
         validated_data["ai_category"] = ai_result.get("category", "OTHER")

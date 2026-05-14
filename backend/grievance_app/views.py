@@ -970,6 +970,9 @@ class AdminComplaintUpdateView(generics.UpdateAPIView):
         old_status = old.status
         old_officer = old.assigned_officer
         complaint = serializer.save()
+        if complaint.assigned_officer and not complaint.department_id and complaint.assigned_officer.department_id:
+            complaint.department = complaint.assigned_officer.department
+            complaint.save(update_fields=["department"])
         if complaint.assigned_officer and complaint.assigned_officer != old_officer:
             complaint.forwarded_to = complaint.assigned_officer
             complaint.current_level = "DEPARTMENT" if Department.objects.filter(Q(head_officer=complaint.assigned_officer) | Q(sub_head_officer=complaint.assigned_officer), is_active=True).exists() else "OFFICER"

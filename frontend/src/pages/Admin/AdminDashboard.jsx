@@ -104,14 +104,28 @@ export default function AdminDashboard() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => adminApi.updateComplaint(id, data),
+    mutationFn: ({ id, data }) => {
+      const payload = {
+        ...data,
+        department: data.department || null,
+        assigned_officer: data.assigned_officer || null,
+        duplicate_of: data.duplicate_of || null,
+      };
+      return adminApi.updateComplaint(id, payload);
+    },
     onSuccess: () => {
       qc.invalidateQueries(["admin-complaints"]);
       qc.invalidateQueries(["admin-stats"]);
       toast.success("Complaint updated successfully");
       setEditing(null);
     },
-    onError: () => toast.error("Update failed"),
+    onError: (err) => {
+      const details = err.response?.data;
+      const message = details
+        ? Object.entries(details).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`).join(" | ")
+        : "Update failed";
+      toast.error(message);
+    },
   });
 
   const deleteUserMutation = useMutation({
