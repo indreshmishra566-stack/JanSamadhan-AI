@@ -470,7 +470,7 @@ export default function HierarchyDashboard() {
 // ─── Team Management Sub-Component ───────────────────────────────────────────
 function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
   const emptyForm = {
-    username: "", email: "", password: "", phone: "",
+    email: "", password: "", phone: "",
     first_name: "", last_name: "", employee_id: "",
     department_id: user?.department || "", role: "OFFICER", designation: "", reports_to: "",
     state: user?.state || "", district: user?.district || "", block: user?.block || "",
@@ -539,8 +539,8 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
         <div className="card p-5 mb-5">
           <h3 className="font-medium mb-4">Create Officer</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[["first_name","First Name"],["last_name","Last Name"],["username","Username"],
-              ["email","Email"],["phone","Phone"],["employee_id","Employee ID"]].map(([k, l]) => (
+            {[["first_name","First Name"],["last_name","Last Name"],
+              ["email","Email / Login ID"],["phone","Phone"],["employee_id","Employee ID"]].map(([k, l]) => (
               <div key={k}>
                 <label className="text-xs text-gray-500 mb-1 block">{l}</label>
                 <input className="input text-sm" value={form[k]}
@@ -593,7 +593,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => createMutation.mutate(form)}
-              disabled={createMutation.isPending || !form.username || !form.password}
+              disabled={createMutation.isPending || !form.email || !form.password}
               className="btn-primary text-sm"
             >
               {createMutation.isPending ? "Creating..." : "Create Officer"}

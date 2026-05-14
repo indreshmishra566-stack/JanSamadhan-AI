@@ -352,8 +352,12 @@ def _build_user_payload(data, creator):
     if not _can_create_role(creator, target_role, dept):
         return None, Response({"error": f"You cannot create a {target_role} under your current hierarchy."}, status=403)
 
-    if User.objects.filter(username=data.get("username")).exists():
-        return None, Response({"error": "Username already exists."}, status=400)
+    email = str(data.get("email", "")).strip().lower()
+    username = str(data.get("username") or email).strip().lower()
+    if not email:
+        return None, Response({"error": "Email is required for officer login and credentials delivery."}, status=400)
+    if User.objects.filter(Q(username=username) | Q(email=email)).exists():
+        return None, Response({"error": "An account with this email already exists."}, status=400)
 
     reports_to = creator
     if data.get("reports_to"):
@@ -362,8 +366,8 @@ def _build_user_payload(data, creator):
         reports_to = dept.head_officer
 
     payload = {
-        "username": data["username"],
-        "email": data.get("email", ""),
+        "username": username,
+        "email": email,
         "password": data["password"],
         "role": target_role,
         "phone": data.get("phone", ""),
