@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { authApi } from "../api";
+import { authApi, clearStoredTokens, getStoredAccessToken, setStoredTokens } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -14,10 +14,10 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = getStoredAccessToken();
     if (token) {
       refreshUser()
-        .catch(() => { localStorage.clear(); })
+        .catch(() => { clearStoredTokens(); })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -26,13 +26,12 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const { data } = await authApi.login(credentials);
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
+    setStoredTokens(data);
     return refreshUser();
   };
 
   const logout = () => {
-    localStorage.clear();
+    clearStoredTokens();
     setUser(null);
     window.location.href = "/login";
   };

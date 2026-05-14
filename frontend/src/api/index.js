@@ -2,6 +2,31 @@ import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
+const ACCESS_TOKEN_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
+
+export function getStoredAccessToken() {
+  return sessionStorage.getItem(ACCESS_TOKEN_KEY) || localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function getStoredRefreshToken() {
+  return sessionStorage.getItem(REFRESH_TOKEN_KEY) || localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+export function setStoredTokens({ access, refresh }) {
+  if (access) sessionStorage.setItem(ACCESS_TOKEN_KEY, access);
+  if (refresh) sessionStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
+export function clearStoredTokens() {
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 // ─── Sanitize helper (prevents XSS in submitted strings) ─────────────────────
 function sanitizeString(value) {
   if (typeof value !== "string") return value;
@@ -30,7 +55,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = getStoredAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   if (config.data && !(config.data instanceof FormData)) {
     config.data = sanitizePayload(config.data);
@@ -44,19 +69,19 @@ api.interceptors.response.use(
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
-      const refresh = localStorage.getItem("refresh_token");
+      const refresh = getStoredRefreshToken();
       if (refresh) {
         try {
           const { data } = await axios.post(`${API_BASE}/auth/refresh/`, { refresh });
-          localStorage.setItem("access_token", data.access);
+          setStoredTokens({ access: data.access });
           original.headers.Authorization = `Bearer ${data.access}`;
           return api(original);
         } catch {
-          localStorage.clear();
+          clearStoredTokens();
           window.location.href = "/login";
         }
       } else {
-        localStorage.clear();
+        clearStoredTokens();
         window.location.href = "/login";
       }
     }
