@@ -482,8 +482,10 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
 
   const createMutation = useMutation({
     mutationFn: (data) => hierarchyApi.createOfficer(data),
-    onSuccess: () => {
-      toast.success("Officer account created!");
+    onSuccess: ({ data }) => {
+      toast.success(data?.credentials_email_sent
+        ? "Officer account created and credentials emailed!"
+        : `Officer account created. ${data?.credentials_email_note || "Credentials email was not sent."}`);
       setShowForm(false);
       setForm(emptyForm);
       onCreated();

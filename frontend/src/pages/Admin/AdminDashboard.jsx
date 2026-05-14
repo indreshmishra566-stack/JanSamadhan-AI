@@ -544,7 +544,14 @@ function OfficerManagement({ departments, officers, onChanged }) {
 
   const createMutation = useMutation({
     mutationFn: (data) => adminApi.createOfficer(data),
-    onSuccess: () => { toast.success("Officer account created!"); setShowForm(false); setForm(emptyForm); onChanged(); },
+    onSuccess: ({ data }) => {
+      toast.success(data?.credentials_email_sent
+        ? "Officer account created and credentials emailed!"
+        : `Officer account created. ${data?.credentials_email_note || "Credentials email was not sent."}`);
+      setShowForm(false);
+      setForm(emptyForm);
+      onChanged();
+    },
     onError: (err) => toast.error(err.response?.data?.error || "Failed to create officer"),
   });
 

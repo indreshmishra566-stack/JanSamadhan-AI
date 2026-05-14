@@ -169,6 +169,56 @@ def _send_complaint_submission_email(complaint):
         return False, f"Email failed: {exc}"
 
 
+def _send_staff_credentials_email(user, raw_password, creator=None):
+    if not user.email:
+        return False, "No email on officer account."
+
+    if (
+        settings.EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend"
+        and settings.EMAIL_HOST == "smtp.gmail.com"
+        and (not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD)
+    ):
+        return False, "Email is not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD."
+
+    creator_name = ""
+    if creator:
+        creator_name = creator.get_full_name() or creator.username
+    login_url = getattr(settings, "FRONTEND_URL", "").rstrip("/") or "https://jan-samadhan.vercel.app"
+    lines = [
+        "Your Jan Samadhan AI staff account has been created.",
+        "",
+        f"Role: {user.get_role_display()}",
+        f"Name: {user.get_full_name() or user.username}",
+        f"Username: {user.username}",
+        f"Email: {user.email}",
+        f"Password: {raw_password}",
+        f"Login URL: {login_url}/login",
+    ]
+    if user.department:
+        lines.append(f"Department: {user.department.name}")
+    if creator_name:
+        lines.append(f"Created by: {creator_name}")
+    lines.extend([
+        "",
+        "Please sign in and change your password from Profile after first login.",
+    ])
+
+    try:
+        connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 10))
+        send_mail(
+            "Jan Samadhan AI staff account credentials",
+            "\n".join(lines),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+            connection=connection,
+        )
+        return True, "Credentials email sent."
+    except Exception as exc:
+        logger.exception("Staff credentials email failed for user %s", user.username)
+        return False, f"Email failed: {exc}"
+
+
 def _activate_citizen_without_otp(user):
     user.is_active = True
     user.is_verified = True
@@ -787,8 +837,13 @@ def create_subordinate_officer(request):
     payload, error_response = _build_user_payload(data, user)
     if error_response:
         return error_response
+    raw_password = payload["password"]
     new_user = User.objects.create_user(**payload)
-    return Response(UserSerializer(new_user).data, status=201)
+    email_sent, email_note = _send_staff_credentials_email(new_user, raw_password, creator=user)
+    response_data = UserSerializer(new_user).data
+    response_data["credentials_email_sent"] = email_sent
+    response_data["credentials_email_note"] = email_note
+    return Response(response_data, status=201)
 
 
 @api_view(["GET"])
@@ -1002,8 +1057,13 @@ class AdminCreateOfficerView(generics.CreateAPIView):
         payload, error_response = _build_user_payload(data, request.user)
         if error_response:
             return error_response
+        raw_password = payload["password"]
         user = User.objects.create_user(**payload)
-        return Response(UserSerializer(user).data, status=201)
+        email_sent, email_note = _send_staff_credentials_email(user, raw_password, creator=request.user)
+        response_data = UserSerializer(user).data
+        response_data["credentials_email_sent"] = email_sent
+        response_data["credentials_email_note"] = email_note
+        return Response(response_data, status=201)
 
 
 # ─── Notifications ────────────────────────────────────────────────────────────
