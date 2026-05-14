@@ -733,7 +733,7 @@ function OfficerManagement({ departments, officers, onChanged }) {
 }
 
 function DepartmentManagement({ departments, officers, onChanged }) {
-  const emptyForm = { name: "", code: "", description: "", email: "", parent: "", head_officer: "", sub_head_officer: "" };
+  const emptyForm = { name: "", code: "", description: "", parent: "", head_officer: "", sub_head_officer: "" };
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingDepartment, setEditingDepartment] = useState(null);
@@ -807,11 +807,6 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                 onChange={(e) => setForm({ ...form, code: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">Email</label>
-              <input className="input text-sm" type="email" value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div>
               <label className="text-xs text-gray-500 mb-1 block">Parent Department</label>
               <select className="input text-sm" value={form.parent}
                 onChange={(e) => setForm({ ...form, parent: e.target.value })}>
@@ -868,8 +863,6 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, name: e.target.value })} />
                   <input className="input text-sm uppercase" value={editingDepartment.code}
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, code: e.target.value.toUpperCase() })} />
-                  <input className="input text-sm" value={editingDepartment.email || ""}
-                    onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
                   <input className="input text-sm" value={editingDepartment.description || ""}
                     onChange={(e) => setEditingDepartment({ ...editingDepartment, description: e.target.value })} />
                   <select className="input text-sm" value={editingDepartment.parent || ""}
@@ -930,7 +923,6 @@ function DepartmentManagement({ departments, officers, onChanged }) {
                     {d.head_officer_name && <span className="badge bg-indigo-50 text-indigo-700">Head: {d.head_officer_name}</span>}
                     {d.sub_head_officer_name && <span className="badge bg-amber-50 text-amber-700">Sub Head: {d.sub_head_officer_name}</span>}
                     {typeof d.child_count === "number" && <span className="badge bg-emerald-50 text-emerald-700">{d.child_count} child departments</span>}
-                    {d.email && <span className="badge bg-gray-100 text-gray-600">{d.email}</span>}
                   </div>
                 </>
               )}

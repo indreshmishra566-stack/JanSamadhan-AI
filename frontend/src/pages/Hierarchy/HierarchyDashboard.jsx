@@ -701,7 +701,7 @@ function TeamManagement({ user, departmentOfficers, departments, onCreated }) {
 
 function DepartmentBranchManagement({ user, departments, parentOptions, profileDepartment, departmentOfficers, onChanged }) {
   const emptyForm = {
-    name: "", code: "", description: "", email: "",
+    name: "", code: "", description: "",
     parent: user?.department || "", head_officer: "", sub_head_officer: "",
   };
   const [showForm, setShowForm] = useState(false);
@@ -763,7 +763,6 @@ function DepartmentBranchManagement({ user, departments, parentOptions, profileD
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input className="input text-sm" placeholder="Department name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             <input className="input text-sm uppercase" placeholder="Code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-            <input className="input text-sm" placeholder="Department email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <select className="input text-sm" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })}>
               <option value="">-- Root within my branch --</option>
               {parentOptions.map((dept) => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
@@ -813,7 +812,6 @@ function DepartmentBranchManagement({ user, departments, parentOptions, profileD
               <div className="space-y-3">
                 <input className="input text-sm" value={editingDepartment.name} onChange={(e) => setEditingDepartment({ ...editingDepartment, name: e.target.value })} />
                 <input className="input text-sm uppercase" value={editingDepartment.code} onChange={(e) => setEditingDepartment({ ...editingDepartment, code: e.target.value.toUpperCase() })} />
-                <input className="input text-sm" value={editingDepartment.email || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, email: e.target.value })} />
                 <select className="input text-sm" value={editingDepartment.parent || ""} onChange={(e) => setEditingDepartment({ ...editingDepartment, parent: e.target.value || null })}>
                   <option value="">-- Root within my branch --</option>
                   {parentOptions.filter((item) => item.id !== department.id).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
