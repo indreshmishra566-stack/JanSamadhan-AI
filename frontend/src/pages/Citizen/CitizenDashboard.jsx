@@ -50,6 +50,18 @@ const isAllowedComplaintAttachment = (file) => {
   return ["image", "audio", "video", "pdf"].includes(getAttachmentKind(file));
 };
 
+const getVoiceInputErrorMessage = (errorCode) => {
+  const messages = {
+    "not-allowed": "Microphone permission is blocked. Allow microphone access from the browser address bar, then try again.",
+    "service-not-allowed": "This browser blocked online speech-to-text. Try Chrome/Edge, or use audio recording proof.",
+    "audio-capture": "No microphone was found. Connect or enable a microphone, then try again.",
+    network: "Speech-to-text service is not reachable from this browser. Try Chrome/Edge, or use audio recording proof.",
+    "no-speech": "No speech was detected. Speak clearly near the microphone and try again.",
+    aborted: "Voice input was stopped.",
+  };
+  return messages[errorCode] || "Could not capture voice input. Try Chrome/Edge or use audio recording proof.";
+};
+
 const CHAT_QUICK_PROMPTS = [
   "How do I file a complaint?",
   "Show my pending complaints",
@@ -153,6 +165,7 @@ export default function CitizenDashboard() {
   const audioChunksRef = useRef([]);
   const videoChunksRef = useRef([]);
   const voiceBaseRef = useRef("");
+  const speechTranscriptRef = useRef("");
   const emptyForm = {
     title: "",
     description: "",
@@ -427,6 +440,7 @@ export default function CitizenDashboard() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
+      toast("Voice-to-text is not supported in this browser. Recording audio proof instead.", { duration: 6000 });
       await startAudioRecording();
       return;
     }
@@ -435,22 +449,37 @@ export default function CitizenDashboard() {
     recognition.lang = voiceLanguage;
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
     voiceBaseRef.current = form.description.trim();
+    speechTranscriptRef.current = "";
 
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
         .map((result) => result[0]?.transcript || "")
         .join(" ")
         .trim();
+      speechTranscriptRef.current = transcript;
       const separator = voiceBaseRef.current && transcript ? " " : "";
       setForm((prev) => ({
         ...prev,
         description: `${voiceBaseRef.current}${separator}${transcript}`.trimStart(),
       }));
     };
-    recognition.onerror = () => {
-      toast.error("Could not capture voice input");
+    recognition.onerror = async (event) => {
+      const message = getVoiceInputErrorMessage(event.error);
+      toast.error(message, { duration: 7000 });
       setIsListening(false);
+      recognitionRef.current = null;
+      try {
+        recognition.stop();
+      } catch {
+        // Browser may already have stopped the speech recognizer.
+      }
+      const shouldFallbackToRecording = ["network", "service-not-allowed", "audio-capture"].includes(event.error);
+      if (shouldFallbackToRecording && !speechTranscriptRef.current) {
+        toast("Switching to audio recording proof for this browser.", { duration: 5000 });
+        await startAudioRecording();
+      }
     };
     recognition.onend = () => {
       recognitionRef.current = null;
@@ -828,6 +857,9 @@ export default function CitizenDashboard() {
                 <p className="mt-1 text-xs font-medium text-red-700">Recording video proof now. Press Stop video when complete; it will be attached below.</p>
               ) : isListening && (
                 <p className="mt-1 text-xs font-medium text-cyan-700">Listening now. Speak clearly and stop when the description is complete.</p>
+              )}
+              {!isListening && !isRecordingAudio && (
+                <p className="mt-1 text-xs text-gray-500">Voice-to-text depends on browser support. Chrome/Edge work best; if speech service fails, the app records audio proof instead.</p>
               )}
             </div>
             <div>
