@@ -1204,15 +1204,14 @@ def run_admin_setup_seed(request):
     departments = list(
         Department.objects.filter(
             code__in=[
-                "WATER", "ELECTRICITY", "SANITATION", "ROADS", "HEALTH",
-                "EDUCATION", "PUBLIC_SERVICES", "DRAINAGE", "STREET_LIGHT", "WASTE_MGMT",
+                "WATER", "ELECTRICITY", "SANITATION", "ROADS",
+                "HEALTH", "EDUCATION", "PUBLIC_SERVICES", "OTHER",
             ]
         ).values("name", "code", "head_officer__username")
     )
     return Response({
         "status": "ok",
-        "message": "10 departments and 10 department officers are ready for admin management.",
-        "officer_password": "Officer@1234",
+        "message": "8 core departments are ready. Add officer emails from the dashboard to assign department heads.",
         "departments": departments,
     })
 
