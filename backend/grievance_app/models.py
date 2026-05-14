@@ -201,6 +201,23 @@ class ForwardingRecord(models.Model):
         return f"{self.complaint.ticket_id}: {self.from_level} → {self.to_level}"
 
 
+class ComplaintOfficerRating(models.Model):
+    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name="handler_ratings")
+    officer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="complaint_handler_ratings")
+    citizen = models.ForeignKey(User, on_delete=models.CASCADE, related_name="submitted_handler_ratings")
+    rating = models.IntegerField()
+    feedback = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("complaint", "officer", "citizen")
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.complaint.ticket_id}: {self.officer} rated {self.rating}/5"
+
+
 class ComplaintHistory(models.Model):
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name="history")
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

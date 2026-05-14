@@ -50,6 +50,22 @@ const isAllowedComplaintAttachment = (file) => {
   return ["image", "audio", "video", "pdf"].includes(getAttachmentKind(file));
 };
 
+const getComplaintHandlers = (complaint) => {
+  const handlers = complaint?.assigned_handlers || [];
+  if (handlers.length) return handlers;
+  if (complaint?.assigned_officer) {
+    return [{
+      id: complaint.assigned_officer,
+      name: complaint.officer_name || "Assigned officer/admin",
+      role: "OFFICER",
+      source: "Current assignment",
+      rating: complaint.citizen_rating || null,
+      feedback: complaint.citizen_feedback || "",
+    }];
+  }
+  return [];
+};
+
 const getVoiceInputErrorMessage = (errorCode) => {
   const messages = {
     "not-allowed": "Microphone permission is blocked. Allow microphone access from the browser address bar, then try again.",
@@ -223,7 +239,7 @@ export default function CitizenDashboard() {
   const disposedStatuses = ["RESOLVED", "CLOSED", "REJECTED"];
   const pendingComplaints = complaints.filter((c) => !disposedStatuses.includes(c.status));
   const disposedComplaints = complaints.filter((c) => disposedStatuses.includes(c.status));
-  const assignedWithoutRating = complaints.filter((c) => c.assigned_officer && !c.citizen_rating);
+  const assignedWithoutRating = complaints.filter((c) => getComplaintHandlers(c).some((handler) => !handler.rating));
   const escalatedComplaints = complaints.filter((c) => c.status === "ESCALATED");
   const latestComplaint = complaints[0];
 
@@ -1113,8 +1129,10 @@ export default function CitizenDashboard() {
                       {c.supervising_head_name && (
                         <span className="badge bg-indigo-50 text-indigo-700">Head: {c.supervising_head_name}</span>
                       )}
-                      {c.citizen_rating && (
-                        <span className="badge bg-yellow-50 text-yellow-700">Rated {c.citizen_rating}/5</span>
+                      {getComplaintHandlers(c).some((handler) => handler.rating) && (
+                        <span className="badge bg-yellow-50 text-yellow-700">
+                          {getComplaintHandlers(c).filter((handler) => handler.rating).length}/{getComplaintHandlers(c).length} rated
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1133,9 +1151,9 @@ export default function CitizenDashboard() {
                     <button type="button" onClick={(event) => { event.stopPropagation(); navigator.clipboard?.writeText(c.ticket_id); toast.success("Registration ID copied"); }} className="btn-secondary inline-flex items-center gap-2 text-sm">
                       <ClipboardList size={15} /> Copy Registration ID
                     </button>
-                    {c.assigned_officer && !c.citizen_rating && (
+                    {getComplaintHandlers(c).some((handler) => !handler.rating) && (
                       <button type="button" onClick={(event) => { event.stopPropagation(); openFeedback(c); }} className="btn-primary inline-flex items-center gap-2 text-sm">
-                        <MessageSquareReply size={15} /> Rate Assigned Handler
+                        <MessageSquareReply size={15} /> Rate Assigned Officers
                       </button>
                     )}
                   </div>
@@ -1146,7 +1164,10 @@ export default function CitizenDashboard() {
                         <DetailItem label="Current Level" value={c.current_level} accent />
                         <DetailItem label="Assigned Local Officer" value={c.officer_name} />
                         <DetailItem label="Supervising Department Head" value={c.supervising_head_name} />
-                        <DetailItem label="Your Handler Rating" value={c.citizen_rating ? `${c.citizen_rating}/5` : "Not rated yet"} />
+                        <DetailItem
+                          label="Officer Ratings"
+                          value={`${getComplaintHandlers(c).filter((handler) => handler.rating).length}/${getComplaintHandlers(c).length || 0} rated`}
+                        />
                         <DetailItem label="Location" value={c.location} />
                         <DetailItem label="State" value={c.state} />
                         <DetailItem label="District" value={c.district} />
@@ -1227,14 +1248,30 @@ export default function CitizenDashboard() {
                       This complaint is linked to {c.duplicate_of ? `master ticket #${c.duplicate_of}` : "another primary complaint"} for combined action.</p>
                     </div>
                   )}
-                  {c.citizen_rating && (
-                    <div className="mt-3 flex gap-3 rounded-lg bg-yellow-50 p-3 text-sm">
-                      <Star size={18} className="mt-0.5 shrink-0 text-yellow-600" />
-                      <p><span className="font-medium text-yellow-700">Your rating for assigned handler:</span> {c.citizen_rating}/5{c.citizen_feedback ? ` · ${c.citizen_feedback}` : ""}</p>
+                  {getComplaintHandlers(c).length > 0 && (
+                    <div className="mt-3 rounded-lg bg-yellow-50 p-4 text-sm">
+                      <div className="mb-3 flex items-center gap-2 font-semibold text-yellow-800">
+                        <Star size={18} /> Rate every officer/admin assigned to this complaint
+                      </div>
+                      <div className="space-y-3">
+                        {getComplaintHandlers(c).map((handler) => (
+                          handler.rating ? (
+                            <div key={handler.id} className="rounded-lg border border-yellow-100 bg-white px-3 py-2">
+                              <p className="font-medium text-slate-800">{handler.name}</p>
+                              <p className="mt-1 text-xs text-yellow-700">Rated {handler.rating}/5{handler.feedback ? ` · ${handler.feedback}` : ""}</p>
+                            </div>
+                          ) : (
+                            <FeedbackForm
+                              key={handler.id}
+                              complaintId={c.id}
+                              officerId={handler.id}
+                              handlerName={handler.name || "assigned admin/officer"}
+                              onDone={() => qc.invalidateQueries(["my-complaints"])}
+                            />
+                          )
+                        ))}
+                      </div>
                     </div>
-                  )}
-                  {c.assigned_officer && !c.citizen_rating && (
-                    <FeedbackForm complaintId={c.id} handlerName={c.officer_name || "assigned admin/officer"} onDone={() => qc.invalidateQueries(["my-complaints"])} />
                   )}
                 </div>
               )}
@@ -1345,15 +1382,15 @@ function CitizenChatbot({ open, onToggle, messages, input, onInputChange, onSend
   );
 }
 
-function FeedbackForm({ complaintId, handlerName, onDone }) {
+function FeedbackForm({ complaintId, officerId, handlerName, onDone }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const mutation = useMutation({
-    mutationFn: () => complaintApi.feedback(complaintId, { citizen_rating: rating, citizen_feedback: feedback }),
-    onSuccess: () => { toast.success("Thank you for your feedback!"); onDone(); },
+    mutationFn: () => complaintApi.rateHandler(complaintId, officerId, { rating, feedback }),
+    onSuccess: () => { toast.success("Officer/admin rating saved!"); onDone(); },
   });
   return (
-    <div className="mt-3 rounded-lg bg-green-50 p-4" onClick={(event) => event.stopPropagation()}>
+    <div className="rounded-lg bg-green-50 p-4" onClick={(event) => event.stopPropagation()}>
       <p className="text-sm font-medium text-green-800 mb-1">Rate assigned officer/admin</p>
       <p className="mb-2 text-xs text-green-700">This rating is saved for {handlerName || "the assigned handler"} on this complaint.</p>
       <div className="flex gap-2 mb-2">

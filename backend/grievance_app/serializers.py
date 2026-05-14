@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord
+from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord, ComplaintOfficerRating
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -118,7 +118,7 @@ class ForwardingRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ForwardingRecord
-        fields = ["id", "from_user_name", "to_user_name", "from_level", "to_level", "action", "note", "created_at"]
+        fields = ["id", "from_user", "to_user", "from_user_name", "to_user_name", "from_level", "to_level", "action", "note", "created_at"]
 
     def get_from_user_name(self, obj):
         if obj.from_user:
@@ -131,6 +131,22 @@ class ForwardingRecordSerializer(serializers.ModelSerializer):
         return "Unknown"
 
 
+class ComplaintOfficerRatingSerializer(serializers.ModelSerializer):
+    officer_name = serializers.CharField(source="officer.get_full_name", read_only=True)
+    officer_email = serializers.CharField(source="officer.email", read_only=True)
+    officer_role = serializers.CharField(source="officer.role", read_only=True)
+
+    class Meta:
+        model = ComplaintOfficerRating
+        fields = ["id", "complaint", "officer", "officer_name", "officer_email", "officer_role", "rating", "feedback", "created_at", "updated_at"]
+        read_only_fields = ["complaint", "officer", "created_at", "updated_at"]
+
+    def validate_rating(self, value):
+        if value not in range(1, 6):
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+
+
 class ComplaintSerializer(serializers.ModelSerializer):
     citizen_name = serializers.CharField(source="citizen.get_full_name", read_only=True)
     department_name = serializers.CharField(source="department.name", read_only=True)
@@ -138,6 +154,8 @@ class ComplaintSerializer(serializers.ModelSerializer):
     supervising_head_name = serializers.SerializerMethodField()
     history = ComplaintHistorySerializer(many=True, read_only=True)
     forwarding_records = ForwardingRecordSerializer(many=True, read_only=True)
+    handler_ratings = ComplaintOfficerRatingSerializer(many=True, read_only=True)
+    assigned_handlers = serializers.SerializerMethodField()
     sla_remaining_hours = serializers.SerializerMethodField()
 
     class Meta:
@@ -152,6 +170,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
             "sla_deadline", "sla_remaining_hours", "is_sla_breached",
             "citizen_rating", "citizen_feedback", "is_duplicate", "duplicate_of",
             "created_at", "updated_at", "resolved_at", "history", "forwarding_records",
+            "handler_ratings", "assigned_handlers",
         ]
         read_only_fields = [
             "ticket_id", "ai_category", "ai_confidence", "original_language",
@@ -174,6 +193,32 @@ class ComplaintSerializer(serializers.ModelSerializer):
         if not supervising_head:
             return ""
         return supervising_head.get_full_name() or supervising_head.username
+
+    def get_assigned_handlers(self, obj):
+        seen = set()
+        handlers = []
+        ratings_by_officer = {rating.officer_id: rating for rating in obj.handler_ratings.all()}
+
+        def add_handler(user, source):
+            if not user or user.id in seen:
+                return
+            seen.add(user.id)
+            rating = ratings_by_officer.get(user.id)
+            handlers.append({
+                "id": user.id,
+                "name": user.get_full_name() or user.username,
+                "email": user.email,
+                "role": user.role,
+                "source": source,
+                "rating": rating.rating if rating else None,
+                "feedback": rating.feedback if rating else "",
+                "rating_id": rating.id if rating else None,
+            })
+
+        add_handler(obj.assigned_officer, "Current assignment")
+        for record in obj.forwarding_records.all():
+            add_handler(record.to_user, record.get_action_display())
+        return handlers
 
 
 class ComplaintCreateSerializer(serializers.ModelSerializer):

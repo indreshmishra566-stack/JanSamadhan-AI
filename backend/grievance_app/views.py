@@ -18,12 +18,13 @@ from django.db import DatabaseError, IntegrityError, transaction
 from django.db.models import Count, Q, Avg
 from django.shortcuts import get_object_or_404
 
-from .models import User, Department, Complaint, ComplaintHistory, LoginOTP, Notification, ForwardingRecord
+from .models import User, Department, Complaint, ComplaintHistory, LoginOTP, Notification, ForwardingRecord, ComplaintOfficerRating
 from .serializers import (
     RegisterSerializer, UserSerializer, ProfileUpdateSerializer, DepartmentSerializer,
     ComplaintSerializer, ComplaintCreateSerializer, NotificationSerializer,
     AdminComplaintUpdateSerializer, OfficerComplaintUpdateSerializer,
     CitizenFeedbackSerializer, ForwardingRecordSerializer, ChangePasswordSerializer,
+    ComplaintOfficerRatingSerializer,
 )
 from .permissions import IsAdmin, IsCitizen, IsHierarchyOfficer
 
@@ -660,7 +661,9 @@ class CitizenComplaintListCreateView(generics.ListCreateAPIView):
         return ComplaintSerializer
 
     def get_queryset(self):
-        return Complaint.objects.filter(citizen=self.request.user).prefetch_related("history", "forwarding_records")
+        return Complaint.objects.filter(citizen=self.request.user).prefetch_related(
+            "history", "forwarding_records", "handler_ratings"
+        )
 
     def perform_create(self, serializer):
         complaint = serializer.save(citizen=self.request.user)
@@ -720,6 +723,43 @@ class CitizenFeedbackView(generics.UpdateAPIView):
             changed_by=self.request.user,
             note=f"Citizen rated assigned handler: {complaint.citizen_rating}/5",
         )
+
+
+@api_view(["POST", "PATCH"])
+@permission_classes([IsAuthenticated, IsCitizen])
+def rate_complaint_handler(request, pk, officer_id):
+    complaint = get_object_or_404(
+        Complaint.objects.prefetch_related("forwarding_records", "handler_ratings"),
+        pk=pk,
+        citizen=request.user,
+    )
+    officer = get_object_or_404(User, pk=officer_id, role__in=["OFFICER", "ADMIN"])
+    handled_ids = set(complaint.forwarding_records.filter(to_user__isnull=False).values_list("to_user_id", flat=True))
+    if complaint.assigned_officer_id:
+        handled_ids.add(complaint.assigned_officer_id)
+    if officer.id not in handled_ids:
+        return Response({"detail": "This officer/admin has not been assigned to this complaint."}, status=400)
+
+    rating_obj, _ = ComplaintOfficerRating.objects.get_or_create(
+        complaint=complaint,
+        officer=officer,
+        citizen=request.user,
+        defaults={"rating": request.data.get("rating") or 1},
+    )
+    serializer = ComplaintOfficerRatingSerializer(rating_obj, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    rating = serializer.save()
+
+    complaint.citizen_rating = rating.rating
+    complaint.citizen_feedback = rating.feedback
+    complaint.save(update_fields=["citizen_rating", "citizen_feedback", "updated_at"])
+
+    ComplaintHistory.objects.create(
+        complaint=complaint,
+        changed_by=request.user,
+        note=f"Citizen rated {officer.get_full_name() or officer.username}: {rating.rating}/5",
+    )
+    return Response(ComplaintOfficerRatingSerializer(rating).data)
 
 
 # ─── Hierarchy: Forward / Escalate ──────────────────────────────────────────

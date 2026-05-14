@@ -81,6 +81,7 @@ export const complaintApi = {
   create: (data) => api.post("/complaints/", data, { headers: { "Content-Type": "multipart/form-data" } }),
   get: (id) => api.get(`/complaints/${id}/`),
   feedback: (id, data) => api.patch(`/complaints/${id}/feedback/`, data),
+  rateHandler: (id, officerId, data) => api.patch(`/complaints/${id}/handlers/${officerId}/rating/`, data),
   track: (ticketId) => api.get(`/track/${ticketId}/`),
 };
 

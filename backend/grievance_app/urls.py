@@ -20,6 +20,7 @@ urlpatterns = [
     path("complaints/", views.CitizenComplaintListCreateView.as_view()),
     path("complaints/<int:pk>/", views.CitizenComplaintDetailView.as_view()),
     path("complaints/<int:pk>/feedback/", views.CitizenFeedbackView.as_view()),
+    path("complaints/<int:pk>/handlers/<int:officer_id>/rating/", views.rate_complaint_handler),
 
     # Hierarchy actions (forward / escalate)
     path("complaints/<int:pk>/forward/", views.forward_complaint),
