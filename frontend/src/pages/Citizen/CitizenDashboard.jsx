@@ -27,6 +27,8 @@ import {
   ShieldCheck,
   Star,
   Trash2,
+  Video,
+  VideoOff,
   X,
 } from "lucide-react";
 
@@ -57,6 +59,7 @@ export default function CitizenDashboard() {
   const [profileEditRequest, setProfileEditRequest] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [isRecordingVideo, setIsRecordingVideo] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("hi-IN");
   const [attachmentPreview, setAttachmentPreview] = useState(null);
@@ -66,7 +69,11 @@ export default function CitizenDashboard() {
   const [showAdvancedGps, setShowAdvancedGps] = useState(false);
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const videoRecorderRef = useRef(null);
+  const videoStreamRef = useRef(null);
+  const videoPreviewRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const videoChunksRef = useRef([]);
   const voiceBaseRef = useRef("");
   const emptyForm = {
     title: "",
@@ -98,6 +105,22 @@ export default function CitizenDashboard() {
     }
     setIsListening(false);
     setIsRecordingAudio(false);
+  }, []);
+
+  const stopVideoRecording = useCallback(() => {
+    if (videoRecorderRef.current && videoRecorderRef.current.state !== "inactive") {
+      try {
+        videoRecorderRef.current.stop();
+        return;
+      } catch {
+        videoRecorderRef.current = null;
+      }
+    }
+    if (videoStreamRef.current) {
+      videoStreamRef.current.getTracks().forEach((track) => track.stop());
+      videoStreamRef.current = null;
+    }
+    setIsRecordingVideo(false);
   }, []);
 
   const { data, isLoading } = useQuery({
@@ -150,7 +173,16 @@ export default function CitizenDashboard() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [form.attachment]);
 
-  useEffect(() => () => stopVoiceInput(), [stopVoiceInput]);
+  useEffect(() => () => {
+    stopVoiceInput();
+    stopVideoRecording();
+  }, [stopVoiceInput, stopVideoRecording]);
+
+  useEffect(() => {
+    if (isRecordingVideo && videoPreviewRef.current && videoStreamRef.current) {
+      videoPreviewRef.current.srcObject = videoStreamRef.current;
+    }
+  }, [isRecordingVideo]);
 
   const setTab = (nextTab) => {
     setTabState(nextTab);
@@ -168,6 +200,7 @@ export default function CitizenDashboard() {
         { duration: 6000 }
       );
       stopVoiceInput();
+      stopVideoRecording();
       setShowForm(false);
       setForm(emptyForm);
     },
@@ -201,6 +234,19 @@ export default function CitizenDashboard() {
     toast.success("Audio recording attached to complaint proof");
   };
 
+  const attachRecordedVideo = (blob) => {
+    const extension = blob.type.includes("mp4") ? "mp4" : "webm";
+    const file = new File([blob], `complaint-video-${Date.now()}.${extension}`, { type: blob.type || "video/webm" });
+    setForm((prev) => ({
+      ...prev,
+      attachment: file,
+      description: prev.description.trim()
+        ? prev.description
+        : "Video recording attached as complaint proof.",
+    }));
+    toast.success("Video recording attached to complaint proof");
+  };
+
   const startAudioRecording = async () => {
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
       toast.error("Audio recording is not supported in this browser");
@@ -208,6 +254,7 @@ export default function CitizenDashboard() {
     }
 
     try {
+      stopVideoRecording();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
       const recorder = new MediaRecorder(stream);
@@ -233,6 +280,65 @@ export default function CitizenDashboard() {
     } catch {
       toast.error("Microphone permission is needed for audio recording");
     }
+  };
+
+  const startVideoRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      toast.error("Video recording is not supported in this browser");
+      return;
+    }
+
+    try {
+      stopVoiceInput();
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      videoStreamRef.current = stream;
+      videoChunksRef.current = [];
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+      }
+
+      const preferredTypes = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+        "video/mp4",
+      ];
+      const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      videoRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data?.size) videoChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        videoStreamRef.current = null;
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.srcObject = null;
+        }
+        setIsRecordingVideo(false);
+        if (videoChunksRef.current.length) {
+          const blob = new Blob(videoChunksRef.current, { type: recorder.mimeType || "video/webm" });
+          attachRecordedVideo(blob);
+        }
+        videoRecorderRef.current = null;
+      };
+
+      recorder.start();
+      setIsRecordingVideo(true);
+      toast.success("Video recording started. Press Stop video when complete.");
+    } catch {
+      toast.error("Camera and microphone permission are needed for video recording");
+      stopVideoRecording();
+    }
+  };
+
+  const toggleVideoRecording = async () => {
+    if (isRecordingVideo) {
+      stopVideoRecording();
+      return;
+    }
+    await startVideoRecording();
   };
 
   const toggleVoiceInput = async () => {
@@ -530,7 +636,7 @@ export default function CitizenDashboard() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-700">Lodge Public Grievance</p>
                 <h2 className="mt-1 text-lg font-semibold text-slate-950">Register a new citizen complaint</h2>
               </div>
-              <button onClick={() => { stopVoiceInput(); setShowForm(false); }} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-900"><X size={18} /></button>
+              <button onClick={() => { stopVoiceInput(); stopVideoRecording(); setShowForm(false); }} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-900"><X size={18} /></button>
             </div>
           </div>
           <div className="p-6">
@@ -580,6 +686,19 @@ export default function CitizenDashboard() {
                     {isListening ? <MicOff size={14} /> : <Mic size={14} />}
                     {isRecordingAudio ? "Stop recording" : isListening ? "Stop voice" : "Voice / Record"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={toggleVideoRecording}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                      isRecordingVideo
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                    }`}
+                    aria-pressed={isRecordingVideo}
+                  >
+                    {isRecordingVideo ? <VideoOff size={14} /> : <Video size={14} />}
+                    {isRecordingVideo ? "Stop video" : "Video / Record"}
+                  </button>
                 </div>
               </div>
               <textarea className="input min-h-24 resize-y" value={form.description}
@@ -587,6 +706,8 @@ export default function CitizenDashboard() {
                 placeholder="Describe the issue clearly. AI will classify and route it." required />
               {isRecordingAudio ? (
                 <p className="mt-1 text-xs font-medium text-red-700">Recording audio proof now. Press Stop recording when complete; it will be attached below.</p>
+              ) : isRecordingVideo ? (
+                <p className="mt-1 text-xs font-medium text-red-700">Recording video proof now. Press Stop video when complete; it will be attached below.</p>
               ) : isListening && (
                 <p className="mt-1 text-xs font-medium text-cyan-700">Listening now. Speak clearly and stop when the description is complete.</p>
               )}
@@ -672,6 +793,17 @@ export default function CitizenDashboard() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Attachment proof (optional)</label>
+              {isRecordingVideo && (
+                <div className="mb-3 overflow-hidden rounded-lg border border-red-200 bg-black">
+                  <video ref={videoPreviewRef} autoPlay muted playsInline className="max-h-80 w-full object-contain" />
+                  <div className="flex items-center justify-between bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                    <span>Camera recording in progress</span>
+                    <button type="button" onClick={stopVideoRecording} className="rounded-md bg-white px-2 py-1 hover:bg-red-100">
+                      Stop video
+                    </button>
+                  </div>
+                </div>
+              )}
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-cyan-200 bg-cyan-50/50 px-4 py-5 text-center transition hover:bg-cyan-50">
                 <AttachmentIcon size={24} className="text-cyan-700" />
                 <span className="text-sm font-semibold text-gray-800">
@@ -725,7 +857,7 @@ export default function CitizenDashboard() {
               <button type="submit" disabled={createMutation.isPending} className="btn-primary">
                 {createMutation.isPending ? "Submitting..." : "Submit Grievance"}
               </button>
-              <button type="button" onClick={() => { stopVoiceInput(); setShowForm(false); }} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={() => { stopVoiceInput(); stopVideoRecording(); setShowForm(false); }} className="btn-secondary">Cancel</button>
             </div>
           </form>
           </div>
