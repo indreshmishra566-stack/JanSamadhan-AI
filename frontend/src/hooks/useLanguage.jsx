@@ -19,6 +19,7 @@ export function LanguageProvider({ children }) {
   }, []);
 
   const changeLanguage = (newLanguage) => {
+    console.log("🔄 Changing language to", newLanguage, "- Current:", language);
     setPortalLanguage(newLanguage);
     setLanguageState(newLanguage);
   };

@@ -151,6 +151,12 @@ export default function CitizenDashboard() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const content = getPublicText(language);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log("🌐 CitizenDashboard language changed to:", language);
+    console.log("📝 Translations loaded:", content.dashboard.statTotalLabel);
+  }, [language, content]);
   const qc = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab") === "profile" ? "profile" : "complaints";
