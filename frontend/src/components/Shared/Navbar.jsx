@@ -3,6 +3,7 @@ import { ChevronDown, LogOut, Menu, Pencil, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import NotificationsPanel from "./NotificationsPanel";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const ROLE_LABELS = {
   CITIZEN: "Citizen",
@@ -50,6 +51,7 @@ export default function Navbar({ onMenuClick }) {
       </div>
       <div className="flex items-center gap-3">
         <NotificationsPanel />
+        <LanguageSwitcher />
         <div className="relative" ref={profileMenuRef}>
           <button
             type="button"

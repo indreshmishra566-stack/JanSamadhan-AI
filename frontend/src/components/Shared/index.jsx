@@ -294,3 +294,4 @@ export function TabPills({ value, onChange, items }) {
 export { default as NotificationsPanel } from "./NotificationsPanel";
 export { default as ProfilePanel } from "./ProfilePanel";
 export { default as PortalEntryShell } from "./PortalEntryShell";
+export { default as LanguageSwitcher } from "./LanguageSwitcher";
