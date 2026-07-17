@@ -704,14 +704,14 @@ export default function CitizenDashboard() {
     setChatText("");
   };
 
-  const stats = [
+  const stats = useMemo(() => [
     { label: content.dashboard.statTotalLabel, value: complaints.length, icon: "📋", color: "blue", sub: content.dashboard.statTotalSub },
     { label: content.dashboard.statPendingLabel, value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: content.dashboard.statPendingSub },
     { label: content.dashboard.statDisposedLabel, value: disposedComplaints.length, icon: "✅", color: "green", sub: content.dashboard.statDisposedSub },
     { label: content.dashboard.statEscalatedLabel, value: escalatedComplaints.length, icon: "🔴", color: "red", sub: content.dashboard.statEscalatedSub },
-  ];
+  ], [content, complaints.length, pendingComplaints.length, disposedComplaints.length, escalatedComplaints.length]);
 
-  const serviceCards = [
+  const serviceCards = useMemo(() => [
     {
       title: content.dashboard.cardLodgeTitle,
       text: content.dashboard.cardLodgeText,
@@ -728,19 +728,19 @@ export default function CitizenDashboard() {
     },
     {
       title: content.dashboard.cardReminderTitle,
-      text: pendingComplaints.length ? `${pendingComplaints.length} active case${pendingComplaints.length > 1 ? "s" : ""} can be followed up.` : "No pending grievance needs a reminder.",
+      text: pendingComplaints.length ? `${pendingComplaints.length} ${pendingComplaints.length > 1 ? content.dashboard.activeCasesFollowUpPlural : content.dashboard.activeCasesFollowUp} can be followed up.` : content.dashboard.noPendingReminder,
       icon: BellRing,
       action: () => pendingComplaints[0] ? sendReminder(pendingComplaints[0]) : toast.success("No pending reminders right now."),
       cta: content.dashboard.cardReminderCTA,
     },
     {
       title: content.dashboard.cardFeedbackTitle,
-      text: assignedWithoutRating.length ? `${assignedWithoutRating.length} assigned case${assignedWithoutRating.length > 1 ? "s" : ""} awaiting officer/admin rating.` : "All assigned handlers are rated.",
+      text: assignedWithoutRating.length ? `${assignedWithoutRating.length} ${assignedWithoutRating.length > 1 ? content.dashboard.assignedCasesRatingPlural : content.dashboard.assignedCasesRating} ${content.dashboard.awaitingRating}` : content.dashboard.allHandlersRated,
       icon: Star,
       action: () => assignedWithoutRating[0] ? openFeedback(assignedWithoutRating[0]) : toast("No assigned case is awaiting rating."),
       cta: content.dashboard.cardFeedbackCTA,
     },
-  ];
+  ], [content, pendingComplaints, assignedWithoutRating, sendReminder, openFeedback]);
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6">

@@ -431,6 +431,13 @@ const base = {
     videoRecordingInProgress: "Recording video proof now. Press Stop video when complete; it will be attached below.",
     voiceListeningInProgress: "Listening now. Speak clearly and stop when the description is complete.",
     voiceInfoText: "Voice-to-text depends on browser support. Chrome/Edge work best; if speech service fails, the app records audio proof instead.",
+    noPendingReminder: "No pending grievance needs a reminder.",
+    allHandlersRated: "All assigned handlers are rated.",
+    activeCasesFollowUp: "active case",
+    activeCasesFollowUpPlural: "active cases",
+    assignedCasesRating: "assigned case",
+    assignedCasesRatingPlural: "assigned cases",
+    awaitingRating: "awaiting officer/admin rating.",
   },
 };
 
