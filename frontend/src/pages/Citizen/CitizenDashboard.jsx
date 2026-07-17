@@ -704,43 +704,49 @@ export default function CitizenDashboard() {
     setChatText("");
   };
 
-  const stats = useMemo(() => [
-    { label: content.dashboard.statTotalLabel, value: complaints.length, icon: "📋", color: "blue", sub: content.dashboard.statTotalSub },
-    { label: content.dashboard.statPendingLabel, value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: content.dashboard.statPendingSub },
-    { label: content.dashboard.statDisposedLabel, value: disposedComplaints.length, icon: "✅", color: "green", sub: content.dashboard.statDisposedSub },
-    { label: content.dashboard.statEscalatedLabel, value: escalatedComplaints.length, icon: "🔴", color: "red", sub: content.dashboard.statEscalatedSub },
-  ], [content, complaints.length, pendingComplaints.length, disposedComplaints.length, escalatedComplaints.length]);
+  const stats = useMemo(() => {
+    const currentContent = getPublicText(language);
+    return [
+      { label: currentContent.dashboard.statTotalLabel, value: complaints.length, icon: "📋", color: "blue", sub: currentContent.dashboard.statTotalSub },
+      { label: currentContent.dashboard.statPendingLabel, value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: currentContent.dashboard.statPendingSub },
+      { label: currentContent.dashboard.statDisposedLabel, value: disposedComplaints.length, icon: "✅", color: "green", sub: currentContent.dashboard.statDisposedSub },
+      { label: currentContent.dashboard.statEscalatedLabel, value: escalatedComplaints.length, icon: "🔴", color: "red", sub: currentContent.dashboard.statEscalatedSub },
+    ];
+  }, [language, complaints.length, pendingComplaints.length, disposedComplaints.length, escalatedComplaints.length]);
 
-  const serviceCards = useMemo(() => [
+  const serviceCards = useMemo(() => {
+    const currentContent = getPublicText(language);
+    return [
     {
-      title: content.dashboard.cardLodgeTitle,
-      text: content.dashboard.cardLodgeText,
+      title: currentContent.dashboard.cardLodgeTitle,
+      text: currentContent.dashboard.cardLodgeText,
       icon: ClipboardList,
       action: () => { setShowForm(true); setTab("complaints"); },
-      cta: content.dashboard.cardLodgeCTA,
+      cta: currentContent.dashboard.cardLodgeCTA,
     },
     {
-      title: content.dashboard.cardViewTitle,
-      text: latestComplaint ? `${content.dashboard.registerIdLatestPrefix} ${latestComplaint.ticket_id}` : content.dashboard.noLatestComplaint,
+      title: currentContent.dashboard.cardViewTitle,
+      text: latestComplaint ? `${currentContent.dashboard.registerIdLatestPrefix} ${latestComplaint.ticket_id}` : currentContent.dashboard.noLatestComplaint,
       icon: Search,
       action: () => { setShowForm(false); setTab("complaints"); },
-      cta: content.dashboard.cardViewCTA,
+      cta: currentContent.dashboard.cardViewCTA,
     },
     {
-      title: content.dashboard.cardReminderTitle,
-      text: pendingComplaints.length ? `${pendingComplaints.length} ${pendingComplaints.length > 1 ? content.dashboard.activeCasesFollowUpPlural : content.dashboard.activeCasesFollowUp} can be followed up.` : content.dashboard.noPendingReminder,
+      title: currentContent.dashboard.cardReminderTitle,
+      text: pendingComplaints.length ? `${pendingComplaints.length} ${pendingComplaints.length > 1 ? currentContent.dashboard.activeCasesFollowUpPlural : currentContent.dashboard.activeCasesFollowUp} can be followed up.` : currentContent.dashboard.noPendingReminder,
       icon: BellRing,
       action: () => pendingComplaints[0] ? sendReminder(pendingComplaints[0]) : toast.success("No pending reminders right now."),
-      cta: content.dashboard.cardReminderCTA,
+      cta: currentContent.dashboard.cardReminderCTA,
     },
     {
-      title: content.dashboard.cardFeedbackTitle,
-      text: assignedWithoutRating.length ? `${assignedWithoutRating.length} ${assignedWithoutRating.length > 1 ? content.dashboard.assignedCasesRatingPlural : content.dashboard.assignedCasesRating} ${content.dashboard.awaitingRating}` : content.dashboard.allHandlersRated,
+      title: currentContent.dashboard.cardFeedbackTitle,
+      text: assignedWithoutRating.length ? `${assignedWithoutRating.length} ${assignedWithoutRating.length > 1 ? currentContent.dashboard.assignedCasesRatingPlural : currentContent.dashboard.assignedCasesRating} ${currentContent.dashboard.awaitingRating}` : currentContent.dashboard.allHandlersRated,
       icon: Star,
       action: () => assignedWithoutRating[0] ? openFeedback(assignedWithoutRating[0]) : toast("No assigned case is awaiting rating."),
-      cta: content.dashboard.cardFeedbackCTA,
+      cta: currentContent.dashboard.cardFeedbackCTA,
     },
-  ], [content, pendingComplaints, assignedWithoutRating, sendReminder, openFeedback]);
+    ];
+  }, [language, pendingComplaints, assignedWithoutRating, sendReminder, openFeedback, latestComplaint]);
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6">
