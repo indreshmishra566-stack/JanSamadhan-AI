@@ -5,6 +5,8 @@ import { complaintApi } from "../../api";
 import { PriorityBadge, StatusBadge, CategoryIcon, StatCard, LoadingSpinner, EmptyState, InfoSection, DetailItem, TimelineList, ProfilePanel, DashboardHero, TabPills, LocationMap, LocationPickerMap } from "../../components/Shared";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
+import { getPublicText } from "../../i18n/public";
 import toast from "react-hot-toast";
 import {
   AlertCircle,
@@ -147,6 +149,8 @@ function buildCitizenBotReply(message, context) {
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const content = getPublicText(language);
   const qc = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab") === "profile" ? "profile" : "complaints";
@@ -701,40 +705,40 @@ export default function CitizenDashboard() {
   };
 
   const stats = [
-    { label: "Total Registered", value: complaints.length, icon: "📋", color: "blue", sub: "All grievances filed" },
-    { label: "Pending Action", value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: "Under review or assigned" },
-    { label: "Disposed", value: disposedComplaints.length, icon: "✅", color: "green", sub: "Resolved, closed, or rejected" },
-    { label: "Escalated", value: escalatedComplaints.length, icon: "🔴", color: "red", sub: "Needs higher attention" },
+    { label: content.dashboard.statTotalLabel, value: complaints.length, icon: "📋", color: "blue", sub: content.dashboard.statTotalSub },
+    { label: content.dashboard.statPendingLabel, value: pendingComplaints.length, icon: "⏳", color: "yellow", sub: content.dashboard.statPendingSub },
+    { label: content.dashboard.statDisposedLabel, value: disposedComplaints.length, icon: "✅", color: "green", sub: content.dashboard.statDisposedSub },
+    { label: content.dashboard.statEscalatedLabel, value: escalatedComplaints.length, icon: "🔴", color: "red", sub: content.dashboard.statEscalatedSub },
   ];
 
   const serviceCards = [
     {
-      title: "Lodge Public Grievance",
-      text: "Submit issue details with AI routing, GPS, voice input, and supporting media.",
+      title: content.dashboard.cardLodgeTitle,
+      text: content.dashboard.cardLodgeText,
       icon: ClipboardList,
       action: () => { setShowForm(true); setTab("complaints"); },
-      cta: "Lodge grievance",
+      cta: content.dashboard.cardLodgeCTA,
     },
     {
-      title: "View Status",
-      text: latestComplaint ? `Latest registration ID: ${latestComplaint.ticket_id}` : "Track all registration IDs from one case register.",
+      title: content.dashboard.cardViewTitle,
+      text: latestComplaint ? `${content.dashboard.registerIdLatestPrefix} ${latestComplaint.ticket_id}` : content.dashboard.noLatestComplaint,
       icon: Search,
       action: () => { setShowForm(false); setTab("complaints"); },
-      cta: "Open register",
+      cta: content.dashboard.cardViewCTA,
     },
     {
-      title: "Send Reminder",
+      title: content.dashboard.cardReminderTitle,
       text: pendingComplaints.length ? `${pendingComplaints.length} active case${pendingComplaints.length > 1 ? "s" : ""} can be followed up.` : "No pending grievance needs a reminder.",
       icon: BellRing,
       action: () => pendingComplaints[0] ? sendReminder(pendingComplaints[0]) : toast.success("No pending reminders right now."),
-      cta: "Send reminder",
+      cta: content.dashboard.cardReminderCTA,
     },
     {
-      title: "Feedback / Appeal",
+      title: content.dashboard.cardFeedbackTitle,
       text: assignedWithoutRating.length ? `${assignedWithoutRating.length} assigned case${assignedWithoutRating.length > 1 ? "s" : ""} awaiting officer/admin rating.` : "All assigned handlers are rated.",
       icon: Star,
       action: () => assignedWithoutRating[0] ? openFeedback(assignedWithoutRating[0]) : toast("No assigned case is awaiting rating."),
-      cta: "Rate handler",
+      cta: content.dashboard.cardFeedbackCTA,
     },
   ];
 
@@ -742,20 +746,19 @@ export default function CitizenDashboard() {
     <div className="mx-auto max-w-7xl p-4 md:p-6">
       <DashboardHero
         tone="blue"
-        eyebrow="Citizen Grievance Dashboard"
-        title={`Welcome, ${user?.first_name || user?.username}`}
-        subtitle="Lodge public grievances, monitor registration IDs, send follow-up reminders, review officer action, and submit closure feedback from one citizen workspace."
+        eyebrow={content.dashboard.eyebrow}
+        title={`${content.dashboard.welcome}, ${user?.first_name || user?.username}`}
+        subtitle={content.dashboard.subtitle}
         badges={[
-          user?.district || user?.state || "Public dashboard",
-          "24x7 grievance lodging",
-          "Unique registration ID tracking",
-          "AI assisted routing",
+          user?.district || user?.state || content.dashboard.badges[0],
+          content.dashboard.badges[1],
+          content.dashboard.badges[2],
         ]}
         actions={[
-          { label: "Lodge Grievance", onClick: () => { setShowForm(true); setTab("complaints"); } },
+          { label: content.dashboard.lodgeGrievanceBtn, onClick: () => { setShowForm(true); setTab("complaints"); } },
           tab === "profile"
-            ? { label: "Edit Profile", onClick: () => setProfileEditRequest((count) => count + 1), variant: "secondary" }
-            : { label: "Profile", onClick: () => setTab("profile"), variant: "secondary" },
+            ? { label: content.dashboard.editProfileBtn, onClick: () => setProfileEditRequest((count) => count + 1), variant: "secondary" }
+            : { label: content.dashboard.profileBtn, onClick: () => setTab("profile"), variant: "secondary" },
         ]}
       />
 
@@ -789,8 +792,8 @@ export default function CitizenDashboard() {
           value={tab}
           onChange={setTab}
           items={[
-            { value: "complaints", label: "Complaints" },
-            { value: "profile", label: "Profile" },
+            { value: "complaints", label: content.dashboard.tabComplaints },
+            { value: "profile", label: content.dashboard.tabProfile },
           ]}
         />
       </div>
@@ -802,8 +805,8 @@ export default function CitizenDashboard() {
           <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-700">Lodge Public Grievance</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">Register a new citizen complaint</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-700">{content.dashboard.formSubtitle}</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">{content.dashboard.formTitle}</h2>
               </div>
               <button onClick={() => { stopVoiceInput(); stopVideoRecording(); setShowForm(false); }} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-900"><X size={18} /></button>
             </div>
@@ -818,18 +821,18 @@ export default function CitizenDashboard() {
           </div>
           <div className="mb-4 flex gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
-            <p>Write one clear issue per registration. Location, documents, media proof, and voice input help officers verify and resolve faster.</p>
+            <p>{content.dashboard.formAlert}</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{content.dashboard.formTitleLabel}</label>
               <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="Short issue title" required />
+                placeholder={content.dashboard.formTitlePlaceholder} required />
             </div>
             <div>
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Description <span className="text-gray-400 font-normal">(Hindi or English both accepted)</span>
+                  {content.dashboard.formDescriptionLabel} <span className="text-gray-400 font-normal">{content.dashboard.formDescriptionSubtext}</span>
                 </label>
                 <div className="flex items-center gap-2">
                   <select
@@ -872,32 +875,32 @@ export default function CitizenDashboard() {
               </div>
               <textarea className="input min-h-24 resize-y" value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Describe the issue clearly. AI will classify and route it." required />
+                placeholder={content.dashboard.formTitlePlaceholder} required />
               {isRecordingAudio ? (
-                <p className="mt-1 text-xs font-medium text-red-700">Recording audio proof now. Press Stop recording when complete; it will be attached below.</p>
+                <p className="mt-1 text-xs font-medium text-red-700">{content.dashboard.voiceRecordingInProgress}</p>
               ) : isRecordingVideo ? (
-                <p className="mt-1 text-xs font-medium text-red-700">Recording video proof now. Press Stop video when complete; it will be attached below.</p>
+                <p className="mt-1 text-xs font-medium text-red-700">{content.dashboard.videoRecordingInProgress}</p>
               ) : isListening && (
-                <p className="mt-1 text-xs font-medium text-cyan-700">Listening now. Speak clearly and stop when the description is complete.</p>
+                <p className="mt-1 text-xs font-medium text-cyan-700">{content.dashboard.voiceListeningInProgress}</p>
               )}
               {!isListening && !isRecordingAudio && (
-                <p className="mt-1 text-xs text-gray-500">Voice-to-text depends on browser support. Chrome/Edge work best; if speech service fails, the app records audio proof instead.</p>
+                <p className="mt-1 text-xs text-gray-500">{content.dashboard.voiceInfoText}</p>
               )}
             </div>
             <div>
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <label className="block text-sm font-medium text-gray-700">Location / Address</label>
-                <span className="text-xs font-medium text-gray-500">Use GPS to fill address boxes automatically</span>
+                <label className="block text-sm font-medium text-gray-700">{content.dashboard.formLocationLabel}</label>
+                <span className="text-xs font-medium text-gray-500">{content.dashboard.formLocationSubtext}</span>
               </div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <MapPin size={16} className="absolute left-3 top-2.5 text-gray-400" />
                   <input className="input pl-9" value={form.location}
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    placeholder="Street, ward, landmark, or area" />
+                    placeholder={content.dashboard.formLocationPlaceholder} />
                 </div>
                 <button type="button" onClick={detectLocation} disabled={isDetectingLocation} className="btn-secondary flex items-center gap-2 shrink-0">
-                  <Navigation size={15} /> {isDetectingLocation ? "Detecting..." : "GPS Fill"}
+                  <Navigation size={15} /> {isDetectingLocation ? content.dashboard.formGPSDetecting : content.dashboard.formGPSButton}
                 </button>
               </div>
               {gpsNote && (
