@@ -1,0 +1,54 @@
+from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
+from . import views
+
+urlpatterns = [
+    # Auth
+    path("auth/login/", views.LoginView.as_view()),
+    path("auth/refresh/", TokenRefreshView.as_view()),
+    path("auth/register/", views.RegisterView.as_view()),
+    path("auth/register/resend-otp/", views.ResendRegistrationOTPView.as_view()),
+    path("auth/register/verify-otp/", views.VerifyRegistrationOTPView.as_view()),
+    path("auth/me/", views.MeView.as_view()),
+    path("auth/change-password/", views.ChangePasswordView.as_view()),
+
+    # Departments
+    path("departments/", views.DepartmentListView.as_view()),
+    path("departments/<int:pk>/", views.DepartmentDetailView.as_view()),
+
+    # Citizen
+    path("complaints/", views.CitizenComplaintListCreateView.as_view()),
+    path("complaints/<int:pk>/", views.CitizenComplaintDetailView.as_view()),
+    path("complaints/<int:pk>/feedback/", views.CitizenFeedbackView.as_view()),
+    path("complaints/<int:pk>/handlers/<int:officer_id>/rating/", views.rate_complaint_handler),
+
+    # Hierarchy actions (forward / escalate)
+    path("complaints/<int:pk>/forward/", views.forward_complaint),
+    path("complaints/<int:pk>/escalate/", views.escalate_complaint),
+
+    # Hierarchy officer views
+    path("hierarchy/complaints/", views.HierarchyComplaintListView.as_view()),
+    path("hierarchy/complaints/<int:pk>/", views.HierarchyComplaintUpdateView.as_view()),
+    path("hierarchy/create-officer/", views.create_subordinate_officer),
+    path("hierarchy/subordinates/", views.my_subordinates),
+    path("hierarchy/officers/<int:pk>/", views.HierarchyOfficerDetailView.as_view()),
+
+    # Admin
+    path("admin/complaints/", views.AdminComplaintListView.as_view()),
+    path("admin/complaints/<int:pk>/", views.AdminComplaintUpdateView.as_view()),
+    path("admin/stats/", views.AdminDashboardStatsView.as_view()),
+    path("admin/users/", views.AdminUserListView.as_view()),
+    path("admin/users/<int:pk>/", views.AdminUserDetailView.as_view()),
+    path("admin/create-officer/", views.AdminCreateOfficerView.as_view()),
+
+    # Notifications
+    path("notifications/", views.NotificationListView.as_view()),
+    path("notifications/<int:pk>/read/", views.mark_notification_read),
+
+    # Public tracking
+    path("track/<str:ticket_id>/", views.track_complaint),
+    path("demo/seed/", views.run_demo_seed),
+    path("demo/seed-admin-setup/", views.run_admin_setup_seed),
+    path("demo/clear/", views.run_demo_clear),
+    path("demo/clear-all-except-admin/", views.run_clear_all_except_admin),
+]

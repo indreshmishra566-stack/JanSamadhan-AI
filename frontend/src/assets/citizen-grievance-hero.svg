@@ -1,0 +1,153 @@
+<svg width="680" height="760" viewBox="0 0 680 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="40" y1="40" x2="640" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17213A"/>
+      <stop offset="1" stop-color="#10192C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(340 300) rotate(90) scale(280 260)">
+      <stop stop-color="#283A6C"/>
+      <stop offset="1" stop-color="#17213A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cardStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2EC7FF"/>
+      <stop offset="1" stop-color="#295C8E"/>
+    </linearGradient>
+    <linearGradient id="pin" x1="338" y1="24" x2="338" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7B718"/>
+      <stop offset="1" stop-color="#E08B00"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2A354A"/>
+      <stop offset="1" stop-color="#1A2332"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="245" y1="430" x2="460" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3E5AA7"/>
+      <stop offset="1" stop-color="#223F85"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="680" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#09101E" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="680" height="760" fill="url(#glow)" opacity="0.55"/>
+
+  <g opacity="0.4">
+    <path d="M40 120H640" stroke="#22314C"/>
+    <path d="M40 220H640" stroke="#22314C"/>
+    <path d="M40 320H640" stroke="#22314C"/>
+    <path d="M40 420H640" stroke="#22314C"/>
+    <path d="M40 520H640" stroke="#22314C"/>
+    <path d="M40 620H640" stroke="#22314C"/>
+    <path d="M140 40V720" stroke="#22314C"/>
+    <path d="M240 40V720" stroke="#22314C"/>
+    <path d="M340 40V720" stroke="#22314C"/>
+    <path d="M440 40V720" stroke="#22314C"/>
+    <path d="M540 40V720" stroke="#22314C"/>
+  </g>
+
+  <g opacity="0.6">
+    <path d="M340 160V298" stroke="#4258BC" stroke-width="2" stroke-dasharray="8 8"/>
+    <path d="M340 300L110 130" stroke="#4258BC" stroke-width="2" stroke-dasharray="8 8"/>
+    <path d="M340 300L575 130" stroke="#4258BC" stroke-width="2" stroke-dasharray="8 8"/>
+    <path d="M340 300L110 505" stroke="#4258BC" stroke-width="2" stroke-dasharray="8 8"/>
+    <path d="M340 300L575 505" stroke="#4258BC" stroke-width="2" stroke-dasharray="8 8"/>
+  </g>
+
+  <g>
+    <path d="M340 24C320 24 304 40.4 304 60.5C304 88.1 340 123 340 123C340 123 376 88.1 376 60.5C376 40.4 360 24 340 24Z" fill="url(#pin)"/>
+    <circle cx="340" cy="60" r="10" fill="#F7F0E8"/>
+    <text x="340" y="142" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#F7B718">Your location</text>
+  </g>
+
+  <g>
+    <rect x="60" y="78" width="70" height="70" rx="16" fill="#1C2840" stroke="url(#cardStroke)" stroke-width="2"/>
+    <path d="M95 92V134" stroke="#3B82F6" stroke-width="6" stroke-linecap="round"/>
+    <path d="M74 113H116" stroke="#3B82F6" stroke-width="6" stroke-linecap="round"/>
+    <text x="95" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#7FB5FF">Health</text>
+  </g>
+
+  <g>
+    <rect x="550" y="78" width="70" height="70" rx="16" fill="#1C2840" stroke="url(#cardStroke)" stroke-width="2"/>
+    <rect x="572" y="92" width="22" height="42" rx="3" fill="#4C67D8"/>
+    <path d="M579 102H600" stroke="#BFD2FF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M579 112H600" stroke="#BFD2FF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M579 122H600" stroke="#BFD2FF" stroke-width="2" stroke-linecap="round"/>
+    <text x="585" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#7FB5FF">Education</text>
+  </g>
+
+  <g>
+    <rect x="44" y="463" width="76" height="76" rx="16" fill="#163831" stroke="#1ED5A6" stroke-width="1.5"/>
+    <path d="M80 478L62 516H77L67 548L99 500H82L96 478H80Z" fill="#15D29E"/>
+    <text x="82" y="556" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7FE7C8">Utilities</text>
+  </g>
+
+  <g>
+    <rect x="560" y="462" width="76" height="76" rx="16" fill="#163831" stroke="#1ED5A6" stroke-width="1.5"/>
+    <path d="M587 484H609" stroke="#26D39F" stroke-width="6" stroke-linecap="round"/>
+    <path d="M587 498H609" stroke="#26D39F" stroke-width="6" stroke-linecap="round"/>
+    <path d="M587 512H609" stroke="#26D39F" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="598" cy="528" r="7" fill="#26D39F"/>
+    <text x="598" y="556" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7FE7C8">Transport</text>
+  </g>
+
+  <g opacity="0.8">
+    <circle cx="150" cy="292" r="4" fill="#5668E8"/>
+    <circle cx="220" cy="620" r="3" fill="#16CAA6"/>
+    <circle cx="490" cy="620" r="3" fill="#16CAA6"/>
+    <circle cx="540" cy="292" r="4" fill="#5668E8"/>
+    <circle cx="155" cy="410" r="3.5" fill="#16CAA6"/>
+    <circle cx="540" cy="410" r="3.5" fill="#16CAA6"/>
+    <circle cx="340" cy="180" r="3" fill="#F7B718"/>
+    <circle cx="225" cy="175" r="3" fill="#6C7CF0"/>
+    <circle cx="460" cy="175" r="3" fill="#6C7CF0"/>
+    <circle cx="445" cy="392" r="3" fill="#6C7CF0"/>
+  </g>
+
+  <g>
+    <ellipse cx="340" cy="574" rx="95" ry="110" fill="url(#shirt)"/>
+    <path d="M281 454C281 418 307 387 340 387C373 387 399 418 399 454V500H281V454Z" fill="#FFCF99"/>
+    <path d="M288 386C288 348 312 318 341 318C370 318 394 348 394 386V410H288V386Z" fill="#7A4B1D"/>
+    <ellipse cx="341" cy="409" rx="52" ry="55" fill="#FFCF99"/>
+    <ellipse cx="323" cy="407" rx="4.5" ry="6.5" fill="#2E3038"/>
+    <ellipse cx="355" cy="407" rx="4.5" ry="6.5" fill="#2E3038"/>
+    <path d="M316 389C320 386 325 385 330 386" stroke="#5A351A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M349 386C354 384 360 385 364 389" stroke="#5A351A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M339 410L332 428C331 430 333 433 336 433H344" stroke="#C98348" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M326 446C333 452 347 452 355 446" stroke="#C98348" stroke-width="3" stroke-linecap="round"/>
+    <path d="M300 470C271 484 249 512 249 548V596C249 620 267 640 289 644L309 648V516L300 470Z" fill="#36549A"/>
+    <path d="M381 470C411 486 434 514 434 553V596C434 620 416 640 394 644L375 648V516L381 470Z" fill="#36549A"/>
+    <path d="M410 520C428 493 448 485 463 492C478 499 479 524 464 531C449 538 430 535 410 520Z" fill="#FFCF99"/>
+    <path d="M268 596C252 598 244 610 246 622C248 634 263 641 278 637C293 633 300 619 296 608C292 597 282 593 268 596Z" fill="#FFCF99"/>
+  </g>
+
+  <g>
+    <path d="M438 404C449 391 468 375 487 382" stroke="#5668E8" stroke-width="2" stroke-linecap="round"/>
+    <path d="M437 410C451 396 472 390 493 397" stroke="#5668E8" stroke-width="2" stroke-linecap="round"/>
+    <path d="M438 417C452 404 475 402 497 412" stroke="#5668E8" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <rect x="359" y="336" width="82" height="121" rx="14" fill="url(#phone)" stroke="#516988" stroke-width="2"/>
+    <rect x="366" y="344" width="68" height="95" rx="8" fill="#EAF2FF"/>
+    <rect x="383" y="443" width="34" height="8" rx="4" fill="#4D5C73"/>
+    <circle cx="400" cy="448" r="2.5" fill="#263447"/>
+    <rect x="373" y="351" width="54" height="11" rx="4" fill="#3156E0"/>
+    <text x="400" y="359.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="white">Submit Grievance</text>
+    <text x="376" y="374" font-family="Arial, sans-serif" font-size="6" fill="#41536E">Name</text>
+    <rect x="374" y="378" width="52" height="10" rx="3" fill="#FFFFFF" stroke="#D5E0F5"/>
+    <text x="376" y="396" font-family="Arial, sans-serif" font-size="6" fill="#41536E">Category</text>
+    <rect x="374" y="400" width="52" height="10" rx="3" fill="#FFFFFF" stroke="#D5E0F5"/>
+    <text x="376" y="418" font-family="Arial, sans-serif" font-size="6" fill="#41536E">Description</text>
+    <rect x="374" y="422" width="52" height="12" rx="3" fill="#FFFFFF" stroke="#D5E0F5"/>
+    <rect x="376" y="438" width="48" height="13" rx="4" fill="#3156E0"/>
+    <text x="400" y="447.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="700" fill="white">Submit</text>
+  </g>
+
+  <g>
+    <rect x="202" y="680" width="286" height="34" rx="9" fill="rgba(29,39,60,0.82)" stroke="#344360"/>
+    <text x="345" y="702" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9FB0C6">Digital public grievance portal</text>
+    <circle cx="360" cy="680" r="18" fill="#23324B" stroke="#845A31"/>
+    <path d="M360 672V687" stroke="#F7F0E8" stroke-width="2" stroke-linecap="round"/>
+    <path d="M354 681L360 687L366 681" stroke="#F7F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

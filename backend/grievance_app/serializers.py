@@ -1,0 +1,307 @@
+from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from .models import User, Department, Complaint, ComplaintHistory, Notification, ForwardingRecord, ComplaintOfficerRating
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "username", "email", "password", "password2", "first_name", "last_name",
+            "gender", "state", "district", "locality", "pincode",
+        ]
+
+    def validate(self, data):
+        if data["password"] != data["password2"]:
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop("password2")
+        user = User.objects.create_user(**validated_data, role="CITIZEN", is_active=False, is_verified=False)
+        return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source="department.name", read_only=True)
+    reports_to_name = serializers.CharField(source="reports_to.get_full_name", read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "phone", "role", "first_name", "last_name",
+                  "gender", "address_line", "sub_locality", "locality", "country", "pincode",
+                  "designation", "department", "department_name", "employee_id", "is_verified", "date_joined",
+                  "state", "district", "block", "village", "jurisdiction_level",
+                  "created_by", "reports_to", "reports_to_name", "is_active"]
+        read_only_fields = ["date_joined", "is_verified"]
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "first_name", "last_name", "email", "state", "district",
+            "gender", "locality", "pincode",
+        ]
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True, trim_whitespace=False)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password], trim_whitespace=False)
+    new_password2 = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate_current_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def validate(self, data):
+        if data["new_password"] != data["new_password2"]:
+            raise serializers.ValidationError({"new_password2": "New passwords do not match."})
+        if data["current_password"] == data["new_password"]:
+            raise serializers.ValidationError({"new_password": "New password must be different from current password."})
+        return data
+
+    def save(self, **kwargs):
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save(update_fields=["password"])
+        return user
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    complaint_count = serializers.SerializerMethodField()
+    head_officer_name = serializers.SerializerMethodField()
+    sub_head_officer_name = serializers.SerializerMethodField()
+    parent_name = serializers.CharField(source="parent.name", read_only=True)
+    child_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Department
+        fields = ["id", "name", "code", "description", "email", "is_active",
+                  "parent", "parent_name",
+                  "head_officer", "head_officer_name", "sub_head_officer", "sub_head_officer_name",
+                  "complaint_count", "child_count", "created_by", "created_at"]
+
+    def get_complaint_count(self, obj):
+        return obj.complaints.filter(status__in=["PENDING", "ASSIGNED", "IN_PROGRESS"]).count()
+
+    def get_child_count(self, obj):
+        return obj.children.filter(is_active=True).count()
+
+    def get_head_officer_name(self, obj):
+        if obj.head_officer:
+            return obj.head_officer.get_full_name() or obj.head_officer.username
+        return ""
+
+    def get_sub_head_officer_name(self, obj):
+        if obj.sub_head_officer:
+            return obj.sub_head_officer.get_full_name() or obj.sub_head_officer.username
+        return ""
+
+
+class ComplaintHistorySerializer(serializers.ModelSerializer):
+    changed_by_name = serializers.CharField(source="changed_by.username", read_only=True)
+
+    class Meta:
+        model = ComplaintHistory
+        fields = ["id", "old_status", "new_status", "note", "changed_by_name", "created_at"]
+
+
+class ForwardingRecordSerializer(serializers.ModelSerializer):
+    from_user_name = serializers.SerializerMethodField()
+    to_user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ForwardingRecord
+        fields = ["id", "from_user", "to_user", "from_user_name", "to_user_name", "from_level", "to_level", "action", "note", "created_at"]
+
+    def get_from_user_name(self, obj):
+        if obj.from_user:
+            return obj.from_user.get_full_name() or obj.from_user.username
+        return "System"
+
+    def get_to_user_name(self, obj):
+        if obj.to_user:
+            return obj.to_user.get_full_name() or obj.to_user.username
+        return "Unknown"
+
+
+class ComplaintOfficerRatingSerializer(serializers.ModelSerializer):
+    officer_name = serializers.CharField(source="officer.get_full_name", read_only=True)
+    officer_email = serializers.CharField(source="officer.email", read_only=True)
+    officer_role = serializers.CharField(source="officer.role", read_only=True)
+
+    class Meta:
+        model = ComplaintOfficerRating
+        fields = ["id", "complaint", "officer", "officer_name", "officer_email", "officer_role", "rating", "feedback", "created_at", "updated_at"]
+        read_only_fields = ["complaint", "officer", "created_at", "updated_at"]
+
+    def validate_rating(self, value):
+        if value not in range(1, 6):
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+
+
+class ComplaintSerializer(serializers.ModelSerializer):
+    citizen_name = serializers.CharField(source="citizen.get_full_name", read_only=True)
+    department_name = serializers.CharField(source="department.name", read_only=True)
+    officer_name = serializers.CharField(source="assigned_officer.get_full_name", read_only=True)
+    supervising_head_name = serializers.SerializerMethodField()
+    history = ComplaintHistorySerializer(many=True, read_only=True)
+    forwarding_records = ForwardingRecordSerializer(many=True, read_only=True)
+    handler_ratings = ComplaintOfficerRatingSerializer(many=True, read_only=True)
+    assigned_handlers = serializers.SerializerMethodField()
+    sla_remaining_hours = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Complaint
+        fields = [
+            "id", "ticket_id", "title", "description", "original_language",
+            "translated_description", "category", "ai_category", "ai_confidence",
+            "priority", "status", "department", "department_name", "assigned_officer",
+            "officer_name", "supervising_head_name", "citizen_name", "current_level", "forwarded_to",
+            "state", "district", "block", "location", "latitude", "longitude",
+            "attachment", "proof_of_resolution", "officer_remarks", "admin_override_note",
+            "sla_deadline", "sla_remaining_hours", "is_sla_breached",
+            "citizen_rating", "citizen_feedback", "is_duplicate", "duplicate_of",
+            "created_at", "updated_at", "resolved_at", "history", "forwarding_records",
+            "handler_ratings", "assigned_handlers",
+        ]
+        read_only_fields = [
+            "ticket_id", "ai_category", "ai_confidence", "original_language",
+            "translated_description", "is_sla_breached", "sla_deadline",
+            "created_at", "updated_at",
+        ]
+
+    def get_sla_remaining_hours(self, obj):
+        from django.utils import timezone
+        if obj.sla_deadline:
+            delta = obj.sla_deadline - timezone.now()
+            return round(delta.total_seconds() / 3600, 1)
+        return None
+
+    def get_supervising_head_name(self, obj):
+        department = obj.department
+        if not department:
+            return ""
+        supervising_head = department.head_officer or department.sub_head_officer
+        if not supervising_head:
+            return ""
+        return supervising_head.get_full_name() or supervising_head.username
+
+    def get_assigned_handlers(self, obj):
+        seen = set()
+        handlers = []
+        ratings_by_officer = {rating.officer_id: rating for rating in obj.handler_ratings.all()}
+
+        def add_handler(user, source):
+            if not user or user.id in seen:
+                return
+            seen.add(user.id)
+            rating = ratings_by_officer.get(user.id)
+            handlers.append({
+                "id": user.id,
+                "name": user.get_full_name() or user.username,
+                "email": user.email,
+                "role": user.role,
+                "source": source,
+                "rating": rating.rating if rating else None,
+                "feedback": rating.feedback if rating else "",
+                "rating_id": rating.id if rating else None,
+            })
+
+        add_handler(obj.assigned_officer, "Current assignment")
+        for record in obj.forwarding_records.all():
+            add_handler(record.to_user, record.get_action_display())
+        return handlers
+
+
+class ComplaintCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = [
+            "id", "ticket_id", "title", "description", "state", "district",
+            "block", "location", "latitude", "longitude", "attachment",
+        ]
+        read_only_fields = ["id", "ticket_id"]
+
+    def create(self, validated_data):
+        from .ai_service import classify_complaint
+        from django.conf import settings
+        from django.utils import timezone
+
+        text = f"{validated_data.get('title', '')}\n{validated_data.get('description', '')}".strip()
+        ai_result = classify_complaint(text)
+
+        validated_data["ai_category"] = ai_result.get("category", "OTHER")
+        validated_data["category"] = ai_result.get("category", "OTHER")
+        validated_data["priority"] = ai_result.get("priority", "LOW")
+        validated_data["ai_confidence"] = ai_result.get("confidence", 0.0)
+        validated_data["original_language"] = ai_result.get("original_lang", "en")
+        validated_data["translated_description"] = ai_result.get("translated_text", text)
+
+        citizen = self.context["request"].user if self.context.get("request") else None
+
+        # Hybrid routing: category chooses the department, then the nearest
+        # officer in that department branch gets the first assignment while the
+        # category head still retains visibility through the department link.
+        from .routing import apply_initial_grievance_routing
+        apply_initial_grievance_routing(validated_data, ai_result.get("category", "OTHER"), citizen=citizen)
+
+        hours = settings.SLA_HOURS.get(validated_data["priority"], 168)
+        validated_data["sla_deadline"] = timezone.now() + timezone.timedelta(hours=hours)
+
+        return super().create(validated_data)
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ["id", "notification_type", "title", "message", "is_read", "created_at",
+                  "complaint"]
+
+
+class AdminComplaintUpdateSerializer(serializers.ModelSerializer):
+    duplicate_of = serializers.PrimaryKeyRelatedField(
+        queryset=Complaint.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Complaint
+        fields = ["category", "priority", "department", "assigned_officer",
+                  "status", "admin_override_note", "is_duplicate", "duplicate_of"]
+
+    def validate(self, attrs):
+        duplicate_of = attrs.get("duplicate_of")
+        instance = getattr(self, "instance", None)
+        if duplicate_of and instance and duplicate_of.id == instance.id:
+            raise serializers.ValidationError({"duplicate_of": "A complaint cannot be marked as duplicate of itself."})
+        if attrs.get("is_duplicate") is False:
+            attrs["duplicate_of"] = None
+        if duplicate_of and not attrs.get("is_duplicate", getattr(instance, "is_duplicate", False)):
+            attrs["is_duplicate"] = True
+        return attrs
+
+
+class OfficerComplaintUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = ["status", "officer_remarks", "proof_of_resolution"]
+
+
+class CitizenFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = ["citizen_rating", "citizen_feedback"]
+
+    def validate_citizen_rating(self, value):
+        if value not in range(1, 6):
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
